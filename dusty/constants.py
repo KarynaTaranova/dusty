@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-NON_SCANNERS_CONFIG_KEYS = ['target_host', 'target_port', 'protocol', "/",
+NON_SCANNERS_CONFIG_KEYS =  ['target_host', 'target_port', 'protocol', "/",
                             'reportportal', 'html_report', 'xml_report',
                             'safe_pipeline_mode', 'project_name', 'environment',
                             'test_type', 'junit_report', 'jira']
