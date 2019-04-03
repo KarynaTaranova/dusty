@@ -24,7 +24,9 @@ class PTAIModel(DefaultModel):
         self.scan_type = 'SAST'
 
     def __str__(self):
-        return self.finding['description']
+        finding = f"**Issue Hash**: {self.get_hash_code()}\n\n"
+        finding += self.finding['description']
+        return finding
 
     def jira(self, jira_client, priority_mapping=None):
         issue, created = super().jira(jira_client, priority_mapping)
