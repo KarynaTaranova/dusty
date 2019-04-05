@@ -125,8 +125,8 @@ class DefaultModel(object):
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def __str__(self):
-        finding = f'\n**Title**: {self.finding["title"]}\n\n' \
-                  f'**Description**:\n {self.finding["description"]}\n\n' \
+        finding = f'\nTitle: {self.finding["title"]}\n\n' \
+                  f'Description:\n {self.finding["description"]}\n\n' \
                   f'**Tool**: {self.finding["tool"]}\n\n' \
                   f'**Severity**: {self.finding["severity"]}\n\n' \
                   f"**Issue Hash**: {self.get_hash_code()}\n\n"
@@ -196,8 +196,7 @@ class DefaultModel(object):
         if len(self.__str__()) > c.JIRA_DESCRIPTION_MAX_SIZE:
             comments = self.finding['steps_to_reproduce']
             self.finding['steps_to_reproduce'] = ["See in comments\n\n"]
-        else:
-            self.jira_steps_to_reproduce()
+        self.jira_steps_to_reproduce()
         issue, created = jira_client.create_issue(
             self.finding["title"], priority, self.__str__(), self.get_hash_code(),
             additional_labels=[self.finding["tool"], self.scan_type, self.finding["severity"]])
