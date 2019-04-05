@@ -65,7 +65,7 @@ class DefaultModel(object):
             if sourcefile:
                 file_path += '.' + sourcefile
         self.finding = {
-            "title": re.sub('[^A-Za-zА-Яа-я0-9//\\\.\- _]+', '', title),
+            "title": re.sub('[^A-Za-z0-9//\.\- _]+', '', title),
             "date": date,
             "description": description.replace("\n", "\n\n"),
             "severity": severity,
@@ -125,8 +125,8 @@ class DefaultModel(object):
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def __str__(self):
-        finding = f'\n### Title: {self.finding["title"]}\n\n' \
-                  f'### Description:\n {self.finding["description"]}\n\n' \
+        finding = f'\n**Title**: {self.finding["title"]}\n\n' \
+                  f'**Description**:\n {self.finding["description"]}\n\n' \
                   f'**Tool**: {self.finding["tool"]}\n\n' \
                   f'**Severity**: {self.finding["severity"]}\n\n' \
                   f"**Issue Hash**: {self.get_hash_code()}\n\n"
@@ -152,7 +152,7 @@ class DefaultModel(object):
         endpoints = set(self.finding['dynamic_finding_details']['endpoints'] + self.unsaved_endpoints + self.endpoints)
         if endpoints:
             self.scan_type = "DAST"
-            finding += "### Endpoints:\n"
+            finding += "***Endpoints***:\n"
             for endpoint in endpoints:
                 finding += f'{str(endpoint)}\n\n'
         if self.finding['dynamic_finding_details']["payload"] is not None:
@@ -184,32 +184,29 @@ class DefaultModel(object):
         tc.add_error_info(message=message, error_type=self.finding['severity'])
         return tc
 
+    def jira_steps_to_reproduce(self):
+        steps = []
+        for step in self.finding['steps_to_reproduce']:
+            steps.append(step.replace("<pre>", "{code:collapse=true}\n\n").replace("</pre>", "\n\n{code}"))
+        self.finding['steps_to_reproduce'] = steps
+
+    def wrap_jira_comment(self, comment):
+        return "{code:collapse=true}\n\n%s\n\n{code}" % comment
+
     def jira(self, jira_client, priority_mapping=None):
         priority = define_jira_priority(self.finding['severity'], priority_mapping)
         comments = []
-        if len(self.__str__()) >= c.JIRA_DESCRIPTION_MAX_SIZE:
-            steps_to_reproduce = self.finding['steps_to_reproduce']
-            self.finding['steps_to_reproduce'] = []
-            for chunk in steps_to_reproduce:
-                self.finding['steps_to_reproduce'].append(chunk)
-                if len(self.__str__()) >= c.JIRA_DESCRIPTION_MAX_SIZE:
-                    self.finding['steps_to_reproduce'].remove(chunk)
-                if not comments or (len(comments[-1]) + len(chunk)) > c.JIRA_COMMENT_MAX_SIZE:
-                    comments.append(chunk)
-                else:  # Last comment can handle one more chunk
-                    comments[-1] += '  \n  \n' + chunk
+        if len(self.__str__()) > c.JIRA_DESCRIPTION_MAX_SIZE:
+            comments = self.finding['steps_to_reproduce']
+            self.finding['steps_to_reproduce'] = ["See in comments\n\n"]
         else:
-            steps = []
-            for step in self.finding['steps_to_reproduce']:
-                steps.append(step.replace("<pre>", "{code:collapse=true}\n\n").replace("</pre>", "\n\n{code}"))
-            self.finding['steps_to_reproduce'] = steps
+            self.jira_steps_to_reproduce()
         issue, created = jira_client.create_issue(
             self.finding["title"], priority, self.__str__(), self.get_hash_code(),
             additional_labels=[self.finding["tool"], self.scan_type, self.finding["severity"]])
         if created and comments:
             for comment in comments:
-                jira_client.add_comment_to_issue(issue, comment)
-                                                 # "{code:collapse=true}\n\n%s\n\n{code}" % comment[:c.JIRA_COMMENT_MAX_SIZE-1])
+                jira_client.add_comment_to_issue(issue, self.wrap_jira_comment(comment)[:c.JIRA_COMMENT_MAX_SIZE-1])
         return issue, created
 
     def dd_item(self):

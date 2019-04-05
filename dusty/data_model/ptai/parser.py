@@ -17,7 +17,7 @@ import os
 import re
 from bs4 import BeautifulSoup
 from dusty import constants
-from dusty.data_model.canonical_model import DefaultModel as Finding
+from dusty.data_model.ptai_model import PTAIModel as Finding
 
 
 __author__ = 'KarynaTaranova'
@@ -187,7 +187,7 @@ class PTAIScanParser(object):
                                              '=#ccc|titleBGColor=#F7D6C1|bgColor=#FFFFCE}  \n  \n' + data_flow_panel_str \
                                              + '  \n  \n {panel}  \n  \n'
                 function_blocks_strs.append(function_full_info_str)
-            description = 'h3. {}:  \n  \n{}  \n  \n'.format(title, vulnerability_info.strip())
+            description = ' \n \n{}:  \n  \n{}  \n  \n'.format(title, vulnerability_info.strip())
             dup_key = title + ' in file: ' + file_path
             # Add finding data to de-duplication store
             if dup_key not in dupes:
