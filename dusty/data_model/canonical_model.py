@@ -65,7 +65,7 @@ class DefaultModel(object):
             if sourcefile:
                 file_path += '.' + sourcefile
         self.finding = {
-            "title": re.sub('[^A-Za-z0-9//\.\- _]+', '', title),
+            "title": re.sub('[^A-Za-zА-Яа-я0-9//\\\.\- _]+', '', title),
             "date": date,
             "description": description.replace("\n", "\n\n"),
             "severity": severity,
@@ -206,7 +206,7 @@ class DefaultModel(object):
             additional_labels=[self.finding["tool"], self.scan_type, self.finding["severity"]])
         if created and comments:
             for comment in comments:
-                jira_client.add_comment_to_issue(issue, self.wrap_jira_comment(comment)[:c.JIRA_COMMENT_MAX_SIZE-1])
+                jira_client.add_comment_to_issue(issue, comment[:c.JIRA_COMMENT_MAX_SIZE-1])
         return issue, created
 
     def dd_item(self):

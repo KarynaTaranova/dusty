@@ -17,7 +17,7 @@ import os
 import re
 from bs4 import BeautifulSoup
 from dusty import constants
-from dusty.data_model.ptai_model import PTAIModel as Finding
+from dusty.data_model.canonical_model import DefaultModel as Finding
 
 
 __author__ = 'KarynaTaranova'
