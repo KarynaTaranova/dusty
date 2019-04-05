@@ -125,8 +125,8 @@ class DefaultModel(object):
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
     def __str__(self):
-        finding = f'\nTitle: {self.finding["title"]}\n\n' \
-                  f'Description:\n {self.finding["description"]}\n\n' \
+        finding = f'\n### Title: {self.finding["title"]}\n\n' \
+                  f'### Description:\n {self.finding["description"]}\n\n' \
                   f'**Tool**: {self.finding["tool"]}\n\n' \
                   f'**Severity**: {self.finding["severity"]}\n\n' \
                   f"**Issue Hash**: {self.get_hash_code()}\n\n"
