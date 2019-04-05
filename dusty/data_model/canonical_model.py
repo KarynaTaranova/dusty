@@ -190,9 +190,6 @@ class DefaultModel(object):
             steps.append(step.replace("<pre>", "{code:collapse=true}\n\n").replace("</pre>", "\n\n{code}"))
         self.finding['steps_to_reproduce'] = steps
 
-    def wrap_jira_comment(self, comment):
-        return "{code:collapse=true}\n\n%s\n\n{code}" % comment
-
     def jira(self, jira_client, priority_mapping=None):
         priority = define_jira_priority(self.finding['severity'], priority_mapping)
         comments = []
