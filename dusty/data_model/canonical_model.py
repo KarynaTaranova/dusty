@@ -124,13 +124,15 @@ class DefaultModel(object):
         hash_string = self.finding_error_string().strip()
         return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
 
-    def __str__(self):
+    def __str__(self, overwrite_steps_to_reproduce=None):
         finding = f'\n### Title: {self.finding["title"]}\n\n' \
                   f'### Description:\n {self.finding["description"]}\n\n' \
                   f'**Tool**: {self.finding["tool"]}\n\n' \
                   f'**Severity**: {self.finding["severity"]}\n\n' \
                   f"**Issue Hash**: {self.get_hash_code()}\n\n"
-        if self.finding['steps_to_reproduce']:
+        if overwrite_steps_to_reproduce:
+            finding += f"**Steps To Reproduce**: {overwrite_steps_to_reproduce}"
+        elif self.finding['steps_to_reproduce']:
             steps = self._stringify('\n\n'.join(self.finding['steps_to_reproduce']))
             finding += f"**Steps To Reproduce**: {steps}"
         for each in self.finding:
@@ -188,7 +190,7 @@ class DefaultModel(object):
         steps = []
         for step in self.finding['steps_to_reproduce']:
             steps.append(step.replace("<pre>", "{code:collapse=true}\n\n").replace("</pre>", "\n\n{code}"))
-        self.finding['steps_to_reproduce'] = steps
+        return steps
 
     def cut_jira_comment(self, comment):
         code_block_ending = "\n\n{code}"
@@ -205,13 +207,14 @@ class DefaultModel(object):
     def jira(self, jira_client, priority_mapping=None):
         priority = define_jira_priority(self.finding['severity'], priority_mapping)
         comments = []
-        self.jira_steps_to_reproduce()
         if len(self.__str__()) > c.JIRA_DESCRIPTION_MAX_SIZE:
-            comments = self.finding['steps_to_reproduce']
-            self.finding['steps_to_reproduce'] = ["See in comments\n\n"]
+            comments = self.jira_steps_to_reproduce()
+            _overwrite_steps = "See in comments\n\n"
+        else:
+            _overwrite_steps = None
         issue, created = jira_client.create_issue(
-            self.finding["title"], priority, self.__str__(), self.get_hash_code(),
-            additional_labels=[self.finding["tool"], self.scan_type, self.finding["severity"]])
+            self.finding["title"], priority, self.__str__(overwrite_steps_to_reproduce=_overwrite_steps),
+            self.get_hash_code(), additional_labels=[self.finding["tool"], self.scan_type, self.finding["severity"]])
         if created and comments:
             chunks = comments
             comments = list()
