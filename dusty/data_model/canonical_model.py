@@ -190,13 +190,25 @@ class DefaultModel(object):
             steps.append(step.replace("<pre>", "{code:collapse=true}\n\n").replace("</pre>", "\n\n{code}"))
         self.finding['steps_to_reproduce'] = steps
 
+    def cut_jira_comment(self, comment):
+        code_block_ending = "\n\n{code}"
+        if len(comment) > c.JIRA_COMMENT_MAX_SIZE:
+            _comment = comment[:c.JIRA_COMMENT_MAX_SIZE - 1]
+            last_code_block = _comment.rfind("{code:collapse=true}")
+            if last_code_block > -1 and _comment.find("{code}", last_code_block+1) == -1:
+                _comment = _comment[:(c.JIRA_COMMENT_MAX_SIZE - len(code_block_ending) - 1)] + code_block_ending
+        else:
+            _comment = comment
+        return _comment
+
+
     def jira(self, jira_client, priority_mapping=None):
         priority = define_jira_priority(self.finding['severity'], priority_mapping)
         comments = []
+        self.jira_steps_to_reproduce()
         if len(self.__str__()) > c.JIRA_DESCRIPTION_MAX_SIZE:
             comments = self.finding['steps_to_reproduce']
             self.finding['steps_to_reproduce'] = ["See in comments\n\n"]
-        self.jira_steps_to_reproduce()
         issue, created = jira_client.create_issue(
             self.finding["title"], priority, self.__str__(), self.get_hash_code(),
             additional_labels=[self.finding["tool"], self.scan_type, self.finding["severity"]])
@@ -206,9 +218,9 @@ class DefaultModel(object):
             new_line_str = '  \n  \n'
             for chunk in chunks:
                 if not comments or (len(comments[-1]) + len(new_line_str) + len(chunk)) >= c.JIRA_COMMENT_MAX_SIZE:
-                    comments.append(chunk[:c.JIRA_COMMENT_MAX_SIZE - 1])
+                    comments.append(self.cut_jira_comment(chunk))
                 else:  # Last comment can handle one more chunk
-                    comments[-1] += new_line_str + chunk[:c.JIRA_COMMENT_MAX_SIZE - 1]
+                    comments[-1] += new_line_str + self.cut_jira_comment(chunk)
             for comment in comments:
                 jira_client.add_comment_to_issue(issue, comment)
         return issue, created
