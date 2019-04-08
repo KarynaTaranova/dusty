@@ -201,9 +201,16 @@ class DefaultModel(object):
             self.finding["title"], priority, self.__str__(), self.get_hash_code(),
             additional_labels=[self.finding["tool"], self.scan_type, self.finding["severity"]])
         if created and comments:
+            chunks = comments
+            comments = list()
+            new_line_str = '  \n  \n'
+            for chunk in chunks:
+                if not comments or (len(comments[-1]) + len(new_line_str) + len(chunk)) >= c.JIRA_COMMENT_MAX_SIZE:
+                    comments.append(chunk[:c.JIRA_COMMENT_MAX_SIZE - 1])
+                else:  # Last comment can handle one more chunk
+                    comments[-1] += new_line_str + chunk[:c.JIRA_COMMENT_MAX_SIZE - 1]
             for comment in comments:
-                jira_client.add_comment_to_issue(issue, comment[:c.JIRA_COMMENT_MAX_SIZE-1])
-        return issue, created
+                jira_client.add_comment_to_issue(issue, comment)
 
     def dd_item(self):
         pass
