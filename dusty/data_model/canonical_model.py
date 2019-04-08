@@ -211,6 +211,7 @@ class DefaultModel(object):
                     comments[-1] += new_line_str + chunk[:c.JIRA_COMMENT_MAX_SIZE - 1]
             for comment in comments:
                 jira_client.add_comment_to_issue(issue, comment)
+        return issue, created
 
     def dd_item(self):
         pass
