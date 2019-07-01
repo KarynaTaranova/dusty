@@ -26,7 +26,7 @@ from ruamel.yaml.comments import CommentedMap
 from dusty.tools import log
 from dusty.models.module import ModuleModel
 from dusty.models.command import CommandModel
-from dusty.helpers.config import ConfigHelper
+from dusty.models.config import ConfigModel
 from dusty.scanners.performer import ScanningPerformer
 from dusty.processors.performer import ProcessingPerformer
 from dusty.reporters.performer import ReportingPerformer
@@ -48,7 +48,7 @@ class Command(ModuleModel, CommandModel):
         """ Run the command """
         log.debug("Starting")
         # Make instances
-        config = ConfigHelper
+        config = ConfigModel
         scanning = ScanningPerformer
         processing = ProcessingPerformer
         reporting = ReportingPerformer

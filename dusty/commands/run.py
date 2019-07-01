@@ -25,8 +25,8 @@ from dusty.tools import log
 from dusty import constants
 from dusty.models.module import ModuleModel
 from dusty.models.command import CommandModel
-from dusty.helpers.context import RunContext
-from dusty.helpers.config import ConfigHelper
+from dusty.models.context import RunContext
+from dusty.models.config import ConfigModel
 from dusty.scanners.performer import ScanningPerformer
 from dusty.processors.performer import ProcessingPerformer
 from dusty.reporters.performer import ReportingPerformer
@@ -66,7 +66,7 @@ class Command(ModuleModel, CommandModel):
             log.warning("Called from legacy entry point")
         # Init context
         context = RunContext(args)
-        config = ConfigHelper(context)
+        config = ConfigModel(context)
         if args.list_suites:
             suites = config.list_suites(args.config_variable, args.config_file)
             log.info("Available suites: %s", ", ".join(suites))

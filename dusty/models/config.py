@@ -30,7 +30,7 @@ from dusty.tools import log
 from dusty import constants
 
 
-class ConfigHelper:
+class ConfigModel:
     """ Parses config """
 
     def __init__(self, context):

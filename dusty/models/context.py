@@ -35,7 +35,7 @@ class RunContext(MetaModel):
         self.args = args
         self.config = dict()
         self.suite = ""
-        self.results = list()
+        self.findings = list()
         self.errors = list()
         self.scanners = LastUpdatedOrderedDict()  # scanner -> instance
         self.processors = LastUpdatedOrderedDict()  # processor -> instance
