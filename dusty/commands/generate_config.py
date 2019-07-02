@@ -19,6 +19,7 @@
     Command: generate-config
 """
 
+import sys
 import ruamel.yaml
 
 from ruamel.yaml.comments import CommentedMap
@@ -40,8 +41,8 @@ class Command(ModuleModel, CommandModel):
         super().__init__()
         argparser.add_argument(
             "-o", "--output", dest="output_file",
-            help="path to output file",
-            type=str, required=True
+            help="path to output file (use '-' for stdout)",
+            type=str, default="-"
         )
 
     def execute(self, args):
@@ -65,6 +66,8 @@ class Command(ModuleModel, CommandModel):
         reporting.fill_config(data_obj["example"])
         # Save to file
         yaml = ruamel.yaml.YAML()
+        if args.output_file == "-":
+            yaml.dump(data, sys.stdout)
         with open(args.output_file, "wb") as output:
             yaml.dump(data, output)
         # Done
