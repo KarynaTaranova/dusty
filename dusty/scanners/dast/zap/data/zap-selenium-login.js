@@ -93,6 +93,11 @@ function authenticate(helper, paramsValues, credentials) {
             var wait = new WebDriverWait(driver, 15);
             wait.until(ExpectedConditions.presenceOfElementLocated(selector));
         },
+        "sendKeys": function(driver, target, value) {
+            var selector = _makeSeleniumSelector(target);
+            var element = driver.findElement(selector);
+            element.sendKeys(value);
+        },
         "type": function(driver, target, value) {
             var selector = _makeSeleniumSelector(target);
             var element = driver.findElement(selector);
