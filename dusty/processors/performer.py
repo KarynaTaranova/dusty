@@ -149,11 +149,7 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
     @staticmethod
     def fill_config(data_obj):
         """ Make sample config """
-        general_obj = data_obj["general"]
-        general_obj.insert(
-            len(general_obj), "processing", CommentedMap(),
-            comment="Settings common to all processors"
-        )
+        # general_obj = data_obj["settings"]["processing"] # This can also be used
         data_obj.insert(len(data_obj), "processing", CommentedMap(), comment="Processing config")
         processing_obj = data_obj["processing"]
         processing_module = importlib.import_module("dusty.processors")

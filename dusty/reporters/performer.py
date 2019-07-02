@@ -236,11 +236,7 @@ class ReportingPerformer(ModuleModel, PerformerModel, ReporterModel):
     @staticmethod
     def fill_config(data_obj):
         """ Make sample config """
-        general_obj = data_obj["general"]
-        general_obj.insert(
-            len(general_obj), "reporters", CommentedMap(),
-            comment="Settings common to all reporters"
-        )
+        # general_obj = data_obj["settings"]["reporters"] # This can also be used
         data_obj.insert(len(data_obj), "reporters", CommentedMap(), comment="Reporters config")
         reporters_obj = data_obj["reporters"]
         reporters_module = importlib.import_module("dusty.reporters")

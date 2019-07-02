@@ -236,18 +236,13 @@ class ScanningPerformer(ModuleModel, PerformerModel):
     @staticmethod
     def fill_config(data_obj):
         """ Make sample config """
-        general_obj = data_obj["general"]
-        general_obj.insert(
-            len(general_obj), "scanners", CommentedMap(), comment="Settings common to all scanners"
-        )
-        general_scanner_obj = general_obj["scanners"]
         data_obj.insert(len(data_obj), "scanners", CommentedMap(), comment="Scanners config")
         scanner_obj = data_obj["scanners"]
         scanners_module = importlib.import_module("dusty.scanners")
         for _, name, pkg in pkgutil.iter_modules(scanners_module.__path__):
             if not pkg:
                 continue
-            general_scanner_obj.insert(len(general_scanner_obj), name, CommentedMap())
+            # general_scanner_obj = data_obj["settings"][name] # This can also be used
             scanner_type = importlib.import_module("dusty.scanners.{}".format(name))
             scanner_obj.insert(len(scanner_obj), name, CommentedMap())
             inner_obj = scanner_obj[name]
