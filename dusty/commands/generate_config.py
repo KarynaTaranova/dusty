@@ -58,9 +58,8 @@ class Command(ModuleModel, CommandModel):
         config.fill_config(data)
         data_obj = data["suites"]
         data_obj.insert(len(data_obj), "example", CommentedMap(), comment="Example test suite")
-        data_obj["example"].insert(0, "general", CommentedMap(), comment="General config")
-        data_obj["example"]["general"].insert(0, "settings", CommentedMap(), comment="Settings")
-        self._fill_settings(data_obj["example"]["general"]["settings"])
+        data_obj["example"].insert(0, "settings", CommentedMap(), comment="Settings")
+        self._fill_settings(data_obj["example"]["settings"])
         scanning.fill_config(data_obj["example"])
         processing.fill_config(data_obj["example"])
         reporting.fill_config(data_obj["example"])
@@ -92,11 +91,22 @@ class Command(ModuleModel, CommandModel):
         )
         data_obj.insert(
             len(data_obj),
-            "max_concurrent_scanners", CommentedMap(),
-            comment="Maximum number of concurrent scanners"
+            "dast", CommentedMap(),
+            comment="Settings common to all DAST scanners"
         )
-        data_obj["max_concurrent_scanners"].insert(0, "dast", 1)
-        data_obj["max_concurrent_scanners"].insert(1, "sast", 4)
+        data_obj.insert(
+            len(data_obj),
+            "sast", CommentedMap(),
+            comment="Settings common to all SAST scanners"
+        )
+        data_obj["dast"].insert(
+            0, "max_concurrent_scanners", 1,
+            comment="Maximum number of concurrent DAST scanners"
+        )
+        data_obj["sast"].insert(
+            0, "max_concurrent_scanners", 4,
+            comment="Maximum number of concurrent SAST scanners"
+        )
 
     @staticmethod
     def get_name():
