@@ -62,7 +62,7 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
 
     def perform(self):
         """ Perform action """
-        log.info("Starting result processing")
+        log.info("Starting processing")
         # Run processors
         performed = set()
         perform_processing_iteration = True
