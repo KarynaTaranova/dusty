@@ -107,16 +107,16 @@ class Command(ModuleModel, CommandModel):
             0, "max_concurrent_scanners", 4,
             comment="Maximum number of concurrent SAST scanners"
         )
-        # data_obj.insert(
-        #     len(data_obj),
-        #     "processing", CommentedMap(),
-        #     comment="Settings common to all processors"
-        # )
-        # data_obj.insert(
-        #     len(data_obj),
-        #     "reporters", CommentedMap(),
-        #     comment="Settings common to all reporters"
-        # )
+        data_obj.insert(
+            len(data_obj),
+            "processing", CommentedMap(),
+            comment="Settings common to all processors"
+        )
+        data_obj.insert(
+            len(data_obj),
+            "reporters", CommentedMap(),
+            comment="Settings common to all reporters"
+        )
 
     @staticmethod
     def get_name():
