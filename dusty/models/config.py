@@ -88,10 +88,8 @@ class ConfigModel:
             log.error("Suite is not defined: %s", self.context.suite)
             log.info("Available suites: %s", ", ".join(list(config["suites"])))
             return False
-        if "general" not in config["suites"][self.context.suite]:
-            config["suites"][self.context.suite]["general"] = dict()
-        if "settings" not in config["suites"][self.context.suite]["general"]:
-            config["suites"][self.context.suite]["general"]["settings"] = dict()
+        if "settings" not in config["suites"][self.context.suite]:
+            config["suites"][self.context.suite]["settings"] = dict()
         return True
 
     def list_suites(self, config_variable, config_file):

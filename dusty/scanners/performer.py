@@ -75,7 +75,7 @@ class ScanningPerformer(ModuleModel, PerformerModel):
         reporting = self.context.performers.get("reporting", None)
         # Create executors
         executor = dict()
-        settings = self.context.config["general"]["settings"]
+        settings = self.context.config["settings"]
         for scanner_type in self.context.config["scanners"]:
             max_workers = settings.get("max_concurrent_scanners", dict()).get(scanner_type, 1)
             executor[scanner_type] = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
@@ -203,8 +203,8 @@ class ScanningPerformer(ModuleModel, PerformerModel):
                     not isinstance(config[scanner_type][scanner_name], dict):
                 config[scanner_type][scanner_name] = dict()
             general_config = dict()
-            if "scanners" in self.context.config["general"]:
-                general_config = self.context.config["general"]["scanners"]
+            if "settings" in self.context.config:
+                general_config = self.context.config["settings"]
             if scanner_type in general_config:
                 merged_config = general_config[scanner_type].copy()
                 merged_config.update(config[scanner_type][scanner_name])

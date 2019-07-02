@@ -123,8 +123,8 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
             config = self.context.config["processing"]
             if processor_name not in config or not isinstance(config[processor_name], dict):
                 config[processor_name] = dict()
-            if "processing" in self.context.config["general"]:
-                general_config = self.context.config["general"]["processing"]
+            if "processing" in self.context.config["settings"]:
+                general_config = self.context.config["settings"]["processing"]
                 merged_config = general_config.copy()
                 merged_config.update(config[processor_name])
                 config[processor_name] = merged_config
