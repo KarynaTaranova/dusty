@@ -67,12 +67,11 @@ class Command(ModuleModel, CommandModel):
         # Init context
         context = RunContext(args)
         config = ConfigModel(context)
-        if args.list_suites:
+        if args.list_suites or not args.suite:
             suites = config.list_suites(args.config_variable, args.config_file)
+            if not args.suite:
+                log.error("Suite is not defined. Use --help to get help")
             log.info("Available suites: %s", ", ".join(suites))
-            return
-        if not args.suite:
-            log.error("Suite is not defined. Use --help to get help")
             return
         # Make instances
         scanning = ScanningPerformer(context)
