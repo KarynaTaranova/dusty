@@ -31,8 +31,8 @@ class ScannerModel(MetaModel):
         self.findings = list()
         self.errors = list()
 
-    def get_results(self):
-        """ Get results """
+    def get_findings(self):
+        """ Get findigs """
         return self.findings
 
     def get_errors(self):

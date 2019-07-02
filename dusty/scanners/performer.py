@@ -127,10 +127,10 @@ class ScanningPerformer(ModuleModel, PerformerModel):
                             details=f"```\n{traceback.format_exc()}\n```"
                         )
                         self.context.errors.append(error)
-                    # Collect scanner results and errors
+                    # Collect scanner findings and errors
                     scanner = self.context.scanners[item]
                     scanner_type = scanner.__class__.__module__.split(".")[-3]
-                    for result in scanner.get_results():
+                    for result in scanner.get_findings():
                         result.set_meta("scanner_type", scanner_type)
                         self.context.findings.append(result)
                     for error in scanner.get_errors():

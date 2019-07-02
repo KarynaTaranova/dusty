@@ -218,7 +218,7 @@ class ReportingPerformer(ModuleModel, PerformerModel, ReporterModel):
                 self.context.errors.append(error)
 
     def flush(self):
-        """ Flush results """
+        """ Flush """
         # Run reporters
         for reporter_module_name in self.context.reporters:
             reporter = self.context.reporters[reporter_module_name]

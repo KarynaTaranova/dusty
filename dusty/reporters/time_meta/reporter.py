@@ -67,10 +67,10 @@ class Reporter(DependentModuleModel, ReporterModel):
             )
         )
         log.info(
-            "Finished scanning with %s (%d seconds, %d results, %d errors)",
+            "Finished scanning with %s (%d seconds, %d findings, %d errors)",
             scanner,
             self.context.scanners[scanner].get_meta("scanner_run_time"),
-            len(self.context.scanners[scanner].get_results()),
+            len(self.context.scanners[scanner].get_findings()),
             len(self.context.scanners[scanner].get_errors())
         )
 

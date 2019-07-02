@@ -25,7 +25,7 @@ from dusty.models.processor import ProcessorModel
 
 
 class Processor(DependentModuleModel, ProcessorModel):
-    """ Process results: filter false-positives """
+    """ Process findings: filter false-positives """
 
     def __init__(self, context):
         """ Initialize processor instance """

@@ -34,7 +34,7 @@ from dusty.models.error import Error
 
 
 class ProcessingPerformer(ModuleModel, PerformerModel):
-    """ Process results """
+    """ Process findings """
 
     def __init__(self, context):
         """ Initialize instance """

@@ -66,7 +66,7 @@ class Reporter(DependentModuleModel, ReporterModel):
         log.info("Enabled Loki logging in %s mode", mode)
 
     def flush(self):
-        """ Flush results """
+        """ Flush """
         for handler in logging.getLogger("").handlers:
             handler.flush()
 

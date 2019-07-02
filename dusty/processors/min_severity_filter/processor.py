@@ -28,7 +28,7 @@ from . import constants
 
 
 class Processor(DependentModuleModel, ProcessorModel):
-    """ Process results: filter false-positives """
+    """ Process findings: filter low-level items """
 
     def __init__(self, context):
         """ Initialize processor instance """
@@ -40,7 +40,7 @@ class Processor(DependentModuleModel, ProcessorModel):
     def execute(self):
         """ Run the processor """
         severity = self.config.get("severity", constants.DEFAULT_SEVERITY)
-        log.info("Filtering results below %s level", severity)
+        log.info("Filtering findings below %s level", severity)
         for item in self.context.findings:
             if SEVERITIES.index(item.get_meta("severity", SEVERITIES[-1])) > \
                     SEVERITIES.index(severity):
@@ -62,4 +62,4 @@ class Processor(DependentModuleModel, ProcessorModel):
     @staticmethod
     def get_description():
         """ Module description """
-        return "Filters results below minimal severity level"
+        return "Filters findings below minimal severity level"

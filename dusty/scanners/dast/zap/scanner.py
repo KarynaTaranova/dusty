@@ -39,7 +39,7 @@ from dusty.models.scanner import ScannerModel
 from dusty.models.error import Error
 
 from . import constants
-from .parser import parse_results
+from .parser import parse_findings
 
 
 class Scanner(DependentModuleModel, ScannerModel):
@@ -92,15 +92,15 @@ class Scanner(DependentModuleModel, ScannerModel):
         finally:
             try:
                 # Get report
-                log.info("Processing results")
+                log.info("Processing findings")
                 zap_report = self._zap_api.core.jsonreport()
                 # Parse JSON
-                parse_results(zap_report, self)
+                parse_findings(zap_report, self)
             except:
-                log.exception("Exception during ZAP results processing")
+                log.exception("Exception during ZAP findings processing")
                 error = Error(
                     tool=self.get_name(),
-                    error=f"Exception during ZAP results processing",
+                    error=f"Exception during ZAP findings processing",
                     details=f"```\n{traceback.format_exc()}\n```"
                 )
                 self.errors.append(error)

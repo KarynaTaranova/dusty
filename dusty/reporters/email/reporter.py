@@ -32,7 +32,7 @@ from .presenter import EMailPresenter
 
 
 class Reporter(DependentModuleModel, ReporterModel):
-    """ Report results from scanners """
+    """ Report findings from scanners """
 
     def __init__(self, context):
         """ Initialize reporter instance """

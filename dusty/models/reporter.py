@@ -49,4 +49,4 @@ class ReporterModel(MetaModel):
         """ Report """
 
     def flush(self):
-        """ Flush results """
+        """ Flush """

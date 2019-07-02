@@ -28,9 +28,9 @@ from dusty.models.finding import DastFinding
 from . import constants
 
 
-def parse_results(data, scanner):
-    """ Parse results """
-    log.debug("Parsing results")
+def parse_findings(data, scanner):
+    """ Parse findings """
+    log.debug("Parsing findings")
     zap_json = json.loads(data)
     for site in zap_json["site"]:
         for alert in site["alerts"]:
