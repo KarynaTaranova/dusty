@@ -20,9 +20,30 @@
     Markdown tools
 """
 
+import html2text
 import markdown2
 
 
 def markdown_to_html(text):
     """ Convert markdown to HTML """
     return markdown2.markdown(text, extras=["tables", "fenced-code-blocks"])
+
+
+def markdown_escape(string):
+    """ Escape markdown special symbols """
+    to_escape = [
+        "\\", "`", "*", "_",
+        "{", "}", "[", "]", "(", ")",
+        "#", "|", "+", "-", ".", "!"
+    ]
+    for item in to_escape:
+        string = string.replace(item, f"\\{item}")
+    return string.replace("\n", " ")
+
+
+def html_to_markdown(html, escape=False):
+    """ Convert HTML to markdown """
+    converter = html2text.HTML2Text()
+    if escape:
+        html = markdown_escape(html)
+    return converter.handle(html)
