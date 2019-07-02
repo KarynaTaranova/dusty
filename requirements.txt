@@ -5,4 +5,5 @@ python-owasp-zap-v2.4==0.0.14
 Jinja2==2.10.1
 python-logging-loki==0.1.0
 markdown2==2.3.6
+html2text==2018.1.9
 reportportal-client @ git+https://github.com/reportportal/client-Python.git#egg=reportportal-client

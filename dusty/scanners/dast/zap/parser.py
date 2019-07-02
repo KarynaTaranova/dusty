@@ -21,6 +21,7 @@
 """
 
 import json
+import html2text
 
 from dusty.tools import log
 from dusty.models.finding import DastFinding
@@ -31,18 +32,19 @@ from . import constants
 def parse_findings(data, scanner):
     """ Parse findings """
     log.debug("Parsing findings")
+    converter = html2text.HTML2Text()
     zap_json = json.loads(data)
     for site in zap_json["site"]:
         for alert in site["alerts"]:
             description = list()
             if "desc" in alert:
-                description.append(alert["desc"])
+                description.append(converter.handle(alert["desc"]))
             if "solution" in alert:
-                description.append(f'Solution:\n {alert["solution"]}')
+                description.append(f'*Solution:*\n {converter.handle(alert["solution"])}')
             if "reference" in alert:
-                description.append(f'Reference:\n {alert["reference"]}')
+                description.append(f'*Reference:*\n {converter.handle(alert["reference"])}')
             if "otherinfo" in alert:
-                description.append(f'Other information:\n {alert["otherinfo"]}')
+                description.append(f'*Other information:*\n {converter.handle(alert["otherinfo"])}')
             description = "\n".join(description)
             # Make finding object
             finding = DastFinding(
