@@ -152,7 +152,7 @@ class HTMLPresenter:
     def project_findings(self):
         """ Returns project findings """
         result = list()
-        for item in self.context.results:
+        for item in self.context.findings:
             if item.get_meta("information_finding", False) or \
                     item.get_meta("false_positive_finding", False):
                 continue
@@ -164,7 +164,7 @@ class HTMLPresenter:
     def project_information_findings(self):
         """ Returns project information findings """
         result = list()
-        for item in self.context.results:
+        for item in self.context.findings:
             if item.get_meta("information_finding", False) and \
                     not item.get_meta("false_positive_finding", False):
                 result.append(self._item_to_finding(item))
@@ -175,7 +175,7 @@ class HTMLPresenter:
     def project_false_positive_findings(self):
         """ Returns project false positive findings """
         result = list()
-        for item in self.context.results:
+        for item in self.context.findings:
             if item.get_meta("false_positive_finding", False):
                 result.append(self._item_to_finding(item))
         result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))

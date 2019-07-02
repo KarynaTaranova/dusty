@@ -52,4 +52,4 @@ def parse_results(data, scanner):
             finding.set_meta("tool", "ZAP")
             finding.set_meta("severity", constants.ZAP_SEVERITIES[alert["riskcode"]])
             finding.set_meta("confidence", constants.ZAP_CONFIDENCES[alert["confidence"]])
-            scanner.results.append(finding)
+            scanner.findings.append(finding)

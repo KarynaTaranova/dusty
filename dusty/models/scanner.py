@@ -28,12 +28,12 @@ class ScannerModel(MetaModel):
 
     def __init__(self):
         super().__init__()
-        self.results = list()
+        self.findings = list()
         self.errors = list()
 
     def get_results(self):
         """ Get results """
-        return self.results
+        return self.findings
 
     def get_errors(self):
         """ Get errors """
