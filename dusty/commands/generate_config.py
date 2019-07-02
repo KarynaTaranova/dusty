@@ -94,19 +94,29 @@ class Command(ModuleModel, CommandModel):
             "dast", CommentedMap(),
             comment="Settings common to all DAST scanners"
         )
+        data_obj["dast"].insert(
+            0, "max_concurrent_scanners", 1,
+            comment="Maximum number of concurrent DAST scanners"
+        )
         data_obj.insert(
             len(data_obj),
             "sast", CommentedMap(),
             comment="Settings common to all SAST scanners"
         )
-        data_obj["dast"].insert(
-            0, "max_concurrent_scanners", 1,
-            comment="Maximum number of concurrent DAST scanners"
-        )
         data_obj["sast"].insert(
             0, "max_concurrent_scanners", 4,
             comment="Maximum number of concurrent SAST scanners"
         )
+        # data_obj.insert(
+        #     len(data_obj),
+        #     "processing", CommentedMap(),
+        #     comment="Settings common to all processors"
+        # )
+        # data_obj.insert(
+        #     len(data_obj),
+        #     "reporters", CommentedMap(),
+        #     comment="Settings common to all reporters"
+        # )
 
     @staticmethod
     def get_name():
