@@ -77,7 +77,7 @@ class ScanningPerformer(ModuleModel, PerformerModel):
         executor = dict()
         settings = self.context.config["settings"]
         for scanner_type in self.context.config["scanners"]:
-            max_workers = settings.get("max_concurrent_scanners", dict()).get(scanner_type, 1)
+            max_workers = settings.get(scanner_type, dict()).get("max_concurrent_scanners", 1)
             executor[scanner_type] = concurrent.futures.ThreadPoolExecutor(max_workers=max_workers)
             log.info("Made %s executor with %d workers", scanner_type.upper(), max_workers)
         # Starting scanning
