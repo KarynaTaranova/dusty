@@ -23,24 +23,10 @@
 import markdown2
 import inscriptis
 
-from dusty.tools import log
-
 
 def markdown_to_html(text):
     """ Convert markdown to HTML """
     return markdown2.markdown(text, extras=["tables", "fenced-code-blocks"])
-
-
-def markdown_table_escape(string):
-    """ Escape markdown special symbols in tables """
-    to_escape = [
-        "\\", "`", "*", "_",
-        "{", "}", "[", "]", "(", ")",
-        "#", "|", "+", "-", ".", "!"
-    ]
-    for item in to_escape:
-        string = string.replace(item, f"\\{item}")
-    return string.replace("\n", " ")
 
 
 def markdown_escape(string):
@@ -52,14 +38,17 @@ def markdown_escape(string):
     ]
     for item in to_escape:
         string = string.replace(item, f"\\{item}")
-    return string.replace("\n", " ")
+    return string
+
+
+def markdown_table_escape(string):
+    """ Escape markdown special symbols in tables """
+    return markdown_escape(string).replace("\n", " ")
 
 
 def html_to_text(html, escape=True):
     """ Convert HTML to markdown """
     text = inscriptis.get_text(html)
-    log.debug(f"HTML: {text}")
     if escape:
         text = markdown_escape(text)
-        log.debug(f"Escaped: {text}")
     return text
