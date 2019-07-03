@@ -23,7 +23,7 @@
 import json
 import html
 
-from dusty.tools import log, markdown
+from dusty.tools import log, markdown, url
 from dusty.models.finding import DastFinding
 
 from . import constants
@@ -68,4 +68,16 @@ def parse_findings(data, scanner):
             finding.set_meta("tool", "ZAP")
             finding.set_meta("severity", constants.ZAP_SEVERITIES[alert["riskcode"]])
             finding.set_meta("confidence", constants.ZAP_CONFIDENCES[alert["confidence"]])
+            # Endpoints (for backwards compatibility)
+            endpoints = list()
+            for item in alert["instances"]:
+                if not item.get("uri", None):
+                    continue
+                endpoint = url.parse_url(item.get("uri"))
+                if endpoint in endpoints:
+                    continue
+                endpoints.append(endpoint)
+            finding.set_meta("endpoints", endpoints)
+            log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
+            # Done
             scanner.findings.append(finding)
