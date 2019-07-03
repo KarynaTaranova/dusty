@@ -20,13 +20,25 @@
     Markdown tools
 """
 
-import html2text
 import markdown2
+import inscriptis
 
 
 def markdown_to_html(text):
     """ Convert markdown to HTML """
     return markdown2.markdown(text, extras=["tables", "fenced-code-blocks"])
+
+
+def markdown_table_escape(string):
+    """ Escape markdown special symbols in tables """
+    to_escape = [
+        "\\", "`", "*", "_",
+        "{", "}", "[", "]", "(", ")",
+        "#", "|", "+", "-", ".", "!"
+    ]
+    for item in to_escape:
+        string = string.replace(item, f"\\{item}")
+    return string.replace("\n", " ")
 
 
 def markdown_escape(string):
@@ -41,9 +53,9 @@ def markdown_escape(string):
     return string.replace("\n", " ")
 
 
-def html_to_markdown(html, escape=False):
+def html_to_text(html, escape=True):
     """ Convert HTML to markdown """
-    converter = html2text.HTML2Text()
+    text = inscriptis.get_text(html)
     if escape:
-        html = markdown_escape(html)
-    return converter.handle(html)
+        text = markdown_escape(text)
+    return text

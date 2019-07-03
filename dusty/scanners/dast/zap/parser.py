@@ -22,9 +22,8 @@
 
 import json
 
-import inscriptis
 
-from dusty.tools import log
+from dusty.tools import log, markdown
 from dusty.models.finding import DastFinding
 
 from . import constants
@@ -38,16 +37,16 @@ def parse_findings(data, scanner):
         for alert in site["alerts"]:
             description = list()
             if "desc" in alert:
-                description.append(inscriptis.get_text(alert["desc"]))
+                description.append(markdown.html_to_text(alert["desc"]))
             if "solution" in alert:
                 description.append(
-                    f'**Solution:**\n {inscriptis.get_text(alert["solution"])}')
+                    f'**Solution:**\n {markdown.html_to_text(alert["solution"])}')
             if "reference" in alert:
                 description.append(
-                    f'**Reference:**\n {inscriptis.get_text(alert["reference"], True)}')
+                    f'**Reference:**\n {markdown.html_to_text(alert["reference"])}')
             if "otherinfo" in alert:
                 description.append(
-                    f'**Other information:**\n {inscriptis.get_text(alert["otherinfo"])}')
+                    f'**Other information:**\n {markdown.html_to_text(alert["otherinfo"])}')
             description = "\n".join(description)
             # Make finding object
             finding = DastFinding(
