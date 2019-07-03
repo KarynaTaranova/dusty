@@ -23,6 +23,8 @@
 import markdown2
 import inscriptis
 
+from dusty.tools import log
+
 
 def markdown_to_html(text):
     """ Convert markdown to HTML """
@@ -56,6 +58,8 @@ def markdown_escape(string):
 def html_to_text(html, escape=True):
     """ Convert HTML to markdown """
     text = inscriptis.get_text(html)
+    log.debug(f"HTML: {text}")
     if escape:
         text = markdown_escape(text)
+        log.debug(f"Escaped: {text}")
     return text
