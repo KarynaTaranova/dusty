@@ -23,6 +23,7 @@
 import logging
 from queue import Queue
 
+import requests
 import logging_loki
 
 from dusty.tools import log
@@ -39,7 +40,20 @@ class Reporter(DependentModuleModel, ReporterModel):
         self.context = context
         self.config = \
             self.context.config["reporters"][__name__.split(".")[-2]]
+        self._disable_loki_ssl_verification()
         self._enable_loki_logging()
+
+    def _disable_loki_ssl_verification(self):
+        # Patched function (property)
+        @property
+        def __session(self) -> requests.Session:
+            if self._session is None:
+                self._session = requests.Session()
+                self._session.verify = False
+                self._session.auth = self.auth or None
+            return self._session
+        # Replace implementation in logging_loki
+        logging_loki.handlers.LokiHandler.session = __session
 
     def _enable_loki_logging(self):
         loki_username = self.config.get("username", None)
