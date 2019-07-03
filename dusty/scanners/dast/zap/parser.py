@@ -40,13 +40,13 @@ def parse_findings(data, scanner):
                 description.append(markdown.html_to_text(alert["desc"]))
             if "solution" in alert:
                 description.append(
-                    f'**Solution:**\n {markdown.html_to_text(alert["solution"])}')
+                    f'\n**Solution:**\n {markdown.html_to_text(alert["solution"])}')
             if "reference" in alert:
                 description.append(
-                    f'**Reference:**\n {markdown.html_to_text(alert["reference"])}')
+                    f'\n**Reference:**\n {markdown.html_to_text(alert["reference"])}')
             if "otherinfo" in alert:
                 description.append(
-                    f'**Other information:**\n {markdown.html_to_text(alert["otherinfo"])}')
+                    f'\n**Other information:**\n {markdown.html_to_text(alert["otherinfo"])}')
             description = "\n".join(description)
             # Make finding object
             finding = DastFinding(
