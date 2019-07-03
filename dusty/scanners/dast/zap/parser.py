@@ -21,7 +21,7 @@
 """
 
 import json
-
+import html
 
 from dusty.tools import log, markdown
 from dusty.models.finding import DastFinding
@@ -47,6 +47,18 @@ def parse_findings(data, scanner):
             if "otherinfo" in alert:
                 description.append(
                     f'\n**Other information:**\n {markdown.html_to_text(alert["otherinfo"])}')
+            if alert["instances"]:
+                description.append("\n")
+                description.append("| URI | Method | Parameter | Attack | Evidence |")
+                description.append("| --- | ------ | --------- | ------ | -------- |")
+            for item in alert["instances"]:
+                description.append("| {} |".format(" | ".join([
+                    html.escape(markdown.markdown_table_escape(item.get("uri", "-"))),
+                    html.escape(markdown.markdown_table_escape(item.get("method", "-"))),
+                    html.escape(markdown.markdown_table_escape(item.get("param", "-"))),
+                    html.escape(markdown.markdown_table_escape(item.get("attack", "-"))),
+                    html.escape(markdown.markdown_table_escape(item.get("evidence", "-")))
+                ])))
             description = "\n".join(description)
             # Make finding object
             finding = DastFinding(
