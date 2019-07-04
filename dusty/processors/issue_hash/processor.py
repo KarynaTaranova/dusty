@@ -44,15 +44,15 @@ class Processor(DependentModuleModel, ProcessorModel):
         for item in self.context.findings:
             # Legacy code: prepare issue hash
             endpoint_str = ""
-            added_endpoints = set()
-            for endpoint_url in item.get_meta("endpoints", list()):
-                endpoint = make_endpoint_from_url(
-                    endpoint_url, include_query=False, include_fragment=False
-                )
-                if str(endpoint) in added_endpoints:
-                    continue
-                endpoint_str += str(endpoint)
-                added_endpoints.add(str(endpoint))
+            # added_endpoints = set()
+            # for endpoint_url in item.get_meta("endpoints", list()):
+            #     endpoint = make_endpoint_from_url(
+            #         endpoint_url, include_query=False, include_fragment=False
+            #     )
+            #     if str(endpoint) in added_endpoints:
+            #         continue
+            #     endpoint_str += str(endpoint)
+            #     added_endpoints.add(str(endpoint))
             # Original:
             # issue_hash = f'{self.finding["title"]}_' \
             #    f'{self.finding["static_finding_details"]["cwe"]}_' \
