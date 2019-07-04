@@ -48,7 +48,11 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
         log.debug("Preparing")
         config = self.context.config["processing"]
         # Schedule processors
-        for processor_name in constants.DEFAULT_PROCESSORS + list(config):
+        all_processors = dependency.resolve_name_order(
+            list(config) + constants.DEFAULT_PROCESSORS,
+            "dusty.processors.{}.processor", "Processor"
+        )
+        for processor_name in all_processors:
             try:
                 self.schedule_processor(processor_name, dict())
             except:
