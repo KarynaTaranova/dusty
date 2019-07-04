@@ -21,5 +21,14 @@
 
 
 # Legacy
-JIRA_FIELD_DO_NOT_USE_VALUE = '!remove'
-JIRA_FIELD_USE_DEFAULT_VALUE = '!default'
+JIRA_FIELD_DO_NOT_USE_VALUE = "!remove"
+JIRA_FIELD_USE_DEFAULT_VALUE = "!default"
+
+# Priority/Severity mapping
+JIRA_SEVERITY_MAPPING = {
+    "Critical": "Critical",
+    "High": "Major",
+    "Medium": "Medium",
+    "Low": "Minor",
+    "Info": "Trivial"
+}

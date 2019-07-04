@@ -30,8 +30,8 @@ from dusty.models.finding import DastFinding
 
 from dusty.constants import SEVERITIES
 
-# from . import constants
-from .legacy import JiraWrapper
+from . import constants
+from .legacy import JiraWrapper, prepare_jira_mapping
 
 
 class Reporter(DependentModuleModel, ReporterModel):
@@ -60,15 +60,20 @@ class Reporter(DependentModuleModel, ReporterModel):
             return
         log.debug("Legacy wrapper is valid")
         # Prepare findings
+        priority_mapping = self.config.get("custom_mapping", prepare_jira_mapping(wrapper))
         findings = list()
         for item in self.context.findings:
             if item.get_meta("information_finding", False) or \
                     item.get_meta("false_positive_finding", False):
                 continue
             if isinstance(item, DastFinding):
+                severity = item.get_meta("severity", SEVERITIES[-1])
+                priority = constants.JIRA_SEVERITY_MAPPING[severity]
+                if priority_mapping and priority in priority_mapping:
+                    priority = priority_mapping[priority]
                 findings.append({
                     "title": item.title,
-                    "priority": "Minor",
+                    "priority": priority,
                     "description": item.description.replace("\\.", "."),
                     "issue_hash": "deadbeef",
                     "additional_labels": [
@@ -79,7 +84,8 @@ class Reporter(DependentModuleModel, ReporterModel):
                     "raw": item
                 })
             else:
-                raise ValueError("Unsupported item type")
+                log.warning("Unsupported finding type")
+                continue # raise ValueError("Unsupported item type")
         findings.sort(key=lambda item: (
             SEVERITIES.index(item["raw"].get_meta("severity", SEVERITIES[-1])),
             item["raw"].get_meta("tool", ""),
@@ -89,15 +95,13 @@ class Reporter(DependentModuleModel, ReporterModel):
         wrapper.connect()
         for finding in findings:
             issue, created = wrapper.create_issue(
-                finding["title"], # title, self.finding["title"]
+                finding["title"], # title
                 finding["priority"], # priority
-                finding["description"], # description,
-                # self.__str__(overwrite_steps_to_reproduce=_overwrite_steps)
+                finding["description"], # description
                 finding["issue_hash"], # issue_hash, self.get_hash_code()
                 # attachments=None,
                 # get_or_create=True,
-                finding["additional_labels"] # additional_labels=None
-                # [self.finding["tool"], self.scan_type, self.finding["severity"]]
+                finding["additional_labels"] # additional_labels
             )
             _ = issue, created
 
