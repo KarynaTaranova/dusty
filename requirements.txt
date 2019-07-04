@@ -17,4 +17,5 @@ python-logging-loki==0.1.0
 python-owasp-zap-v2.4==0.0.14
 
 # Reporting
+jira==2.0.0
 reportportal-client @ git+https://github.com/reportportal/client-Python.git#egg=reportportal-client
