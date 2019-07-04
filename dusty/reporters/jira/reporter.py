@@ -28,7 +28,7 @@ from dusty.models.module import DependentModuleModel
 from dusty.models.reporter import ReporterModel
 
 # from . import constants
-# from .legacy import JiraWrapper
+from .legacy import JiraWrapper
 
 
 class Reporter(DependentModuleModel, ReporterModel):
@@ -43,7 +43,18 @@ class Reporter(DependentModuleModel, ReporterModel):
 
     def report(self):
         """ Report """
-        log.info("Creating Jira tickets")
+        log.info("Creating legacy wrapper instance")
+        wrapper = JiraWrapper(
+            self.config.get("url"),
+            self.config.get("username"),
+            self.config.get("password"),
+            self.config.get("project"),
+            self.config.get("fields")
+        )
+        if not wrapper.valid:
+            log.error("Jira configuration is invalid. Skipping Jira reporting")
+            return
+        log.debug("Legacy wrapper is valid")
 
     @staticmethod
     def fill_config(data_obj):
