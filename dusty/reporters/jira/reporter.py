@@ -86,6 +86,7 @@ class Reporter(DependentModuleModel, ReporterModel):
             item["raw"].title
         ))
         # Submit issues
+        wrapper.connect()
         for finding in findings:
             issue, created = wrapper.create_issue(
                 finding["title"], # title, self.finding["title"]
