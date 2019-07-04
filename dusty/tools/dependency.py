@@ -44,7 +44,7 @@ def resolve_depencies(modules_ordered_dict):
         try:
             module_name_map[modules_ordered_dict[item].__class__.__module__.split(".")[-2]] = \
                 modules_ordered_dict[item]
-        except:
+        except IndexError:
             module_name_map[modules_ordered_dict[item].__module__.split(".")[-2]] = \
                 modules_ordered_dict[item]
     log.debug("Modules: %s", str(list(module_name_map.keys())))
