@@ -207,3 +207,77 @@ class JiraWrapper(object):
 
     def get_created_tickets(self):
         return self.created_jira_tickets
+
+
+def get_project_priorities(jira_client, project, issue_type="Bug"):
+    """ Returns list of Jira priorities in project """
+    try:
+        meta = jira_client.createmeta(
+            projectKeys=project,
+            issuetypeNames=issue_type,
+            expand="projects.issuetypes.fields"
+        )
+        logging.debug("Got metadata for %d projects", len(meta["projects"]))
+        if not meta["projects"]:
+            logging.error(
+                "No meta returned for %s with type %s", project, issue_type
+            )
+            return []
+        project_meta = meta["projects"][0]
+        logging.debug(
+            "Got metadata for %d issuetypes", len(project_meta["issuetypes"])
+        )
+        if not project_meta["issuetypes"]:
+            logging.error("No %s in %s", issue_type, project)
+            return []
+        issue_types = project_meta["issuetypes"][0]
+        if "priority" not in issue_types["fields"]:
+            logging.error("No priority field in %s", project)
+            return []
+        priorities = [
+            priority["name"] for priority in \
+                issue_types["fields"]["priority"]["allowedValues"]
+        ]
+        return priorities
+    except:  # pylint: disable=W0702
+        logging.exception("Failed to get meta for %s", project)
+        return []
+
+
+def prepare_jira_mapping(jira_service):
+    """ Make Jira mapping (for projects that are using custom values) """
+    if not jira_service or not jira_service.valid:
+        return None
+    jira_service.connect()
+    issue_type = "Bug"
+    if jira_service.fields["issuetype"]["name"] != "!default_issuetype":
+        issue_type = jira_service.fields["issuetype"]["name"]
+    project_priorities = get_project_priorities(
+        jira_service.client,
+        jira_service.project,
+        issue_type
+    )
+    if not project_priorities:
+        jira_service.client.close()
+        return None
+    logging.debug(
+        "%s %s priorities: %s",
+        jira_service.project, issue_type, str(project_priorities)
+    )
+    c = const
+    mapping = dict()
+    for severity in c.JIRA_SEVERITIES:
+        if severity not in project_priorities:
+            for alternative in c.JIRA_ALTERNATIVES[severity]:
+                if alternative in project_priorities:
+                    logging.warning(
+                        "Mapping %s %s Jira priority: %s -> %s",
+                        jira_service.project, issue_type,
+                        severity, alternative
+                    )
+                    mapping[severity] = alternative
+                    break
+            if severity not in mapping:
+                logging.error("Failed to find Jira mapping for %s", severity)
+    jira_service.client.close()
+    return mapping
