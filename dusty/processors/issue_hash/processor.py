@@ -19,9 +19,13 @@
     Processor: issue_hash
 """
 
+import hashlib
+
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.processor import ProcessorModel
+
+from .legacy import make_endpoint_from_url
 
 
 class Processor(DependentModuleModel, ProcessorModel):
@@ -38,9 +42,32 @@ class Processor(DependentModuleModel, ProcessorModel):
         """ Run the processor """
         log.info("Injecting issue hashes")
         for item in self.context.findings:
-            issue_hash = "deadbeef"
+            # Legacy code: prepare issue hash
+            endpoint_str = ""
+            added_endpoints = set()
+            for endpoint_url in item.get_meta("endpoints", list()):
+                endpoint = make_endpoint_from_url(
+                    endpoint_url, include_query=False, include_fragment=False
+                )
+                if str(endpoint) in added_endpoints:
+                    continue
+                endpoint_str += str(endpoint)
+                added_endpoints.add(str(endpoint))
+            # Original:
+            # issue_hash = f'{self.finding["title"]}_' \
+            #    f'{self.finding["static_finding_details"]["cwe"]}_' \
+            #    f'{self.finding["static_finding_details"]["line_number"]}_' \
+            #    f'{self.finding["static_finding_details"]["file_name"]}_' \
+            #    f'{endpoint_str}'
+            issue_hash = f'{item.title}_' \
+               f'{None}_' \
+               f'{None}_' \
+               f'{None}_' \
+               f'{endpoint_str}'
+            issue_hash = hashlib.sha256(issue_hash.strip().encode('utf-8')).hexdigest()
+            # Inject issue hash
             item.set_meta("issue_hash", issue_hash)
-            item.description += f"\n**Issue Hash:** {issue_hash}"
+            item.description += f"\n\n**Issue Hash:** {issue_hash}"
 
     @staticmethod
     def get_name():
