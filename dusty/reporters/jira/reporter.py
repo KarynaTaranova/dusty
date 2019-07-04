@@ -69,7 +69,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                 findings.append({
                     "title": item.title,
                     "priority": "Minor",
-                    "description": item.description,
+                    "description": item.description.replace("\\.", "."),
                     "issue_hash": "deadbeef",
                     "additional_labels": [
                         item.get_meta("tool", ""),
