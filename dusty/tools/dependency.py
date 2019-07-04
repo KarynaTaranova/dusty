@@ -41,8 +41,13 @@ def resolve_depencies(modules_ordered_dict):
     # Prepare module name map
     module_name_map = dict()
     for item in modules_ordered_dict:
-        module_name_map[modules_ordered_dict[item].__class__.__module__.split(".")[-2]] = \
-            modules_ordered_dict[item]
+        try:
+            module_name_map[modules_ordered_dict[item].__class__.__module__.split(".")[-2]] = \
+                modules_ordered_dict[item]
+        except:
+            log.debug(modules_ordered_dict[item].__class__.__module__.split("."))
+            log.debug(modules_ordered_dict[item].__module__.split("."))
+            raise
     log.debug("Modules: %s", str(list(module_name_map.keys())))
     # Check required depencies
     for module_name in module_name_map:
