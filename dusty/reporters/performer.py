@@ -49,7 +49,7 @@ class ReportingPerformer(ModuleModel, PerformerModel, ReporterModel):
         log.debug("Preparing")
         config = self.context.config["reporters"]
         # Schedule reporters
-        for reporter_name in list(config) + constants.DEFAULT_REPORTERS:
+        for reporter_name in constants.DEFAULT_REPORTERS + list(config):
             try:
                 self.schedule_reporter(reporter_name, dict())
             except:

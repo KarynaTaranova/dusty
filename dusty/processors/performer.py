@@ -48,7 +48,7 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
         log.debug("Preparing")
         config = self.context.config["processing"]
         # Schedule processors
-        for processor_name in list(config) + constants.DEFAULT_PROCESSORS:
+        for processor_name in constants.DEFAULT_PROCESSORS + list(config):
             try:
                 self.schedule_processor(processor_name, dict())
             except:
