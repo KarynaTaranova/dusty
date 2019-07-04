@@ -26,11 +26,12 @@ from dusty.tools import log
 from dusty.tools.dict import LastUpdatedOrderedDict
 
 
-def resolve_name_order(names, module_template):
+def resolve_name_order(names, package_template, module_name):
     """ Resolve module name order """
     modules = LastUpdatedOrderedDict()
     for name in names:
-        module = importlib.import_module(module_template.format(name))
+        package = importlib.import_module(package_template.format(name))
+        module = getattr(package, module_name)
         modules[module.get_name()] = module
     resolve_depencies(modules)
     return list(modules)

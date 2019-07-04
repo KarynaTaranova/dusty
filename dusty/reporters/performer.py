@@ -51,7 +51,7 @@ class ReportingPerformer(ModuleModel, PerformerModel, ReporterModel):
         # Schedule reporters
         all_reporters = dependency.resolve_name_order(
             list(config) + constants.DEFAULT_REPORTERS,
-            "dusty.reporters.{}.reporter.Reporter"
+            "dusty.reporters.{}.reporter", "Reporter"
         )
         for reporter_name in all_reporters:
             try:
