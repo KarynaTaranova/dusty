@@ -39,6 +39,7 @@ JIRA_ALTERNATIVES = {
     'Critical': ['Very High', 'Blocker'],
     'Blocker': ['Very High', 'Critical']
 }
+JIRA_OPENED_STATUSES = ['Open', 'In Progress']
 
 # Priority/Severity mapping
 JIRA_SEVERITY_MAPPING = {

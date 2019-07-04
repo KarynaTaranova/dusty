@@ -85,10 +85,12 @@ class EMailPresenter:
         result = list()
         tickets = self.context.performers["reporting"].get_module_meta("jira", "new_tickets", None)
         if tickets:
-            for _ in tickets:
+            for ticket in tickets:
                 result.append(EMailJiraTicket(
-                    jira_id="", jira_url="", priority="", status="",
-                    open_date="", description="", assignee=""
+                    jira_id=ticket["jira_id"], jira_url=ticket["jira_url"],
+                    priority=ticket["priority"], status=ticket["status"],
+                    open_date=ticket["open_date"], description=ticket["description"],
+                    assignee=ticket["assignee"]
                 ))
         result.sort(key=lambda item: item.jira_id)
         return result
@@ -100,10 +102,12 @@ class EMailPresenter:
         tickets = \
             self.context.performers["reporting"].get_module_meta("jira", "existing_tickets", None)
         if tickets:
-            for _ in tickets:
+            for ticket in tickets:
                 result.append(EMailJiraTicket(
-                    jira_id="", jira_url="", priority="", status="",
-                    open_date="", description="", assignee=""
+                    jira_id=ticket["jira_id"], jira_url=ticket["jira_url"],
+                    priority=ticket["priority"], status=ticket["status"],
+                    open_date=ticket["open_date"], description=ticket["description"],
+                    assignee=ticket["assignee"]
                 ))
         result.sort(key=lambda item: item.jira_id)
         return result

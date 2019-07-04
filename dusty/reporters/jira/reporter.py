@@ -93,6 +93,8 @@ class Reporter(DependentModuleModel, ReporterModel):
         ))
         # Submit issues
         wrapper.connect()
+        new_tickets = list()
+        existing_tickets = list()
         for finding in findings:
             issue, created = wrapper.create_issue(
                 finding["title"], # title
@@ -103,7 +105,29 @@ class Reporter(DependentModuleModel, ReporterModel):
                 # get_or_create=True,
                 finding["additional_labels"] # additional_labels
             )
-            _ = issue, created
+            if created:
+                new_tickets.append({
+                    "jira_id": issue.key,
+                    "jira_url": self.config.get("url"),
+                    "priority": issue.fields.priority,
+                    "status": issue.fields.status.name,
+                    "open_date": issue.fields.created,
+                    "description": issue.fields.summary,
+                    "assignee": issue.fields.assignee
+                })
+            else:
+                if issue.fields.status.name in constants.JIRA_OPENED_STATUSES:
+                    existing_tickets.append({
+                        "jira_id": issue.key,
+                        "jira_url": self.config.get("url"),
+                        "priority": issue.fields.priority,
+                        "status": issue.fields.status.name,
+                        "open_date": issue.fields.created,
+                        "description": issue.fields.summary,
+                        "assignee": issue.fields.assignee
+                    })
+        self.set_meta("new_tickets", new_tickets)
+        self.set_meta("existing_tickets", existing_tickets)
 
     @staticmethod
     def fill_config(data_obj):
