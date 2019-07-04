@@ -28,13 +28,21 @@ from dusty.tools.dict import LastUpdatedOrderedDict
 
 def resolve_name_order(names, package_template, module_name):
     """ Resolve module name order """
+    # Add modules
     modules = LastUpdatedOrderedDict()
+    module_name_map = dict()
     for name in names:
         package = importlib.import_module(package_template.format(name))
         module = getattr(package, module_name)
         modules[module.get_name()] = module
+        module_name_map[module.get_name()] = name
+    # Resolve order
     resolve_depencies(modules)
-    return list(modules)
+    # Return original names
+    result = list()
+    for module in modules:
+        result.append(module_name_map[module])
+    return result
 
 def resolve_depencies(modules_ordered_dict):
     """ Resolve depencies """
