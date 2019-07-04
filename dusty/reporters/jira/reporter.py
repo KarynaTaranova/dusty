@@ -75,7 +75,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                     "title": item.title,
                     "priority": priority,
                     "description": item.description.replace("\\.", "."),
-                    "issue_hash": "deadbeef",
+                    "issue_hash": item.get_meta("issue_hash", "<no_hash>"),
                     "additional_labels": [
                         item.get_meta("tool", ""),
                         "DAST", # self.scan_type

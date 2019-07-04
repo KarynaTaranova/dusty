@@ -23,6 +23,8 @@ from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.processor import ProcessorModel
 
+from . import constants
+
 
 class Processor(DependentModuleModel, ProcessorModel):
     """ Process findings: filter false-positives """
@@ -36,8 +38,22 @@ class Processor(DependentModuleModel, ProcessorModel):
 
     def execute(self):
         """ Run the processor """
-        log.debug(f"Config: {self.config}")
         log.info("Processing false-positives")
+        fp_config_path = self.config.get("file", constants.DEFAULT_FP_CONFIG_PATH)
+        try:
+            false_positives = list()
+            # Load false positives
+            with open(fp_config_path, "r") as file:
+                for line in file.readlines():
+                    if line.strip():
+                        false_positives.append(line.strip())
+            # Process findings
+            for item in self.context.findings:
+                issue_hash = item.get_meta("issue_hash", "<no_hash>")
+                if issue_hash in false_positives:
+                    item.set_meta("false_positive_finding", True)
+        except:  # pylint: disable=W0702
+            log.exception("Failed to process false-positives")
 
     @staticmethod
     def fill_config(data_obj):
@@ -48,9 +64,9 @@ class Processor(DependentModuleModel, ProcessorModel):
         )
 
     @staticmethod
-    def validate_config(config):
-        """ Validate config """
-        log.debug(f"Config: {config}")
+    def depends_on():
+        """ Return required depencies """
+        return ["issue_hash"]
 
     @staticmethod
     def get_name():

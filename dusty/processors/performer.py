@@ -32,6 +32,8 @@ from dusty.models.module import ModuleModel
 from dusty.models.performer import PerformerModel
 from dusty.models.error import Error
 
+from . import constants
+
 
 class ProcessingPerformer(ModuleModel, PerformerModel):
     """ Process findings """
@@ -46,7 +48,7 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
         log.debug("Preparing")
         config = self.context.config["processing"]
         # Schedule processors
-        for processor_name in config:
+        for processor_name in list(config) + constants.DEFAULT_PROCESSORS:
             try:
                 self.schedule_processor(processor_name, dict())
             except:
