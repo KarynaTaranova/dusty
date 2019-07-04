@@ -21,8 +21,24 @@
 
 
 # Legacy
-JIRA_FIELD_DO_NOT_USE_VALUE = "!remove"
-JIRA_FIELD_USE_DEFAULT_VALUE = "!default"
+JIRA_FIELD_DO_NOT_USE_VALUE = '!remove'
+JIRA_FIELD_USE_DEFAULT_VALUE = '!default'
+JIRA_SEVERITIES = {
+    'Trivial': 4,
+    'Minor': 3,
+    'Medium': 2,
+    'Major': 1,
+    'Critical': 0,
+    'Blocker': 0
+}
+JIRA_ALTERNATIVES = {
+    'Trivial': ['Low', 'Minor'],
+    'Minor': ['Low', 'Medium'],
+    'Medium': ['Major'],
+    'Major': ['High', 'Critical'],
+    'Critical': ['Very High', 'Blocker'],
+    'Blocker': ['Very High', 'Critical']
+}
 
 # Priority/Severity mapping
 JIRA_SEVERITY_MAPPING = {
