@@ -25,6 +25,7 @@ import hashlib
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.processor import ProcessorModel
+from dusty.models.finding import DastFinding
 
 
 class Processor(DependentModuleModel, ProcessorModel):
@@ -41,14 +42,31 @@ class Processor(DependentModuleModel, ProcessorModel):
         """ Run the processor """
         log.info("Injecting issue hashes")
         for item in self.context.findings:
+            issue_hash = None
             # Legacy code: prepare issue hash
-            title = re.sub('[^A-Za-zА-Яа-я0-9//\\\.\- _]+', '', item.title)  # pylint: disable=W1401
-            issue_hash = hashlib.sha256(
-                f'{title}_None_None__'.strip().encode('utf-8')
-            ).hexdigest()
+            # Original:
+            # def finding_error_string(self) -> str:
+            #     endpoint_str = ""
+            #     for e in self.endpoints:
+            #         endpoint_str += str(e)
+            #     return f'{self.finding["title"]}_' \
+            #            f'{self.finding["static_finding_details"]["cwe"]}_' \
+            #            f'{self.finding["static_finding_details"]["line_number"]}_' \
+            #            f'{self.finding["static_finding_details"]["file_name"]}_' \
+            #            f'{endpoint_str}'
+            # def get_hash_code(self) -> str:
+            #     hash_string = self.finding_error_string().strip()
+            #     logging.info("Finding error string: '%s'", hash_string)
+            #     return hashlib.sha256(hash_string.encode('utf-8')).hexdigest()
+            if isinstance(item, DastFinding):
+                title = re.sub('[^A-Za-zА-Яа-я0-9//\\\.\- _]+', '', item.title)  # pylint: disable=W1401
+                issue_hash = hashlib.sha256(
+                    f'{title}_None_None__'.strip().encode('utf-8')
+                ).hexdigest()
             # Inject issue hash
-            item.set_meta("issue_hash", issue_hash)
-            item.description += f"\n\n**Issue Hash:** {issue_hash}"
+            if issue_hash:
+                item.set_meta("issue_hash", issue_hash)
+                item.description += f"\n\n**Issue Hash:** {issue_hash}"
 
     @staticmethod
     def get_name():
