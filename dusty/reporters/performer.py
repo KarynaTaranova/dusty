@@ -49,7 +49,11 @@ class ReportingPerformer(ModuleModel, PerformerModel, ReporterModel):
         log.debug("Preparing")
         config = self.context.config["reporters"]
         # Schedule reporters
-        for reporter_name in constants.DEFAULT_REPORTERS + list(config):
+        all_reporters = dependency.resolve_name_order(
+            list(config) + constants.DEFAULT_REPORTERS,
+            "dusty.reporters.{}.reporter.Reporter"
+        )
+        for reporter_name in all_reporters:
             try:
                 self.schedule_reporter(reporter_name, dict())
             except:

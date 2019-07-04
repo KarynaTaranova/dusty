@@ -20,8 +20,20 @@
     Dependency tools
 """
 
-from dusty.tools import log
+import importlib
 
+from dusty.tools import log
+from dusty.tools.dict import LastUpdatedOrderedDict
+
+
+def resolve_name_order(names, module_template):
+    """ Resolve module name order """
+    modules = LastUpdatedOrderedDict()
+    for name in names:
+        module = importlib.import_module(module_template.format(name))
+        modules[module.get_name()] = module
+    resolve_depencies(modules)
+    return list(modules)
 
 def resolve_depencies(modules_ordered_dict):
     """ Resolve depencies """
