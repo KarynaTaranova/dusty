@@ -107,31 +107,21 @@ class Reporter(DependentModuleModel, ReporterModel):
                 # get_or_create=True,
                 finding["additional_labels"] # additional_labels
             )
+            ticket_meta = {
+                "jira_id": issue.key,
+                "jira_url": f"{self.config.get('url')}/browse/{issue.key}",
+                "priority": issue.fields.priority,
+                "status": issue.fields.status.name,
+                "open_date": datetime.strptime(
+                    issue.fields.created, "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%d %b %Y %H:%M"),
+                "description": issue.fields.summary,
+                "assignee": issue.fields.assignee
+            }
             if created:
-                new_tickets.append({
-                    "jira_id": issue.key,
-                    "jira_url": f"{self.config.get('url')}/browse/{issue.key}",
-                    "priority": issue.fields.priority,
-                    "status": issue.fields.status.name,
-                    "open_date": datetime.strptime(
-                        issue.fields.created, "%Y-%m-%dT%H:%M:%S.%f%z"
-                    ).strftime("%d %b %Y %H:%M"),
-                    "description": issue.fields.summary,
-                    "assignee": issue.fields.assignee
-                })
+                new_tickets.append(ticket_meta)
             else:
                 if issue.fields.status.name in constants.JIRA_OPENED_STATUSES:
-                    existing_tickets.append({
-                        "jira_id": issue.key,
-                        "jira_url": f"{self.config.get('url')}/browse/{issue.key}",
-                        "priority": issue.fields.priority,
-                        "status": issue.fields.status.name,
-                        "open_date": datetime.strptime(
-                            issue.fields.created, "%Y-%m-%dT%H:%M:%S.%f%z"
-                        ).strftime("%d %b %Y %H:%M"),
-                        "description": issue.fields.summary,
-                        "assignee": issue.fields.assignee
-                    })
+                    existing_tickets.append(ticket_meta)
         self.set_meta("new_tickets", new_tickets)
         self.set_meta("existing_tickets", existing_tickets)
 
