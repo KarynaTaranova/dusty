@@ -20,6 +20,8 @@
     Reporter: jira
 """
 
+from datetime import datetime
+
 from ruamel.yaml.comments import CommentedSeq
 from ruamel.yaml.comments import CommentedMap
 
@@ -108,10 +110,12 @@ class Reporter(DependentModuleModel, ReporterModel):
             if created:
                 new_tickets.append({
                     "jira_id": issue.key,
-                    "jira_url": self.config.get("url"),
+                    "jira_url": f"{self.config.get('url')}/browse/{issue.key}",
                     "priority": issue.fields.priority,
                     "status": issue.fields.status.name,
-                    "open_date": issue.fields.created,
+                    "open_date": datetime.strptime(
+                        issue.fields.created, "%Y-%m-%dT%H:%M:%S.%f%z"
+                    ).strftime("%d %b %Y %H:%M"),
                     "description": issue.fields.summary,
                     "assignee": issue.fields.assignee
                 })
@@ -119,10 +123,12 @@ class Reporter(DependentModuleModel, ReporterModel):
                 if issue.fields.status.name in constants.JIRA_OPENED_STATUSES:
                     existing_tickets.append({
                         "jira_id": issue.key,
-                        "jira_url": self.config.get("url"),
+                        "jira_url": f"{self.config.get('url')}/browse/{issue.key}",
                         "priority": issue.fields.priority,
                         "status": issue.fields.status.name,
-                        "open_date": issue.fields.created,
+                        "open_date": datetime.strptime(
+                            issue.fields.created, "%Y-%m-%dT%H:%M:%S.%f%z"
+                        ).strftime("%d %b %Y %H:%M"),
                         "description": issue.fields.summary,
                         "assignee": issue.fields.assignee
                     })
