@@ -42,9 +42,9 @@ class Processor(DependentModuleModel, ProcessorModel):
         log.info("Injecting issue hashes")
         for item in self.context.findings:
             # Legacy code: prepare issue hash
-            title = re.sub('[^A-Za-zА-Яа-я0-9//\\\.\- _]+', '', item.title)
+            title = re.sub('[^A-Za-zА-Яа-я0-9//\\\.\- _]+', '', item.title)  # pylint: disable=W1401
             issue_hash = hashlib.sha256(
-                f'{title}_None_None_None_'.strip().encode('utf-8')
+                f'{title}_None_None__'.strip().encode('utf-8')
             ).hexdigest()
             # Inject issue hash
             item.set_meta("issue_hash", issue_hash)
