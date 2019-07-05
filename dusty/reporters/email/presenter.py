@@ -65,6 +65,12 @@ class EMailPresenter:
             self.context.performers["reporting"].get_module_meta("html", "report_file", None)
         if report_file:
             result.append(report_file)
+        # Additional attachments
+        attachments = self.config.get("attachments", list())
+        if isinstance(attachments, list):
+            result.extend(attachments)
+        else:
+            result.extend([item.strip() for item in attachments.split(",")])
         return result
 
     @property

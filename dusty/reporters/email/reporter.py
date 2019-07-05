@@ -93,6 +93,11 @@ class Reporter(DependentModuleModel, ReporterModel):
             "body", "The following application was scanned: My awesome project (staging)",
             comment="(optional) Custom email body first line"
         )
+        data_obj.insert(
+            len(data_obj),
+            "attachments", "/path/to/file.1, /path/to/file.2",
+            comment="(optional) Additional custom attachments. Also supports YAML list syntax"
+        )
 
     @staticmethod
     def validate_config(config):
