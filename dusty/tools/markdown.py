@@ -41,6 +41,18 @@ def markdown_escape(string):
     return string
 
 
+def markdown_unescape(string):
+    """ Un-escape markdown special symbols """
+    to_escape = [
+        "\\", "`", "*", "_",
+        "{", "}", "[", "]", "(", ")",
+        "#", "|", "+", "-", ".", "!"
+    ]
+    for item in to_escape:
+        string = string.replace(f"\\{item}", item)
+    return string
+
+
 def markdown_table_escape(string):
     """ Escape markdown special symbols in tables """
     return markdown_escape(string).replace("\n", " ")

@@ -22,7 +22,7 @@
 
 from junit_xml import TestSuite, TestCase
 
-from dusty.tools import log
+from dusty.tools import log, markdown
 from dusty.models.module import DependentModuleModel
 from dusty.models.reporter import ReporterModel
 from dusty.models.finding import DastFinding
@@ -58,7 +58,7 @@ class Reporter(DependentModuleModel, ReporterModel):
             if isinstance(item, DastFinding):
                 test_case = TestCase(item.title, classname=item.get_meta("tool", ""))
                 test_case.add_error_info(
-                    message=item.description,
+                    message=markdown.markdown_unescape(item.description),
                     error_type=item.get_meta("severity", SEVERITIES[-1])
                 )
                 test_cases.append(test_case)
