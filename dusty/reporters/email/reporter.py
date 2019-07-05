@@ -97,20 +97,10 @@ class Reporter(DependentModuleModel, ReporterModel):
     @staticmethod
     def validate_config(config):
         """ Validate config """
-        if "server" not in config:
-            error = "No SMTP server host defined in config"
-            log.error(error)
-            raise ValueError(error)
-        if "login" not in config:
-            error = "No SMTP server login defined in config"
-            log.error(error)
-            raise ValueError(error)
-        if "password" not in config:
-            error = "No SMTP server password defined in config"
-            log.error(error)
-            raise ValueError(error)
-        if "mail_to" not in config:
-            error = "No email receivers defined in config"
+        required = ["server", "login", "password", "mail_to"]
+        not_set = [item for item in required if item not in config]
+        if not_set:
+            error = f"Required configuration options not set: {', '.join(not_set)}"
             log.error(error)
             raise ValueError(error)
 

@@ -109,9 +109,12 @@ class Reporter(DependentModuleModel, ReporterModel):
     @staticmethod
     def validate_config(config):
         """ Validate config """
-        if "url" not in config:
-            log.error("No Loki URL defined in config")
-            raise ValueError("No Loki URL defined in config")
+        required = ["url"]
+        not_set = [item for item in required if item not in config]
+        if not_set:
+            error = f"Required configuration options not set: {', '.join(not_set)}"
+            log.error(error)
+            raise ValueError(error)
 
     @staticmethod
     def run_after():

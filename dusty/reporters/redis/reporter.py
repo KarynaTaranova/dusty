@@ -58,8 +58,10 @@ class Reporter(DependentModuleModel, ReporterModel):
     @staticmethod
     def validate_config(config):
         """ Validate config """
-        if "connection_string" not in config:
-            error = "No Redis connection string defined in config"
+        required = ["connection_string"]
+        not_set = [item for item in required if item not in config]
+        if not_set:
+            error = f"Required configuration options not set: {', '.join(not_set)}"
             log.error(error)
             raise ValueError(error)
 
