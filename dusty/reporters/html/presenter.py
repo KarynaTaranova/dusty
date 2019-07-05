@@ -127,10 +127,6 @@ class HTMLPresenter:
     def project_alerts(self):
         """ Returns project alerts """
         result = list()
-        result.append(HTMLReportAlert(
-            type_="warning",
-            text="This report is from proof-of-concept version of Dusty 2.0"
-        ))
         if self.project_errors:
             result.append(HTMLReportAlert(
                 type_="warning",
