@@ -64,6 +64,11 @@ class Reporter(DependentModuleModel, ReporterModel):
             raise ValueError(error)
 
     @staticmethod
+    def run_after():
+        """ Return optional depencies """
+        return ["html", "junit"]
+
+    @staticmethod
     def get_name():
         """ Reporter name """
         return "Redis"
