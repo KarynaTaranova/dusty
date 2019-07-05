@@ -52,7 +52,7 @@ class Reporter(DependentModuleModel, ReporterModel):
         """ Make sample config """
         data_obj.insert(
             len(data_obj),
-            "connection_string", "redis.example.com", comment="Redis connection string"
+            "connection_string", "redis://redis.example.com:6379/0", comment="Redis connection string"
         )
 
     @staticmethod
