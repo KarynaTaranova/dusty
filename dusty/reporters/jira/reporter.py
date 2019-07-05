@@ -59,7 +59,7 @@ class Reporter(DependentModuleModel, ReporterModel):
         )
         if not wrapper.valid:
             log.error("Jira configuration is invalid. Skipping Jira reporting")
-            return
+            raise RuntimeError("Jira configuration is invalid")
         log.debug("Legacy wrapper is valid")
         # Prepare findings
         priority_mapping = self.config.get("custom_mapping", prepare_jira_mapping(wrapper))
