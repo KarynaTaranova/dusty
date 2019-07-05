@@ -80,7 +80,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                     "issue_hash": item.get_meta("issue_hash", "<no_hash>"),
                     "additional_labels": [
                         item.get_meta("tool", ""),
-                        "DAST", # self.scan_type
+                        self.context.get_meta("testing_type", "AST"),
                         item.get_meta("severity", SEVERITIES[-1])
                     ],
                     "raw": item
