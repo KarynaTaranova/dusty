@@ -41,7 +41,6 @@ class Reporter(DependentModuleModel, ReporterModel):
         """ Report """
         # Prepare wrapper
         log.info("Saving HTML/XML reports (if any) to redis using legacy wrapper")
-        log.debug("Connection string: ''%s'", self.config.get("connection_string"))
         RedisFile(
             self.config.get("connection_string"),
             self.context.performers["reporting"].get_module_meta("html", "report_file", None),
