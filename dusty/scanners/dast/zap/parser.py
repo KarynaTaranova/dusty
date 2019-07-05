@@ -48,7 +48,7 @@ def parse_findings(data, scanner):
                 description.append(
                     f'\n**Other information:**\n {markdown.html_to_text(alert["otherinfo"])}')
             if alert["instances"]:
-                description.append("\n")
+                description.append("\n**Instances:**\n")
                 description.append("| URI | Method | Parameter | Attack | Evidence |")
                 description.append("| --- | ------ | --------- | ------ | -------- |")
             for item in alert["instances"]:
