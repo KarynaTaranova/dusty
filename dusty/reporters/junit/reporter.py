@@ -52,6 +52,9 @@ class Reporter(DependentModuleModel, ReporterModel):
             f"{self.context.get_meta('testing_type', 'AST')}"
         test_cases = list()
         for item in self.context.findings:
+            if item.get_meta("information_finding", False) or \
+                    item.get_meta("false_positive_finding", False):
+                continue
             if isinstance(item, DastFinding):
                 test_case = TestCase(item.title, classname=item.get_meta("tool", ""))
                 test_case.add_error_info(
