@@ -28,6 +28,9 @@ python-owasp-zap-v2.4==0.0.14
 # Loki
 python-logging-loki==0.1.0
 
+# Influx
+influxdb==5.2.0
+
 # Jira
 jira==2.0.0
 
