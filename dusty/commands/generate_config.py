@@ -68,11 +68,10 @@ class Command(ModuleModel, CommandModel):
         yaml = ruamel.yaml.YAML()
         if args.output_file == "-":
             yaml.dump(data, sys.stdout)
+            return
         with open(args.output_file, "wb") as output:
             yaml.dump(data, output)
-        # Done
-        log.info("Made sample config: %s", args.output_file)
-        log.debug("Done")
+            log.info("Made sample config: %s", args.output_file)
 
     @staticmethod
     def _fill_settings(data_obj):
