@@ -113,7 +113,12 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def validate_config(config):
         """ Validate config """
-        required = ["target"]
+        required = [
+            "qualys_api_server", "qualys_login", "qualys_password",
+            "qualys_option_profile_id", "qualys_report_template_id",
+            "qualys_scanner_type",
+            "target"
+        ]
         not_set = [item for item in required if item not in config]
         if not_set:
             error = f"Required configuration options not set: {', '.join(not_set)}"
