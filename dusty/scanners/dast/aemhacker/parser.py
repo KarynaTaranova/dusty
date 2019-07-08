@@ -22,7 +22,7 @@
 
 import re
 
-from dusty.tools import log, url
+from dusty.tools import log, markdown, url
 from dusty.models.finding import DastFinding
 
 
@@ -46,7 +46,7 @@ def parse_findings(data, scanner):
         description = "\n".join(description)
         finding = DastFinding(
             title=item.group("name"),
-            description=description
+            description=markdown.markdown_escape(description)
         )
         finding.set_meta("tool", "AEM Hacker")
         finding.set_meta("severity", "Info")
