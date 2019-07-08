@@ -41,12 +41,12 @@ def parse_findings(data, scanner):
     for item in item_regex.finditer(data):
         # Make finding object
         description = list()
-        description.append(item.group("description"))
-        description.append(f'\n**URL:** {item.group("url")}')
+        description.append(markdown.markdown_escape(item.group("description")))
+        description.append(f'\n**URL:** {markdown.markdown_escape(item.group("url"))}')
         description = "\n".join(description)
         finding = DastFinding(
             title=item.group("name"),
-            description=markdown.markdown_escape(description)
+            description=description
         )
         finding.set_meta("tool", "AEM Hacker")
         finding.set_meta("severity", "Info")
