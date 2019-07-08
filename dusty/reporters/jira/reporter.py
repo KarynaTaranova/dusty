@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,E0401
+# pylint: disable=I0011,E0401,R0914
 
 #   Copyright 2019 getcarrier.io
 #
@@ -58,12 +58,17 @@ class Reporter(DependentModuleModel, ReporterModel):
             self.config.get("fields")
         )
         if not wrapper.valid:
+            # Save default mapping to meta as a fallback
+            default_mapping = constants.JIRA_SEVERITY_MAPPING
+            default_mapping.update(self.config.get("custom_mapping", dict()))
+            self.set_meta("mapping", default_mapping)
+            # Report error
             log.error("Jira configuration is invalid. Skipping Jira reporting")
             raise RuntimeError("Jira configuration is invalid")
         log.debug("Legacy wrapper is valid")
         # Prepare findings
         priority_mapping = self.config.get("custom_mapping", prepare_jira_mapping(wrapper))
-        mapping_meta = dict()
+        mapping_meta = dict(priority_mapping)
         findings = list()
         for item in self.context.findings:
             if item.get_meta("information_finding", False) or \
@@ -74,7 +79,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                 priority = constants.JIRA_SEVERITY_MAPPING[severity]
                 if priority_mapping and priority in priority_mapping:
                     priority = priority_mapping[priority]
-                mapping_meta[severity] = priority
+                mapping_meta[severity] = priority  # Update meta mapping to reflect actual results
                 findings.append({
                     "title": item.title,
                     "priority": priority,
