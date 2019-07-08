@@ -23,8 +23,10 @@
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.reporter import ReporterModel
+from dusty.models.finding import DastFinding
+from dusty.constants import SEVERITIES
 
-# from .legacy import RedisFile
+from .legacy import launch_reportportal_service
 
 
 class Reporter(DependentModuleModel, ReporterModel):
@@ -44,10 +46,46 @@ class Reporter(DependentModuleModel, ReporterModel):
             "rp_token": self.config.get("rp_token"),
         }
         self._rp_config["rp_launch_tags"] = self.config.get("rp_launch_tags", None)
+        self._rp_client = None
 
-    # def report(self):
-    #     """ Report """
-    #     log.info("Reporting to ReportPortal")
+    def on_start(self):
+        """ Called when testing starts """
+        log.info("Starting ReportPortal launch")
+        self._rp_client = launch_reportportal_service(self._rp_config)
+
+    def report(self):
+        """ Report """
+        if not self._rp_client:
+            log.warning("ReportPortal configuration/connection is invalid. Skipping RP reporting")
+            return
+        log.info("Reporting to ReportPortal")
+        for item in self.context.findings:
+            if item.get_meta("false_positive_finding", False):
+                continue
+            if isinstance(item, DastFinding):
+                item_details = item.description
+                tags = [
+                    f'Tool: {item.get_meta("tool", "")}',
+                    f'TestType: {self.context.get_meta("testing_type", "AST")}',
+                    f'Severity: {item.get_meta("severity", SEVERITIES[-1])}'
+                ]
+                if item.get_meta("confidence", None):
+                    tags.append(f'Confidence: {item.get_meta("confidence")}')
+                self._rp_client.start_test_item(
+                    item.title,
+                    description=item.description,
+                    tags=tags
+                )
+                if item.get_meta("legacy.images", None):
+                    for attachment in item.get_meta("legacy.images"):
+                        self._rp_client.test_item_message(attachment["name"], "INFO", attachment)
+                self._rp_client.test_item_message("!!!MARKDOWN_MODE!!! %s " % item_details, "INFO")
+                self._rp_client.test_item_message(item.get_meta("issue_hash", "<no_hash>"), "ERROR")
+                self._rp_client.finish_test_item()
+            else:
+                log.warning("Unsupported finding type")
+                continue # raise ValueError("Unsupported item type")
+        self._rp_client.finish_test()
 
     @staticmethod
     def fill_config(data_obj):
