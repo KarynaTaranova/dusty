@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,R0903
+# pylint: disable=I0011,R0903,R0914
 
 #   Copyright 2019 getcarrier.io
 #
@@ -21,6 +21,7 @@
 """
 
 import datetime
+from time import time
 
 from dusty.constants import SEVERITIES
 
@@ -75,5 +76,46 @@ class InfluxPresenter:
             },
             "fields": results_by_severity
         })
+        # Errors
+        policy = self.config.get("policy", {"Blocker": 1, "Critical": 5, "Major": 15})
+        jira_tickets = list()
+        jira_tickets.extend(self.context.performers["reporting"].get_module_meta(
+            "jira", "new_tickets", list()
+        ))
+        jira_tickets.extend(self.context.performers["reporting"].get_module_meta(
+            "jira", "existing_tickets", list()
+        ))
+        for issue in jira_tickets:
+            ts = int(datetime.datetime.strptime(  # pylint: disable=C0103
+                issue["created"], "%Y-%m-%dT%H:%M:%S.%f%z"
+            ).timestamp())
+            break_policy = "Y" if str(issue["priority"]) in policy and \
+                ts + (policy[str(issue["priority"])] * 24 * 3600) < int(time()) else "N"
+            issue = {
+                "measurement": "errors",
+                "time": execution_time,
+                "tags": {
+                    "build_id": build_id,
+                    "description": str(issue["description"]),
+                    "test_name": test_type,
+                    "type": test_type,
+                    "project": project_name,
+                    "priority": issue["priority"],
+                    "created": datetime.datetime.strptime(
+                        issue["created"], "%Y-%m-%dT%H:%M:%S.%f%z"
+                    ).strftime("%d %b %Y %H:%M:%S.%f"),
+                    "link": str(issue["jira_url"])
+                },
+                "fields": {
+                    "breaking_policy": break_policy,
+                    "status": str(issue["status"]),
+                    "assignee": str(issue["assignee"]),
+                    "quantity": 1
+                }
+            }
+            result.append(issue)
+        # NB: not implemented in 1.0:
+        #     - sort_results_by_issue_type (implement with canonical issue naming)
+        #     - out_of_compliance_issues (implement with compliance policy)
         # Return points for InfluxDB
         return result
