@@ -20,7 +20,7 @@
     Reporter: reportportal
 """
 
-from dusty.tools import log
+from dusty.tools import log, markdown
 from dusty.models.module import DependentModuleModel
 from dusty.models.reporter import ReporterModel
 from dusty.models.finding import DastFinding
@@ -63,7 +63,8 @@ class Reporter(DependentModuleModel, ReporterModel):
             if item.get_meta("false_positive_finding", False):
                 continue
             if isinstance(item, DastFinding):
-                item_details = item.description
+                item_details = markdown.markdown_unescape(item.description)
+                item_description = item_details
                 tags = [
                     f'Tool: {item.get_meta("tool", "")}',
                     f'TestType: {self.context.get_meta("testing_type", "AST")}',
@@ -73,7 +74,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                     tags.append(f'Confidence: {item.get_meta("confidence")}')
                 self._rp_client.start_test_item(
                     item.title,
-                    description=item.description,
+                    description=item_description,
                     tags=tags
                 )
                 if item.get_meta("legacy.images", None):
