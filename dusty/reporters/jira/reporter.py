@@ -119,6 +119,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                 "jira_url": f"{self.config.get('url')}/browse/{issue.key}",
                 "priority": issue.fields.priority,
                 "status": issue.fields.status.name,
+                "created": issue.fields.created,
                 "open_date": datetime.strptime(
                     issue.fields.created, "%Y-%m-%dT%H:%M:%S.%f%z").strftime("%d %b %Y %H:%M"),
                 "description": issue.fields.summary,
