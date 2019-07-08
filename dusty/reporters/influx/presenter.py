@@ -46,6 +46,8 @@ class InfluxPresenter:
         )
         results_by_severity = dict()
         for item in self.context.findings:
+            if item.get_meta("false_positive_finding", False):
+                continue
             priority = item.get_meta("severity", SEVERITIES[-1])
             if priority in jira_mapping:
                 priority = jira_mapping[priority]
