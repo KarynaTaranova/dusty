@@ -25,10 +25,10 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.reporter import ReporterModel
-from dusty.helpers.email import EmailHelper
 
 from . import constants
 from .presenter import EMailPresenter
+from .helper import EmailHelper
 
 
 class Reporter(DependentModuleModel, ReporterModel):
