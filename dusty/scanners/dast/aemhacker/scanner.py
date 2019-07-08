@@ -45,7 +45,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             "aem-wrapper.sh", "-u", self.config.get("target"),
             "--host", self.config.get("scanner_host", "127.0.0.1"),
             "--port", self.config.get("scanner_port", "4444")
-        ], capture_output=True)
+        ], stdout=PIPE, stderr=PIPE)
         log.debug("Tast result: %s", task)
         parse_findings(task.stdout, self)
 
