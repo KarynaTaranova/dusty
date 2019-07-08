@@ -63,6 +63,7 @@ class Reporter(DependentModuleModel, ReporterModel):
         log.debug("Legacy wrapper is valid")
         # Prepare findings
         priority_mapping = self.config.get("custom_mapping", prepare_jira_mapping(wrapper))
+        mapping_meta = dict()
         findings = list()
         for item in self.context.findings:
             if item.get_meta("information_finding", False) or \
@@ -73,6 +74,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                 priority = constants.JIRA_SEVERITY_MAPPING[severity]
                 if priority_mapping and priority in priority_mapping:
                     priority = priority_mapping[priority]
+                mapping_meta[severity] = priority
                 findings.append({
                     "title": item.title,
                     "priority": priority,
@@ -124,6 +126,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                     existing_tickets.append(ticket_meta)
         self.set_meta("new_tickets", new_tickets)
         self.set_meta("existing_tickets", existing_tickets)
+        self.set_meta("mapping", mapping_meta)
 
     @staticmethod
     def fill_config(data_obj):
