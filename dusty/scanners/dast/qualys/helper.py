@@ -89,9 +89,9 @@ class QualysHelper:
                 "ServiceRequest": {
                     "filters": {
                         "Criteria": [{
-                            "-field": "name",
-                            "-operator": "EQUALS",
-                            "#text": project_name
+                            "field": "name",
+                            "operator": "EQUALS",
+                            "value": project_name
                         }]
                     }
                 }
