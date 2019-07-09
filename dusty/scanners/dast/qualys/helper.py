@@ -87,13 +87,13 @@ class QualysHelper:
             "/qps/rest/3.0/search/was/webapp",
             json={
                 "ServiceRequest": {
-                    "filters": [{
-                        "Criteria": {
-                            "field": "name",
-                            "operator": "EQUALS",
-                            "data": project_name
-                        }
-                    }]
+                    "filters": {
+                        "Criteria": [{
+                            "-field": "name",
+                            "-operator": "EQUALS",
+                            "#text": project_name
+                        }]
+                    }
                 }
             },
             validator=lambda r: r.ok
