@@ -27,6 +27,8 @@ from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
 
+from .helper import QualysHelper
+
 
 class Scanner(DependentModuleModel, ScannerModel):
     """ Scanner class """
@@ -40,6 +42,18 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def execute(self):
         """ Run the scanner """
+        helper = QualysHelper(
+            self.context,
+            self.config.get("qualys_api_server"),
+            self.config.get("qualys_login"),
+            self.config.get("qualys_password")
+        )
+        # if self.config.get("random_name", False):
+        #     project_name = f"{config.get('project_name')}_{id_generator(8)}"
+        # else:
+        #     project_name = config.get('project_name')
+        project_name = self.context.get_meta("project_name", "UnnamedProject")
+        log.debug(helper.search_for_project(project_name))
 
     @staticmethod
     def fill_config(data_obj):
