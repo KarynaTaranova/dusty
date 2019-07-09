@@ -120,6 +120,9 @@ function authenticate(helper, paramsValues, credentials) {
     auth_script.forEach(function(item) {
         command = item.command;
         target = item.target;
+        target = target.replace(/%Target%/g, paramsValues.get("Target"));
+        target = target.replace(/%Username%/g, credentials.getParam("Username"));
+        target = target.replace(/%Password%/g, credentials.getParam("Password"));
         value = item.value
         value = value.replace(/%Target%/g, paramsValues.get("Target"));
         value = value.replace(/%Username%/g, credentials.getParam("Username"));

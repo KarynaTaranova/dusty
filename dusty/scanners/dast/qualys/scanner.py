@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,E0401,W0702,W0703,R0902
+# pylint: disable=I0011,E0401,W0702,W0703,R0902,R0914
 
 #   Copyright 2019 getcarrier.io
 #
@@ -20,6 +20,12 @@
     Scanner: Qualys WAS
 """
 
+import string
+import random
+
+from time import sleep, time
+from datetime import datetime
+
 from ruamel.yaml.comments import CommentedSeq
 from ruamel.yaml.comments import CommentedMap
 
@@ -28,6 +34,7 @@ from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
 
 from .helper import QualysHelper
+from .parser import parse_findings
 
 
 class Scanner(DependentModuleModel, ScannerModel):
@@ -48,12 +55,131 @@ class Scanner(DependentModuleModel, ScannerModel):
             self.config.get("qualys_login"),
             self.config.get("qualys_password")
         )
-        # if self.config.get("random_name", False):
-        #     project_name = f"{config.get('project_name')}_{id_generator(8)}"
-        # else:
-        #     project_name = config.get('project_name')
+        log.info("Qualys WAS version: %s", helper.get_version())
+        timestamp = datetime.utcfromtimestamp(int(time())).strftime("%Y-%m-%d %H:%M:%S")
+        sleep_interval = 3.0
+        status_check_interval = 15.0
+        # Create/get project
         project_name = self.context.get_meta("project_name", "UnnamedProject")
-        log.debug(helper.search_for_project(project_name))
+        if self.config.get("random_name", False):
+            project_name = f"{project_name}_{self.id_generator(8)}"
+        log.info("Searching for existing webapp")
+        webapp_id = helper.search_for_webapp(project_name)
+        if webapp_id is None:
+            log.info("Creating webapp")
+            webapp_id = helper.create_webapp(
+                project_name,
+                self.config.get("target"),
+                self.config.get("qualys_option_profile_id"),
+                excludes=self.config.get("exclude", None)
+            )
+            sleep(sleep_interval)
+        # Create auth record if needed
+        auth_id = None
+        if self.config.get("auth_script", None):
+            log.info("Creating auth record")
+            auth_name = f"{project_name} SeleniumAuthScript {timestamp}"
+            auth_data = self.render_selenium_script(
+                self.config.get("auth_script"),
+                self.config.get("auth_login", ""),
+                self.config.get("auth_password", ""),
+                self.config.get("target")
+            )
+            auth_id = helper.create_selenium_auth_record(auth_name, auth_data)
+            sleep(sleep_interval)
+            helper.add_auth_record_to_webapp(webapp_id, project_name, auth_id)
+        # Start scan
+        log.info("Starting scan")
+        scan_name = f"{project_name} WAS {timestamp}"
+        scan_auth = {"isDefault": True}
+        if auth_id is not None:
+            scan_auth = {"id": auth_id}
+        scan_scanner = {"type": "EXTERNAL"}
+        if self.config.get("qualys_scanner_type", "EXTERNAL") == "INTERNAL" and \
+                self.config.get("qualys_scanner_pool", None):
+            scan_scanner = {
+                "type": "INTERNAL",
+                "friendlyName": random.choice(self.config.get("qualys_scanner_pool"))
+            }
+        scan_id = helper.start_scan(
+            scan_name, webapp_id,
+            self.config.get("qualys_option_profile_id"),
+            scan_scanner, scan_auth
+        )
+        sleep(sleep_interval)
+        # Wait for scan to finish
+        while helper.get_scan_status(scan_id) in ["SUBMITTED", "RUNNING"]:
+            log.info("Waiting for scan to finish")
+            sleep(status_check_interval)
+        # Request report
+        log.info("Requesting report")
+        report_name = f"{project_name} WAS {timestamp} FOR Scan {scan_id}"
+        report_id = helper.create_report(
+            report_name, webapp_id,
+            self.config.get("qualys_report_template_id")
+        )
+        sleep(sleep_interval)
+        # Wait for report to be created
+        while helper.get_report_status(report_id) in ["RUNNING"]:
+            log.info("Waiting for report to be created")
+            sleep(status_check_interval)
+        # Download report
+        log.info("Downloading report XML")
+        report_xml = helper.download_report(report_id)
+        # Delete assets
+        log.info("Deleting assets")
+        helper.delete_asset("report", report_id)
+        helper.delete_asset("wasscan", scan_id)
+        if auth_id is not None:
+            helper.delete_asset("webappauthrecord", auth_id)
+        helper.delete_asset("webapp", webapp_id)
+        # Parse findings
+        parse_findings(report_xml, self)
+
+    @staticmethod
+    def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+        """ Generate random ID (legacy code) """
+        return ''.join(random.choice(chars) for _ in range(size))
+
+    @staticmethod
+    def render_selenium_script(auth_script, auth_login, auth_password, target):
+        """ Generate selenium script in HTML format """
+        # pylint: disable=C0301
+        result = \
+            f'<?xml version="1.0" encoding="UTF-8"?>' \
+            f'<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' \
+            f'<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">' \
+            f'<head profile="http://selenium-ide.openqa.org/profiles/test-case">' \
+            f'<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />' \
+            f'<link rel="selenium.base" href="https://community.qualys.com/" />' \
+            f'<title>seleniumScriptOK</title>' \
+            f'</head>' \
+            f'<body>' \
+            f'<table cellpadding="1" cellspacing="1" border="1">' \
+            f'<thead>' \
+            f'<tr><td rowspan="1" colspan="3">seleniumScriptOK</td></tr>' \
+            f'</thead><tbody>'
+        for item in auth_script:
+            item_command = item["command"]
+            item_target = item["target"]
+            item_target = item_target.replace("%Target%", target)
+            item_target = item_target.replace("%Username%", auth_login)
+            item_target = item_target.replace("%Password%", auth_password)
+            item_value = item["value"]
+            item_value = item_value.replace("%Target%", target)
+            item_value = item_value.replace("%Username%", auth_login)
+            item_value = item_value.replace("%Password%", auth_password)
+            result += \
+                f'<tr>' \
+                f'<td>{item_command}</td>' \
+                f'<td>{item_target}</td>' \
+                f'<td>{item_value}</td>' \
+                f'</tr>'
+        result += \
+            f'</tbody></table>' \
+            f'</body>' \
+            f'</html>'
+        return result
 
     @staticmethod
     def fill_config(data_obj):
