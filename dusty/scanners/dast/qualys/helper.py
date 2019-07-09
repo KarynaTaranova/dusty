@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,E0401,R0903
+# pylint: disable=I0011,E0401,R0903,R0913
 
 #   Copyright 2019 getcarrier.io
 #
@@ -22,9 +22,9 @@
 
 import time
 import requests
+from dotted.utils import dot
 
 from dusty.tools import log
-# from dusty.models.error import Error
 
 
 class QualysHelper:
@@ -81,8 +81,18 @@ class QualysHelper:
         )
         return response
 
-    def search_for_project(self, project_name):
-        """ Search for existing project and get ID """
+    def get_version(self):
+        """ Get WAS version """
+        response = self._request(
+            "/qps/rest/portal/version",
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0]["Portal-Version"]["WAS-VERSION"]
+
+    def search_for_webapp(self, webapp_name):
+        """ Search for existing WebApp and get ID """
         response = self._request(
             "/qps/rest/3.0/search/was/webapp",
             json={
@@ -91,11 +101,233 @@ class QualysHelper:
                         "Criteria": [{
                             "field": "name",
                             "operator": "EQUALS",
-                            "value": project_name
+                            "value": webapp_name
                         }]
                     }
                 }
             },
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        if obj.ServiceResponse.count == 0:
+            return None
+        return obj.ServiceResponse.data[0].WebApp.id
+
+    def count_scans_in_webapp(self, webapp_id):
+        """ Count submitted/running scans in WebApp """
+        response = self._request(
+            "/qps/rest/3.0/count/was/wasscan",
+            json={
+                "ServiceRequest": {
+                    "filters": {
+                        "Criteria": [{
+                            "field": "webApp.id",
+                            "operator": "EQUALS",
+                            "value": webapp_id
+                        }, {
+                            "field": "status",
+                            "operator": "IN",
+                            "value": "SUBMITTED,RUNNING"
+                        }]
+                    }
+                }
+            },
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        try:
+            return obj.ServiceResponse.count
+        except:  # pylint: disable=W0702
+            return 0  # On error - allow to try to delete stale project
+
+    def create_webapp(self, name, application_url, option_profile, excludes=None):
+        """ Create WebApp record """
+        if excludes is None:
+            payload = {
+                "ServiceRequest": {
+                    "data": {
+                        "WebApp": {
+                            "name": name,
+                            "url": application_url,
+                            "defaultProfile": {"id": option_profile}
+                        }
+                    }
+                }
+            }
+        else:
+            payload = {
+                "ServiceRequest": {
+                    "data": {
+                        "WebApp": {
+                            "name": name,
+                            "url": application_url,
+                            "defaultProfile": {"id": option_profile},
+                            "urlBlacklist": {"set": {"UrlEntry": [
+                                {"value": item, "regex": "true"} for item in excludes
+                            ]}},
+                            "postDataBlacklist": {"set": {"UrlEntry": [
+                                {"value": item, "regex": "true"} for item in excludes
+                            ]}}
+                        }
+                    }
+                }
+            }
+        response = self._request(
+            "/qps/rest/3.0/create/was/webapp", json=payload,
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0].WebApp.id
+
+    def create_selenium_auth_record(self, name, script):
+        """ Create selenium auth record """
+        response = self._request(
+            "/qps/rest/3.0/create/was/webappauthrecord",
+            json={
+                "ServiceRequest": {
+                    "data": {
+                        "WebAppAuthRecord": {
+                            "name": name,
+                            "formRecord": {
+                                "type": "SELENIUM",
+                                "seleniumScript": {
+                                    "name": "seleniumScriptOK",
+                                    "data": script,
+                                    "regex": "selenium"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0].WebAppAuthRecord.id
+
+    def add_auth_record_to_webapp(self, webapp_id, webapp_name, auth_record_id):
+        """ Add auth record to WebApp """
+        response = self._request(
+            f"/qps/rest/3.0/update/was/webapp/{webapp_id}",
+            json={
+                "ServiceRequest": {
+                    "data": {
+                        "WebApp": {
+                            "name": webapp_name,
+                            "authRecords": {
+                                "add": {
+                                    "WebAppAuthRecord": [{
+                                        "id": auth_record_id
+                                    }]
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            validator=lambda r: r.ok and dot(r.json()).ServiceResponse.responseCode
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.responseCode == "SUCCESS"
+
+    def delete_asset(self, asset_type, asset_id):
+        """ Delete asset """
+        response = self._request(
+            f"/qps/rest/3.0/delete/was/{asset_type}/{asset_id}",
+            json={}, validator=lambda r: r.ok and dot(r.json()).ServiceResponse.responseCode
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.responseCode == "SUCCESS"
+
+    def start_scan(self, name, webapp_id, option_profile, scanner_appliance, auth_record):
+        """ Start scan """
+        response = self._request(
+            "/qps/rest/3.0/launch/was/wasscan/",
+            json={
+                "ServiceRequest": {
+                    "data": {
+                        "WasScan": {
+                            "name": name,
+                            "type": "VULNERABILITY",
+                            "target": {
+                                "webApp": {"id": webapp_id},
+                                "webAppAuthRecord": auth_record,
+                                "scannerAppliance": scanner_appliance
+                            },
+                            "profile": {"id": option_profile},
+                            "sendMail": False
+                        }
+                    }
+                }
+            },
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0].WasScan.id
+
+    def get_scan_status(self, scan_id):
+        """ Get scan status """
+        response = self._request(
+            f"/qps/rest/3.0/status/was/wasscan/{scan_id}",
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0].WasScan.status
+
+    def create_report(self, name, webapp_id, report_template):
+        """ Create report """
+        response = self._request(
+            "/qps/rest/3.0/create/was/report",
+            json={
+                "ServiceRequest": {
+                    "data": {
+                        "Report": {
+                            "name": name,
+                            "description": "Report generated by API with Dusty",
+                            "format": "XML",
+                            "type": "WAS_SCAN_REPORT",
+                            "config": {
+                                "webAppReport": {
+                                    "target": {
+                                        "webapps": {
+                                            "WebApp": [{
+                                                "id": webapp_id
+                                            }]
+                                        }
+                                    }
+                                }
+                            },
+                            "template": {"id": report_template}
+                        }
+                    }
+                }
+            },
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0].Report.id
+
+    def get_report_status(self, report_id):
+        """ Get scan status """
+        response = self._request(
+            f"/qps/rest/3.0/status/was/report/{report_id}",
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0].Report.status
+
+    def download_report(self, report_id):
+        """ Download report data """
+        response = self._request(
+            f"/qps/rest/3.0/download/was/report/{report_id}",
             validator=lambda r: r.ok
         )
-        return response
+        return response.text

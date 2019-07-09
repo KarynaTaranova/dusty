@@ -21,6 +21,9 @@ inscriptis==0.0.4.0
 # ZAP
 python-owasp-zap-v2.4==0.0.14
 
+# Qualys
+dotted==0.1.8
+
 #
 # Reporting
 #
