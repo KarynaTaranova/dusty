@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,E0401,R0903,R0913
+# pylint: disable=I0011,E0401,R0903,R0913,R0902
 
 #   Copyright 2019 getcarrier.io
 #
@@ -30,13 +30,14 @@ from dusty.tools import log
 class QualysHelper:
     """ Helps to query Qualys API """
 
-    def __init__(self, context, server, login, password, retries=5, retry_delay=2.5):  # pylint: disable=R0913
+    def __init__(self, context, server, login, password, retries=5, retry_delay=2.5, timeout=45):  # pylint: disable=R0913
         self.context = context
         self.server = server
         self.login = login
         self.password = password
         self.retries = retries
         self.retry_delay = retry_delay
+        self.timeout = timeout
         self._connection_obj = None
 
     @property
@@ -72,9 +73,9 @@ class QualysHelper:
         """ Perform API request (directly) """
         api = self._connection
         if json is None:
-            response = api.get(f"{self.server}{endpoint}")
+            response = api.get(f"{self.server}{endpoint}", timeout=self.timeout)
         else:
-            response = api.post(f"{self.server}{endpoint}", json=json)
+            response = api.post(f"{self.server}{endpoint}", json=json, timeout=self.timeout)
         log.debug(
             "API response: %d [%s] %s",
             response.status_code, response.headers, response.text
