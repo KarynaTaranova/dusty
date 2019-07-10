@@ -73,8 +73,8 @@ class ConfigModel:
             for index, item in enumerate(obj):
                 obj[index] = self._variable_substitution(item)
         if isinstance(obj, str) and re.match(r"^\$\![a-zA-Z_][a-zA-Z0-9_]*$", obj) \
-                and obj[1:] in os.environ:
-            return os.environ[obj[1:]]
+                and obj[2:] in os.environ:
+            return os.environ[obj[2:]]
         return obj
 
     def _validate_config_base(self, config):
