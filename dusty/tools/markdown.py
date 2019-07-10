@@ -60,7 +60,7 @@ def markdown_table_escape(string):
 
 def html_to_text(html, escape=True):
     """ Convert HTML to markdown """
-    text = inscriptis.get_text(html)
+    text = inscriptis.get_text(html, display_links=True)
     if escape:
         text = markdown_escape(text)
     return text
