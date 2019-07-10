@@ -331,4 +331,4 @@ class QualysHelper:
             f"/qps/rest/3.0/download/was/report/{report_id}",
             validator=lambda r: r.ok
         )
-        return response.text
+        return response.content
