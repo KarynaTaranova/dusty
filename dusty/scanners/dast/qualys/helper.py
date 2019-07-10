@@ -30,7 +30,7 @@ from dusty.tools import log
 class QualysHelper:
     """ Helps to query Qualys API """
 
-    def __init__(self, context, server, login, password, retries=5, retry_delay=2.5, timeout=45):  # pylint: disable=R0913
+    def __init__(self, context, server, login, password, retries=5, retry_delay=2.5, timeout=120):  # pylint: disable=R0913
         self.context = context
         self.server = server
         self.login = login

@@ -57,8 +57,8 @@ class Scanner(DependentModuleModel, ScannerModel):
         )
         log.info("Qualys WAS version: %s", helper.get_version())
         timestamp = datetime.utcfromtimestamp(int(time())).strftime("%Y-%m-%d %H:%M:%S")
-        sleep_interval = 3.0
-        status_check_interval = 15.0
+        sleep_interval = 5.0
+        status_check_interval = 60.0
         # Create/get project
         project_name = self.context.get_meta("project_name", "UnnamedProject")
         if self.config.get("random_name", False):
