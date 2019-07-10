@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,W1401
+# pylint: disable=I0011,W1401,E0401,R0914,R0915
 
 #   Copyright 2019 getcarrier.io
 #
@@ -20,12 +20,92 @@
     Qualys WAS XML parser
 """
 
-from dusty.tools import log
-# from dusty.tools import log, markdown, url
-# from dusty.models.finding import DastFinding
+import html
+import base64
+
+from lxml import etree
+
+from dusty.tools import log, url
+from dusty.models.finding import DastFinding
+
+from . import constants
 
 
 def parse_findings(data, scanner):
     """ Parse findings """
     log.debug("Parsing findings")
-    _ = data, scanner
+    parser = etree.XMLParser(remove_blank_text=True, no_network=True, recover=True)
+    obj = etree.fromstring(data, parser)
+    qids = obj.xpath("/WAS_WEBAPP_REPORT/GLOSSARY/QID_LIST/QID")
+    disabled_titles = constants.QUALYS_DISABLED_TITLES
+    for qid in qids:
+        qid_title = qid.findtext("TITLE")
+        if qid_title not in disabled_titles:
+            _qid = qid.findtext("QID")
+            qid_solution = qid.findtext("SOLUTION")
+            qid_description = qid.findtext("DESCRIPTION")
+            qid_impact = qid.findtext("IMPACT")
+            qid_category = qid.findtext("CATEGORY")
+            qid_severity = "Info"
+            owasp = qid.findtext("OWASP") if qid.findtext("OWASP") else ""
+            wasc = qid.findtext("WASC") if qid.findtext("WASC") else ""
+            cwe = qid.findtext("CWE") if qid.findtext("CWE") else ""
+            cvss_base = qid.findtext("CVSS_BASE") if qid.findtext("CVSS_BASE") else ""
+            if qid.xpath("SEVERITY"):
+                qid_severity = constants.QUALYS_SEVERITIES[int(qid.findtext("SEVERITY"))]
+            references = []
+            entrypoints = []
+            if "Information Gathered" in qid_category:
+                qid_severity = "Info"
+                records = obj.xpath(
+                    f'//INFORMATION_GATHERED_LIST/INFORMATION_GATHERED/QID[text()="{_qid}"]/..'
+                )
+                for record in records:
+                    references.append(html.escape(
+                        base64.b64decode(record.findtext("DATA")).decode("utf-8", errors="ignore")
+                    ))
+            else:
+                records = obj.xpath(f'//VULNERABILITY_LIST/VULNERABILITY/QID[text()="{_qid}"]/..')
+                for record in records:
+                    record_url = record.findtext('URL')
+                    access_pass = [a.text for a in records[0].xpath('ACCESS_PATH/URL')]
+                    method = record.findtext('PAYLOADS/PAYLOAD/REQUEST/METHOD')
+                    if not method:
+                        log.error("Bad record: %s", str(record))
+                        method = ""
+                    request = record.findtext('PAYLOADS/PAYLOAD/REQUEST/URL')
+                    response = record.findtext('PAYLOADS/PAYLOAD/RESPONSE/CONTENTS')
+                    response = html.escape(
+                        base64.b64decode(response).decode("utf-8", errors="ignore")
+                    )
+                    entrypoints.append(record_url)
+                    entrypoints.extend(access_pass)
+                    references.append(f"{method.upper()}: {request}\n\nResponse: {response}\n\n")
+            for reference in references:
+                description = \
+                    f"{qid_description}\n\n" \
+                    f"**CWE**:{cwe}\n\n" \
+                    f"**OWASP**:{owasp}\n\n" \
+                    f"**WASC**:{wasc}\n\n" \
+                    f"**CVSS_BASE**:{cvss_base}\n\n" \
+                    f"**Impact**:{qid_impact}\n\n" \
+                    f"**Mitigation**:{qid_solution}\n\n" \
+                    f"**References**:{reference}\n\n"
+                # Make finding object
+                finding = DastFinding(
+                    title=f"{qid_title} - {qid_category}",
+                    description=description
+                )
+                finding.set_meta("tool", "QualysWAS")
+                finding.set_meta("severity", qid_severity)
+                # Endpoints (for backwards compatibility)
+                endpoints = list()
+                for item in entrypoints:
+                    endpoint = url.parse_url(item)
+                    if endpoint in endpoints:
+                        continue
+                    endpoints.append(endpoint)
+                finding.set_meta("endpoints", endpoints)
+                log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
+                # Done
+                scanner.findings.append(finding)

@@ -22,7 +22,7 @@
 
 import time
 import requests
-from dotted.utils import dot
+from dotted.utils import dot  # pylint: disable=C0411
 
 from dusty.tools import log
 
