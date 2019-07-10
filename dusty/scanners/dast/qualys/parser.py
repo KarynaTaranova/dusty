@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,W1401,E0401,R0914,R0915
+# pylint: disable=I0011,W1401,E0401,R0914,R0915,R0912
 
 #   Copyright 2019 getcarrier.io
 #
@@ -25,7 +25,7 @@ import base64
 
 from lxml import etree
 
-from dusty.tools import log, url
+from dusty.tools import log, url, markdown
 from dusty.models.finding import DastFinding
 
 from . import constants
@@ -82,15 +82,21 @@ def parse_findings(data, scanner):
                     entrypoints.extend(access_pass)
                     references.append(f"{method.upper()}: {request}\n\nResponse: {response}\n\n")
             for reference in references:
-                description = \
-                    f"{qid_description}\n\n" \
-                    f"**CWE**:{cwe}\n\n" \
-                    f"**OWASP**:{owasp}\n\n" \
-                    f"**WASC**:{wasc}\n\n" \
-                    f"**CVSS_BASE**:{cvss_base}\n\n" \
-                    f"**Impact**:{qid_impact}\n\n" \
-                    f"**Mitigation**:{qid_solution}\n\n" \
-                    f"**References**:{reference}\n\n"
+                description = f"{markdown.html_to_text(qid_description)}\n\n"
+                if qid_impact:
+                    description += f"**Impact:**\n {markdown.html_to_text(qid_impact)}\n\n"
+                if qid_solution:
+                    description += f"**Mitigation:**\n {markdown.html_to_text(qid_solution)}\n\n"
+                if reference:
+                    description += f"**References:**\n {markdown.markdown_escape(reference)}\n\n"
+                if cwe:
+                    description += f"**CWE:** {markdown.markdown_escape(cwe)}\n\n"
+                if owasp:
+                    description += f"**OWASP:** {markdown.markdown_escape(owasp)}\n\n"
+                if wasc:
+                    description += f"**WASC:** {markdown.markdown_escape(wasc)}\n\n"
+                if cvss_base:
+                    description += f"**CVSS_BASE:** {markdown.markdown_escape(cvss_base)}\n\n"
                 # Make finding object
                 finding = DastFinding(
                     title=f"{qid_title} - {qid_category}",
