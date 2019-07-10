@@ -152,6 +152,11 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def _prepare_context(self):
         log.info("Preparing context")
+        if self.config.get("context_file", None):
+            log.debug("All contexts before import: %s", self._zap_api.context.context_list)
+            context_data = self._zap_api.context.import_context(self.config.get("context_file"))
+            log.debug("Imported context data: %s", context_data)
+            log.debug("All contexts after import: %s", self._zap_api.context.context_list)
         self._zap_context_name = "dusty"
         self._zap_context = self._zap_api.context.new_context(self._zap_context_name)
         # Setup context inclusions and exclusions
@@ -299,6 +304,10 @@ class Scanner(DependentModuleModel, ScannerModel):
             comment="ZAP scan type, supported any combination of: 'all', 'xss', 'sqli'"
         )
         data_obj.insert(len(data_obj), "target", "http://app:8080", comment="scan target")
+        data_obj.insert(
+            len(data_obj), "context_file", "/path/to/zap_context",
+            comment="(optional) Path to ZAP context file"
+        )
         data_obj.insert(
             len(data_obj), "include", ["http://app:8080/path.*"],
             comment="(optional) URLs regex to additionally include in scan"
