@@ -153,24 +153,25 @@ class Scanner(DependentModuleModel, ScannerModel):
     def _prepare_context(self):
         log.info("Preparing context")
         if self.config.get("context_file", None):
-            log.debug("All contexts before import: %s", self._zap_api.context.context_list)
+            # Load context from file
             context_data = self._zap_api.context.import_context(self.config.get("context_file"))
-            log.debug("Imported context data: %s", context_data)
-            log.debug("All contexts after import: %s", self._zap_api.context.context_list)
-        log.debug("All contexts before creation: %s", self._zap_api.context.context_list)
-        self._zap_context_name = "dusty"
-        self._zap_context = self._zap_api.context.new_context(self._zap_context_name)
-        log.debug("Created context data: %s", self._zap_context)
-        log.debug("All contexts after creation: %s", self._zap_api.context.context_list)
-        # Setup context inclusions and exclusions
-        self._zap_api.context.include_in_context(
-            self._zap_context_name,
-            f".*{re.escape(url.parse_url(self.config.get('target')).hostname)}.*"
-        )
-        for include_regex in self.config.get("include", list()):
-            self._zap_api.context.include_in_context(self._zap_context_name, include_regex)
-        for exclude_regex in self.config.get("exclude", list()):
-            self._zap_api.context.exclude_from_context(self._zap_context_name, exclude_regex)
+            self._zap_context_name = self._zap_api.context.context_list[int(context_data) - 1]
+            self._zap_context = context_data
+            log.debug("Context handler type: %s", type(self._zap_context))
+        else:
+            # Create new context
+            self._zap_context_name = "dusty"
+            self._zap_context = self._zap_api.context.new_context(self._zap_context_name)
+            log.debug("Context handler type: %s", type(self._zap_context))
+            # Setup context inclusions and exclusions
+            self._zap_api.context.include_in_context(
+                self._zap_context_name,
+                f".*{re.escape(url.parse_url(self.config.get('target')).hostname)}.*"
+            )
+            for include_regex in self.config.get("include", list()):
+                self._zap_api.context.include_in_context(self._zap_context_name, include_regex)
+            for exclude_regex in self.config.get("exclude", list()):
+                self._zap_api.context.exclude_from_context(self._zap_context_name, exclude_regex)
         if self.config.get("auth_script", None):
             # Load our authentication script
             self._zap_api.script.load(
