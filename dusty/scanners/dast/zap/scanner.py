@@ -151,18 +151,17 @@ class Scanner(DependentModuleModel, ScannerModel):
         )
 
     def _prepare_context(self):
-        log.info("Preparing context")
         if self.config.get("context_file", None):
+            log.info("Loading context")
             # Load context from file
             context_data = self._zap_api.context.import_context(self.config.get("context_file"))
             self._zap_context_name = self._zap_api.context.context_list[int(context_data) - 1]
             self._zap_context = context_data
-            log.debug("Context handler type: %s", type(self._zap_context))
         else:
+            log.info("Preparing context")
             # Create new context
             self._zap_context_name = "dusty"
             self._zap_context = self._zap_api.context.new_context(self._zap_context_name)
-            log.debug("Context handler type: %s", type(self._zap_context))
             # Setup context inclusions and exclusions
             self._zap_api.context.include_in_context(
                 self._zap_context_name,
