@@ -157,8 +157,11 @@ class Scanner(DependentModuleModel, ScannerModel):
             context_data = self._zap_api.context.import_context(self.config.get("context_file"))
             log.debug("Imported context data: %s", context_data)
             log.debug("All contexts after import: %s", self._zap_api.context.context_list)
+        log.debug("All contexts before creation: %s", self._zap_api.context.context_list)
         self._zap_context_name = "dusty"
         self._zap_context = self._zap_api.context.new_context(self._zap_context_name)
+        log.debug("Created context data: %s", self._zap_context)
+        log.debug("All contexts after creation: %s", self._zap_api.context.context_list)
         # Setup context inclusions and exclusions
         self._zap_api.context.include_in_context(
             self._zap_context_name,
