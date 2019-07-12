@@ -20,9 +20,11 @@
     Scanner: OWASP ZAP
 """
 
+import os
 import re
 import json
 import time
+import shutil
 import base64
 import urllib
 import traceback
@@ -104,6 +106,7 @@ class Scanner(DependentModuleModel, ScannerModel):
                     details=f"```\n{traceback.format_exc()}\n```"
                 )
                 self.errors.append(error)
+            self._save_intermediates()
             pkg_resources.cleanup_resources()
             self._stop_zap()
 
@@ -135,6 +138,26 @@ class Scanner(DependentModuleModel, ScannerModel):
             except IOError:
                 time.sleep(1)
         return False
+
+    def _save_intermediates(self):
+        if self.config.get("save_intermediates_to", None):
+            base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
+            try:
+                # Make directory for artifacts
+                os.makedirs(base, mode=0o755, exist_ok=True)
+                # Copy log
+                shutil.copyfile(
+                    os.path.join(self._zap_api.core.home_directory, "zap.log"),
+                    os.path.join(base, "zap.log")
+                )
+                # Save session
+                self._zap_api.core.save_session(os.path.join(base, "zap.session"))
+                # Save context
+                self._zap_api.context.export_context(
+                    self._zap_context_name, os.path.join(base, "zap.context")
+                )
+            except:
+                log.exception("Failed to save intermediates")
 
     def _stop_zap(self):
         if self._zap_daemon:
@@ -354,6 +377,10 @@ class Scanner(DependentModuleModel, ScannerModel):
             for key in ["command", "target", "value"]:
                 command_obj.insert(len(command_obj), key, command[key])
             script_obj.append(command_obj)
+        data_obj.insert(
+            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            comment="(optional) Save scan intermediates (raw results, logs, ...)"
+        )
 
     @staticmethod
     def validate_config(config):
