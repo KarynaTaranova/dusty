@@ -141,6 +141,7 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def _save_intermediates(self):
         if self.config.get("save_intermediates_to", None):
+            log.info("Saving intermediates")
             base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
             try:
                 # Make directory for artifacts
