@@ -145,16 +145,16 @@ class Scanner(DependentModuleModel, ScannerModel):
             try:
                 # Make directory for artifacts
                 os.makedirs(base, mode=0o755, exist_ok=True)
-                # Copy log
-                shutil.copyfile(
-                    os.path.join(self._zap_api.core.home_directory, "zap.log"),
-                    os.path.join(base, "zap.log")
-                )
                 # Save session
                 self._zap_api.core.save_session(os.path.join(base, "zap.session"))
                 # Save context
                 self._zap_api.context.export_context(
                     self._zap_context_name, os.path.join(base, "zap.context")
+                )
+                # Copy log
+                shutil.copyfile(
+                    os.path.join(self._zap_api.core.zap_home_path, "zap.log"),
+                    os.path.join(base, "zap.log")
                 )
             except:
                 log.exception("Failed to save intermediates")
