@@ -150,7 +150,7 @@ class Scanner(DependentModuleModel, ScannerModel):
                 os.makedirs(base, mode=0o755, exist_ok=True)
                 # Save report
                 with open(os.path.join(base, "report.xml"), "w") as report:
-                    report.write(report_xml)
+                    report.write(report_xml.decode("utf-8", errors="ignore"))
             except:
                 log.exception("Failed to save intermediates")
 
