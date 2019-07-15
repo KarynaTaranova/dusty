@@ -57,6 +57,8 @@ class Scanner(DependentModuleModel, ScannerModel):
         # Make temporary files
         config_file_fd, config_file = tempfile.mkstemp()
         output_file_fd, output_file = tempfile.mkstemp()
+        log.debug("Config file: %s", config_file)
+        log.debug("Output file: %s", output_file)
         # Fill config data variables
         config_data = config_data.format(
             target=self.config.get("target"),
@@ -73,13 +75,13 @@ class Scanner(DependentModuleModel, ScannerModel):
         # Parse findings
         # parse_findings(output_file, self)
         # Save intermediates
-        self.save_intermediates(output_file)
+        self.save_intermediates(output_file, config_file)
         # Remove temporary files
         os.remove(config_file)
         os.remove(output_file)
         pkg_resources.cleanup_resources()
 
-    def save_intermediates(self, output_file):
+    def save_intermediates(self, output_file, config_file):
         """ Save scanner intermediates """
         if self.config.get("save_intermediates_to", None):
             log.info("Saving intermediates")
@@ -91,6 +93,11 @@ class Scanner(DependentModuleModel, ScannerModel):
                 shutil.copyfile(
                     output_file,
                     os.path.join(base, "report.xml")
+                )
+                # Save config
+                shutil.copyfile(
+                    config_file,
+                    os.path.join(base, "config.w3af")
                 )
             except:
                 log.exception("Failed to save intermediates")
