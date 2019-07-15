@@ -69,19 +69,19 @@ class Scanner(DependentModuleModel, ScannerModel):
         os.close(config_file_fd)
         os.close(output_file_fd)
         # Run scanner
-        subprocess.run([
+        task = subprocess.run([
             "w3af_console", "-y", "-n", "-s", config_file
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # Parse findings
         # parse_findings(output_file, self)
         # Save intermediates
-        self.save_intermediates(output_file, config_file)
+        self.save_intermediates(output_file, config_file, task)
         # Remove temporary files
         os.remove(config_file)
         os.remove(output_file)
         pkg_resources.cleanup_resources()
 
-    def save_intermediates(self, output_file, config_file):
+    def save_intermediates(self, output_file, config_file, task):
         """ Save scanner intermediates """
         if self.config.get("save_intermediates_to", None):
             log.info("Saving intermediates")
@@ -99,6 +99,11 @@ class Scanner(DependentModuleModel, ScannerModel):
                     config_file,
                     os.path.join(base, "config.w3af")
                 )
+                # Save output
+                with open(os.path.join(base, "output.stdout"), "w") as output:
+                    output.write(task.stdout)
+                with open(os.path.join(base, "output.stderr"), "w") as output:
+                    output.write(task.stderr)
             except:
                 log.exception("Failed to save intermediates")
 
