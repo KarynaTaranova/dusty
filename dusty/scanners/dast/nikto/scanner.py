@@ -50,25 +50,31 @@ class Scanner(DependentModuleModel, ScannerModel):
         nikto_parameters = shlex.split(self.config.get("nikto_parameters", ""))
         # Make temporary files
         output_file_fd, output_file = tempfile.mkstemp()
-        context_file_fd, context_file = tempfile.mkstemp()
         log.debug("Output file: %s", output_file)
-        log.debug("Context file: %s", context_file)
         os.close(output_file_fd)
-        os.close(context_file_fd)
+        # Prepare -Save option if needed
+        save_findings = list()
+        if self.config.get("save_intermediates_to", None):
+            base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
+            try:
+                os.makedirs(base, mode=0o755, exist_ok=True)
+                save_findings.append("-Save")
+                save_findings.append(base)
+            except:
+                pass
         # Run scanner
         task = subprocess.run(["perl", "nikto.pl"] + nikto_parameters + [
-            "-h", target_url.hostname, "-p", url.get_port(target_url), "-Format", "xml",
-            "-output", output_file, "-Save", context_file
-        ], cwd="/opt/nikto/program", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            "-h", target_url.hostname, "-p", url.get_port(target_url),
+            "-Format", "xml", "-output", output_file
+        ] + save_findings, cwd="/opt/nikto/program", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # Parse findings
         # parse_findings(output_file, self)
         # Save intermediates
-        self.save_intermediates(output_file, context_file, task)
+        self.save_intermediates(output_file, task)
         # Remove temporary files
         os.remove(output_file)
-        os.remove(context_file)
 
-    def save_intermediates(self, output_file, context_file, task):
+    def save_intermediates(self, output_file, task):
         """ Save scanner intermediates """
         if self.config.get("save_intermediates_to", None):
             log.info("Saving intermediates")
@@ -80,11 +86,6 @@ class Scanner(DependentModuleModel, ScannerModel):
                 shutil.copyfile(
                     output_file,
                     os.path.join(base, "report.xml")
-                )
-                # Save context
-                shutil.copyfile(
-                    context_file,
-                    os.path.join(base, "extended_nikto")
                 )
                 # Save output
                 with open(os.path.join(base, "output.stdout"), "w") as output:
