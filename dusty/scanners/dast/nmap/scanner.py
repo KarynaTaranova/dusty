@@ -31,7 +31,7 @@ from dusty.tools import log, url
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
 
-# from .parser import parse_findings
+from .parser import parse_findings
 
 
 class Scanner(DependentModuleModel, ScannerModel):
@@ -91,7 +91,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             target_url.hostname, "-oX", output_file
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # Parse findings
-        # parse_findings(output_file, self)
+        parse_findings(output_file, self)
         # Save intermediates
         self.save_intermediates(output_file, task)
         # Remove temporary files
