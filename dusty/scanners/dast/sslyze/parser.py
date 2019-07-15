@@ -22,7 +22,7 @@
 
 import json
 
-from dusty.tools import log
+from dusty.tools import log, markdown
 from dusty.models.finding import DastFinding
 
 
@@ -53,7 +53,9 @@ def parse_findings(output_file, scanner):
             descr = "\n".join(certificate_validation)
             finding = DastFinding(
                 title="Certificate is not trusted",
-                description=f"Certificate chain: {chain_info}\n {descr}"
+                description=markdown.markdown_escape(
+                    f"Certificate chain: {chain_info}\n {descr}"
+                )
             )
             finding.set_meta("tool", scanner.get_name())
             finding.set_meta("severity", severity)
@@ -61,7 +63,9 @@ def parse_findings(output_file, scanner):
         if target["commands_results"]["heartbleed"]["is_vulnerable_to_heartbleed"]:
             finding = DastFinding(
                 title="Certificate is vulnerable to Heardbleed",
-                description=f"Certificate chain: {chain_info}\n is vulnerable to heartbleed"
+                description=markdown.markdown_escape(
+                    f"Certificate chain: {chain_info}\n is vulnerable to heartbleed"
+                )
             )
             finding.set_meta("tool", scanner.get_name())
             finding.set_meta("severity", severity)
@@ -69,9 +73,11 @@ def parse_findings(output_file, scanner):
         if "NOT_VULNERABLE" not in target["commands_results"]["robot"]["robot_result_enum"]:
             finding = DastFinding(
                 title="Certificate is vulnerable to Robot",
-                description=f"Certificate chain: {chain_info}\n "
-                            f"is vulnerable to robot with "
-                            f'{target["commands_results"]["robot"]["robot_result_enum"]}'
+                description=markdown.markdown_escape(
+                    f"Certificate chain: {chain_info}\n "
+                    f"is vulnerable to robot with "
+                    f'{target["commands_results"]["robot"]["robot_result_enum"]}'
+                )
             )
             finding.set_meta("tool", scanner.get_name())
             finding.set_meta("severity", severity)
@@ -79,8 +85,10 @@ def parse_findings(output_file, scanner):
         if target["commands_results"]["openssl_ccs"]["is_vulnerable_to_ccs_injection"]:
             finding = DastFinding(
                 title="Certificate is vulnerable to CCS Injection",
-                description=f"Certificate chain: {chain_info}\n "
-                            f"is vulnerable to CCS Injection"
+                description=markdown.markdown_escape(
+                    f"Certificate chain: {chain_info}\n "
+                    f"is vulnerable to CCS Injection"
+                )
             )
             finding.set_meta("tool", scanner.get_name())
             finding.set_meta("severity", severity)
