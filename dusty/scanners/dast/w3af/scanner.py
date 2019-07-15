@@ -69,9 +69,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         os.close(config_file_fd)
         os.close(output_file_fd)
         # Run scanner
-        subprocess.run([
-            "w3af_console", "-y", "-n", "-s", config_file
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run(["w3af_console", "-y", "-n", "-s", config_file])
         # Parse findings
         # parse_findings(output_file, self)
         # Save intermediates
