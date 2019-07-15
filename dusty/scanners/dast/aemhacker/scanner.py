@@ -78,6 +78,10 @@ class Scanner(DependentModuleModel, ScannerModel):
             len(data_obj), "scanner_port", "4444",
             comment="(optional) published scanner port to use during SSRF detection"
         )
+        data_obj.insert(
+            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            comment="(optional) Save scan intermediates (raw results, logs, ...)"
+        )
 
     @staticmethod
     def validate_config(config):

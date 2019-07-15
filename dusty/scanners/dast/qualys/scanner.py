@@ -279,6 +279,10 @@ class Scanner(DependentModuleModel, ScannerModel):
             len(data_obj), "timeout", 120,
             comment="(optional) API request timeout"
         )
+        data_obj.insert(
+            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            comment="(optional) Save scan intermediates (raw results, logs, ...)"
+        )
 
     @staticmethod
     def validate_config(config):
