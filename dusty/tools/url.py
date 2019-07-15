@@ -65,3 +65,10 @@ def get_port(parsed_url):
     if parsed_url.protocol == "https":
         return "443"
     return "80"
+
+
+def find_ip(url):
+    """ Find IP address in string (code from dusty 1.0) """
+    ip_pattern = re.compile('\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s')  # pylint: disable=W1401
+    ip_value = re.findall(ip_pattern, url)
+    return ip_value
