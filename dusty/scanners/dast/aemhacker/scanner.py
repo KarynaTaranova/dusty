@@ -48,7 +48,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             "--port", self.config.get("scanner_port", "4444")
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         log.debug("Tast result: %s", task)
-        parse_findings(task.stdout.decode("utf-8"), self)
+        parse_findings(task.stdout.decode("utf-8", errors="ignore"), self)
         # Save intermediates
         self.save_intermediates(task.stdout)
 

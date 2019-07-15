@@ -66,7 +66,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         self.save_intermediates(output_file, context_file, task)
         # Remove temporary files
         os.remove(output_file)
-        os.remove(context_file_fd)
+        os.remove(context_file)
 
     def save_intermediates(self, output_file, context_file, task):
         """ Save scanner intermediates """
@@ -88,9 +88,9 @@ class Scanner(DependentModuleModel, ScannerModel):
                 )
                 # Save output
                 with open(os.path.join(base, "output.stdout"), "w") as output:
-                    output.write(task.stdout)
+                    output.write(task.stdout.decode("utf-8", errors="ignore"))
                 with open(os.path.join(base, "output.stderr"), "w") as output:
-                    output.write(task.stderr)
+                    output.write(task.stderr.decode("utf-8", errors="ignore"))
             except:
                 log.exception("Failed to save intermediates")
 
