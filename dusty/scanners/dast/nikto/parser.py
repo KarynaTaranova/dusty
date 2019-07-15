@@ -76,7 +76,8 @@ def parse_findings(output_file, scanner):
             dupes[dupe_key] = True
             finding = {
                 "title": titleText,
-                "description": description
+                "description": description,
+                "endpoints": list()
             }
             dupes[dupe_key] = finding
             finding["endpoints"].append(ip)
