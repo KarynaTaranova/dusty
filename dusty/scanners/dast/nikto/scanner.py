@@ -66,6 +66,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         self.save_intermediates(output_file, context_file, task)
         # Remove temporary files
         os.remove(output_file)
+        os.remove(context_file_fd)
 
     def save_intermediates(self, output_file, context_file, task):
         """ Save scanner intermediates """

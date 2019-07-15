@@ -57,6 +57,7 @@ def parse_url(url):
         password=password if password is not None else ""
     )
 
+
 def get_port(parsed_url):
     """ Get port from parsed URL """
     if parsed_url.port:
