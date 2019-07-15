@@ -51,7 +51,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             task = subprocess.run(
                 ["getent", "hosts", host], stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
-            host = url.find_ip(task.stdout)
+            host = url.find_ip(task.stdout.decode("utf-8", errors="ignore"))
             if host:
                 host = host[0].strip()
         if not host:
