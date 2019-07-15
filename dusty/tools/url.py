@@ -56,3 +56,11 @@ def parse_url(url):
         username=username if username is not None else "",
         password=password if password is not None else ""
     )
+
+def get_port(parsed_url):
+    """ Get port from parsed URL """
+    if parsed_url.port:
+        return parsed_url.port
+    if parsed_url.protocol == "https":
+        return "443"
+    return "80"
