@@ -25,6 +25,9 @@ python-owasp-zap-v2.4==0.0.14
 dotted==0.1.8
 lxml==4.2.5
 
+# Nikto
+defusedxml==0.6.0
+
 #
 # Reporting
 #
