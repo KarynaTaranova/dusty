@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,E0401,W0702,W0703,R0902,R0914
+# pylint: disable=I0011,E0401,W0702,W0703,R0902,R0914,R0915
 
 #   Copyright 2019 getcarrier.io
 #
@@ -20,6 +20,7 @@
     Scanner: Qualys WAS
 """
 
+import os
 import string
 import random
 
@@ -136,6 +137,22 @@ class Scanner(DependentModuleModel, ScannerModel):
         helper.delete_asset("webapp", webapp_id)
         # Parse findings
         parse_findings(report_xml, self)
+        # Save intermediates
+        self.save_intermediates(report_xml)
+
+    def save_intermediates(self, report_xml):
+        """ Save scanner intermediates """
+        if self.config.get("save_intermediates_to", None):
+            log.info("Saving intermediates")
+            base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
+            try:
+                # Make directory for artifacts
+                os.makedirs(base, mode=0o755, exist_ok=True)
+                # Save report
+                with open(os.path.join(base, "report.xml"), "w") as report:
+                    report.write(report_xml)
+            except:
+                log.exception("Failed to save intermediates")
 
     @staticmethod
     def id_generator(size=6, chars=string.ascii_uppercase + string.digits):

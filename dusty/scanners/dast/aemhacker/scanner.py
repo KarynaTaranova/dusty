@@ -20,6 +20,7 @@
     Scanner: AEM Hacker
 """
 
+import os
 import subprocess
 
 from dusty.tools import log
@@ -48,6 +49,22 @@ class Scanner(DependentModuleModel, ScannerModel):
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         log.debug("Tast result: %s", task)
         parse_findings(task.stdout.decode("utf-8"), self)
+        # Save intermediates
+        self.save_intermediates(task.stdout)
+
+    def save_intermediates(self, task_stdout):
+        """ Save scanner intermediates """
+        if self.config.get("save_intermediates_to", None):
+            log.info("Saving intermediates")
+            base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
+            try:
+                # Make directory for artifacts
+                os.makedirs(base, mode=0o755, exist_ok=True)
+                # Save report
+                with open(os.path.join(base, "output.txt"), "w") as report:
+                    report.write(task_stdout)
+            except:
+                log.exception("Failed to save intermediates")
 
     @staticmethod
     def fill_config(data_obj):
