@@ -60,11 +60,11 @@ class Scanner(DependentModuleModel, ScannerModel):
         log.debug("Config file: %s", config_file)
         log.debug("Output file: %s", output_file)
         # Fill config data variables
-        config_data = config_data.format(
+        config_data = config_data.decode("utf-8").format(
             target=self.config.get("target"),
             output_section=constants.W3AF_OUTPUT_SECTION.replace("{output_file}", output_file)
         )
-        os.write(config_file_fd, config_data)
+        os.write(config_file_fd, config_data.encode("utf-8"))
         # Close unneeded handles
         os.close(config_file_fd)
         os.close(output_file_fd)
