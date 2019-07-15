@@ -75,7 +75,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         if not ports:
             log.warning("No open ports found. Exiting")
             return
-        # make temporary files
+        # Make temporary files
         output_file_fd, output_file = tempfile.mkstemp()
         log.debug("Output file: %s", output_file)
         os.close(output_file_fd)
