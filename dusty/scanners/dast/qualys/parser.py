@@ -102,7 +102,7 @@ def parse_findings(data, scanner):
                     title=f"{qid_title} - {qid_category}",
                     description=description
                 )
-                finding.set_meta("tool", "QualysWAS")
+                finding.set_meta("tool", scanner.get_name())
                 finding.set_meta("severity", qid_severity)
                 # Endpoints (for backwards compatibility)
                 endpoints = list()

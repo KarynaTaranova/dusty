@@ -48,7 +48,7 @@ def parse_findings(data, scanner):
             title=item.group("name"),
             description=description
         )
-        finding.set_meta("tool", "AEM Hacker")
+        finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", "Info")
         # Endpoints (for backwards compatibility)
         endpoints = list()

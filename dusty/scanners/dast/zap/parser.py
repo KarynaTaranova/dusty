@@ -65,7 +65,7 @@ def parse_findings(data, scanner):
                 title=alert["name"],
                 description=description
             )
-            finding.set_meta("tool", "ZAP")
+            finding.set_meta("tool", scanner.get_name())
             finding.set_meta("severity", constants.ZAP_SEVERITIES[alert["riskcode"]])
             finding.set_meta("confidence", constants.ZAP_CONFIDENCES[alert["confidence"]])
             # Endpoints (for backwards compatibility)

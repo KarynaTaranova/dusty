@@ -31,3 +31,10 @@ set verbose False
 back
 back
 """
+
+W3AF_SEVERITIES = {
+    'Information': 'Info',
+    'Low': 'Low',
+    'Medium': 'Medium',
+    'High': 'High'
+}
