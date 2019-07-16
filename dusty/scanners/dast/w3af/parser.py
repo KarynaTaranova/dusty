@@ -92,7 +92,7 @@ def parse_findings(output_file, scanner):
                     "description": description,
                     "severity": severity,
                     "references": data,
-                    "endpoints": dict()
+                    "endpoints": list()
                 }
             elif data not in dupes[dupe_key]["references"]:
                 dupes[dupe_key]["references"] += data
