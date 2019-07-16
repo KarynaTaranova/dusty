@@ -59,6 +59,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             "--min-rate", "1000", "--max-retries", "0", "--max-rtt-timeout", "200ms",
             target_url.hostname
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
         # Use discovered ports
         ports = list()
         tcp_ports = ""
@@ -90,6 +91,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             "--min-rate", "1000", "--max-retries", "0", f'--script={nse_scripts}',
             target_url.hostname, "-oX", output_file
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
         # Parse findings
         parse_findings(output_file, self)
         # Save intermediates

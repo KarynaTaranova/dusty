@@ -72,6 +72,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         task = subprocess.run([
             "w3af_console", "-y", "-n", "-s", config_file
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
         # Parse findings
         parse_findings(output_file, self)
         # Save intermediates

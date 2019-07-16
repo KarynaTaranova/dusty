@@ -52,6 +52,16 @@ def get_outer_logger():
     )
 
 
+def log_subprocess_result(task):
+    """ Log subprocess args, returncode, stdout and stderr """
+    get_outer_logger().debug("Subprocess args: %s", task.args)
+    get_outer_logger().debug("Subprocess returncode: %d", task.returncode)
+    if task.stdout is not None:
+        get_outer_logger().debug("Subprocess stdout: %s", task.stdout)
+    if task.stderr is not None:
+        get_outer_logger().debug("Subprocess stderr: %s", task.stderr)
+
+
 def debug(msg, *args, **kwargs):
     """ Logs a message with level DEBUG """
     return get_outer_logger().debug(msg, *args, **kwargs)

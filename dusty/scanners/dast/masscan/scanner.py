@@ -51,6 +51,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             task = subprocess.run(
                 ["getent", "hosts", host], stdout=subprocess.PIPE, stderr=subprocess.PIPE
             )
+            log.log_subprocess_result(task)
             host = url.find_ip(task.stdout.decode("utf-8", errors="ignore"))
             if host:
                 host = host[0].strip()
@@ -75,6 +76,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         task = subprocess.run(["masscan", host] + include_ports + [
             "--rate", "1000", "-oJ", output_file,
         ] + exclude_ports, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
         # Parse findings
         parse_findings(output_file, self)
         # Save intermediates

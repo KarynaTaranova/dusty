@@ -67,6 +67,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             "-h", target_url.hostname, "-p", url.get_port(target_url),
             "-Format", "xml", "-output", output_file
         ] + save_findings, cwd="/opt/nikto/program", stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
         # Parse findings
         parse_findings(output_file, self)
         # Save intermediates

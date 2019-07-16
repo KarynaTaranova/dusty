@@ -55,6 +55,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             "sslyze", "--regular", f"--json_out={output_file}", "--quiet",
             f"{target_url.hostname}:{url.get_port(target_url)}"
         ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
         # Parse findings
         parse_findings(output_file, self)
         # Save intermediates
