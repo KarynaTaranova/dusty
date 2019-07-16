@@ -44,7 +44,7 @@ def parse_url(url):
     result = namedtuple("URL", [
         "protocol", "hostname", "port",
         "path", "query", "fragment",
-        "username", "password"
+        "username", "password", "raw"
     ])
     return result(
         protocol=protocol if protocol is not None else "",
@@ -54,7 +54,8 @@ def parse_url(url):
         query=query[1:] if query is not None else "",
         fragment=fragment[1:] if fragment is not None else "",
         username=username if username is not None else "",
-        password=password if password is not None else ""
+        password=password if password is not None else "",
+        raw=url
     )
 
 
