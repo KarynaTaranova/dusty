@@ -45,6 +45,57 @@ class HTMLPresenter:
             )
         raise ValueError("Unsupported item type")
 
+    @staticmethod
+    def _group_findings_by_endpoints(items):
+        result = list()
+        endpoint_map = dict()
+        ungrouped = list()
+        # Prepare endpoint mapping
+        for item in items:
+            endpoints = item.get("endpoints", None)
+            if not endpoints:
+                ungrouped.append(item)
+                continue
+            for endpoint in endpoints:
+                if endpoint not in endpoint_map:
+                    endpoint_map[endpoint] = list()
+                endpoint_map[endpoint].append(item)
+        # Make HTMLReportFinding instances
+        for endpoint in sorted(endpoint_map.keys(), key=lambda item: item.raw):
+            group = HTMLReportFinding(
+                tool="",
+                title=f'Findings on {endpoint.raw}',
+                severity="",
+                description=""
+            )
+            for finding in sorted(
+                    endpoint_map[endpoint],
+                    key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
+            ):
+                try:
+                    group.findings.append(_item_to_finding(finding))
+                except:
+                    log.exception("Failed to create finding item")
+            result.append(group)
+        if ungrouped:
+            group = HTMLReportFinding(
+                tool="",
+                title="Findings with no endpoint",
+                severity="",
+                description=""
+            )
+            for finding in sorted(
+                    ungrouped,
+                    key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
+            ):
+                try:
+                    group.findings.append(_item_to_finding(finding))
+                except:
+                    log.exception("Failed to create finding item")
+            result.append(group)
+        # Done
+        return result
+
     @property
     def project_name(self):
         """ Returns project name """
@@ -149,42 +200,62 @@ class HTMLPresenter:
     def project_findings(self):
         """ Returns project findings """
         result = list()
-        for item in self.context.findings:
-            if item.get_meta("information_finding", False) or \
-                    item.get_meta("false_positive_finding", False):
-                continue
-            try:
-                result.append(self._item_to_finding(item))
-            except:
-                log.exception("Failed to create finding item")
-        result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
+        if self.config.get("group_by_endpoint", False):
+            result.extend(self._group_findings_by_endpoints([
+                item for item in self.context.findings \
+                if not item.get_meta("information_finding", False) \
+                and not item.get_meta("false_positive_finding", False)
+            ]))
+        else:
+            for item in self.context.findings:
+                if item.get_meta("information_finding", False) or \
+                        item.get_meta("false_positive_finding", False):
+                    continue
+                try:
+                    result.append(self._item_to_finding(item))
+                except:
+                    log.exception("Failed to create finding item")
+            result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
         return result
 
     @property
     def project_information_findings(self):
         """ Returns project information findings """
         result = list()
-        for item in self.context.findings:
-            if item.get_meta("information_finding", False) and \
-                    not item.get_meta("false_positive_finding", False):
-                try:
-                    result.append(self._item_to_finding(item))
-                except:
-                    log.exception("Failed to create finding item")
-        result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
+        if self.config.get("group_by_endpoint", False):
+            result.extend(self._group_findings_by_endpoints([
+                item for item in self.context.findings \
+                if item.get_meta("information_finding", False) \
+                and not item.get_meta("false_positive_finding", False)
+            ]))
+        else:
+            for item in self.context.findings:
+                if item.get_meta("information_finding", False) and \
+                        not item.get_meta("false_positive_finding", False):
+                    try:
+                        result.append(self._item_to_finding(item))
+                    except:
+                        log.exception("Failed to create finding item")
+            result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
         return result
 
     @property
     def project_false_positive_findings(self):
         """ Returns project false positive findings """
         result = list()
-        for item in self.context.findings:
-            if item.get_meta("false_positive_finding", False):
-                try:
-                    result.append(self._item_to_finding(item))
-                except:
-                    log.exception("Failed to create finding item")
-        result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
+        if self.config.get("group_by_endpoint", False):
+            result.extend(self._group_findings_by_endpoints([
+                item for item in self.context.findings \
+                if item.get_meta("false_positive_finding", False)
+            ]))
+        else:
+            for item in self.context.findings:
+                if item.get_meta("false_positive_finding", False):
+                    try:
+                        result.append(self._item_to_finding(item))
+                    except:
+                        log.exception("Failed to create finding item")
+            result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
         return result
 
     @property

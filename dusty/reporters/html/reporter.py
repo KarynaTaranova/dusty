@@ -67,6 +67,10 @@ class Reporter(DependentModuleModel, ReporterModel):
             len(data_obj), "format_file_name", True,
             comment="(optional) Allow to use {variables} inside file path"
         )
+        data_obj.insert(
+            len(data_obj), "group_by_endpoint", False,
+            comment="(optional) Create finding groups for every endpoint"
+        )
 
     @staticmethod
     def get_name():
