@@ -112,7 +112,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                 finding["issue_hash"], # issue_hash, self.get_hash_code()
                 # attachments=None,
                 # get_or_create=True,
-                finding["additional_labels"] # additional_labels
+                additional_labels=finding["additional_labels"] # additional_labels
             )
             ticket_meta = {
                 "jira_id": issue.key,
