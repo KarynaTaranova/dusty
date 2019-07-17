@@ -46,7 +46,7 @@ class HTMLPresenter:
         raise ValueError("Unsupported item type")
 
     def _group_findings_by_endpoints(self, items):
-        log.debug("Findigs: %s", items)
+        log.debug("Findings: %s", items)
         result = list()
         endpoint_map = dict()
         ungrouped = list()
@@ -94,6 +94,7 @@ class HTMLPresenter:
                     log.exception("Failed to create finding item")
             result.append(group)
         # Done
+        log.debug("Result: %s", result)
         return result
 
     @property
