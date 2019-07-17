@@ -70,7 +70,11 @@ class HTMLPresenter:
                 )
                 for finding in sorted(
                         endpoint_map[endpoint],
-                        key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
+                        key=lambda item: (
+                            SEVERITIES.index(item.get_meta("severity", SEVERITIES[-1])),
+                            item.get_meta("tool", ""),
+                            item.title
+                        )
                 ):
                     try:
                         group.findings.append(self._item_to_finding(finding))
@@ -86,7 +90,11 @@ class HTMLPresenter:
                 )
                 for finding in sorted(
                         ungrouped,
-                        key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
+                        key=lambda item: (
+                            SEVERITIES.index(item.get_meta("severity", SEVERITIES[-1])),
+                            item.get_meta("tool", ""),
+                            item.title
+                        )
                 ):
                     try:
                         group.findings.append(self._item_to_finding(finding))
