@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,E0401,W0702,W0703,R0902
+# pylint: disable=I0011,E0401,W0702,W0703,R0902,R0912
 
 #   Copyright 2019 getcarrier.io
 #
@@ -60,24 +60,57 @@ def parse_findings(data, scanner):
                     html.escape(markdown.markdown_table_escape(item.get("evidence", "-")))
                 ])))
             description = "\n".join(description)
-            # Make finding object
-            finding = DastFinding(
-                title=alert["name"],
-                description=description
-            )
-            finding.set_meta("tool", scanner.get_name())
-            finding.set_meta("severity", constants.ZAP_SEVERITIES[alert["riskcode"]])
-            finding.set_meta("confidence", constants.ZAP_CONFIDENCES[alert["confidence"]])
-            # Endpoints (for backwards compatibility)
-            endpoints = list()
-            for item in alert["instances"]:
-                if not item.get("uri", None):
-                    continue
-                endpoint = url.parse_url(item.get("uri"))
-                if endpoint in endpoints:
-                    continue
-                endpoints.append(endpoint)
-            finding.set_meta("endpoints", endpoints)
-            log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
-            # Done
-            scanner.findings.append(finding)
+            # Prepare results
+            finding_data = list()
+            if scanner.config.get("split_by_endpoint", False):
+                # Collect endpoints
+                endpoints = list()
+                for item in alert["instances"]:
+                    if not item.get("uri", None):
+                        continue
+                    endpoint = url.parse_url(item.get("uri"))
+                    if endpoint in endpoints:
+                        continue
+                    endpoints.append(endpoint)
+                # Prepare data
+                for endpoint in endpoints:
+                    finding_data.append({
+                        "title": f'{alert["name"]} on {endpoint.raw}',
+                        "description": description,
+                        "tool": scanner.get_name(),
+                        "severity": constants.ZAP_SEVERITIES[alert["riskcode"]],
+                        "confidence": constants.ZAP_CONFIDENCES[alert["confidence"]],
+                        "endpoints": [endpoint]
+                    })
+            # Make one finding object if needed/requested
+            if not finding_data:
+                # Endpoints (for backwards compatibility)
+                endpoints = list()
+                for item in alert["instances"]:
+                    if not item.get("uri", None):
+                        continue
+                    endpoint = url.parse_url(item.get("uri"))
+                    if endpoint in endpoints:
+                        continue
+                    endpoints.append(endpoint)
+                log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
+                # Data
+                finding_data.append({
+                    "title": alert["name"],
+                    "description": description,
+                    "tool": scanner.get_name(),
+                    "severity": constants.ZAP_SEVERITIES[alert["riskcode"]],
+                    "confidence": constants.ZAP_CONFIDENCES[alert["confidence"]],
+                    "endpoints": endpoints
+                })
+            # Make finding objects
+            for object_data in finding_data:
+                finding = DastFinding(
+                    title=object_data["title"],
+                    description=object_data["description"]
+                )
+                finding.set_meta("tool", object_data["tool"])
+                finding.set_meta("severity", object_data["severity"])
+                finding.set_meta("confidence", object_data["confidence"])
+                finding.set_meta("endpoints", object_data["endpoints"])
+                scanner.findings.append(finding)

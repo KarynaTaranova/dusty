@@ -379,6 +379,10 @@ class Scanner(DependentModuleModel, ScannerModel):
                 command_obj.insert(len(command_obj), key, command[key])
             script_obj.append(command_obj)
         data_obj.insert(
+            len(data_obj), "split_by_endpoint", False,
+            comment="(optional) Create separate findings for every endpoint"
+        )
+        data_obj.insert(
             len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
             comment="(optional) Save scan intermediates (raw results, logs, ...)"
         )
