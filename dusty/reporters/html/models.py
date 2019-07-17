@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,R0903
+# pylint: disable=I0011,R0903,R0913
 
 #   Copyright 2019 getcarrier.io
 #
@@ -40,11 +40,14 @@ class HTMLReportAlert:
 class HTMLReportFinding:
     """ HTML report finding item """
 
-    def __init__(self, tool, title, severity, description):
+    def __init__(self, tool, title, severity, description, findings=None):
         self.tool = tool
         self.title = title
         self.severity = severity
         self.description = description
+        self.findings = list()
+        if findings:
+            self.findings.extend(findings)
 
 
 class HTMLReportError:
