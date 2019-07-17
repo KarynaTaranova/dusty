@@ -63,9 +63,9 @@ class HTMLPresenter:
             # Make HTMLReportFinding instances
             for endpoint in sorted(endpoint_map.keys(), key=lambda item: item.raw):
                 group = HTMLReportFinding(
-                    tool="",
+                    tool="-",
                     title=f'Findings on {endpoint.raw}',
-                    severity="",
+                    severity="-",
                     description=""
                 )
                 for finding in sorted(
@@ -83,9 +83,9 @@ class HTMLPresenter:
                 result.append(group)
             if ungrouped:
                 group = HTMLReportFinding(
-                    tool="",
+                    tool="-",
                     title="Findings with no endpoint",
-                    severity="",
+                    severity="-",
                     description=""
                 )
                 for finding in sorted(
