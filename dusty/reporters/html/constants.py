@@ -20,4 +20,4 @@
 """
 
 
-DEFAULT_REPORT_FILE = "report.html"
+DEFAULT_REPORT_FILE = "{project_name}_{testing_type}_{scan_type}_{build_id}_report.html"

@@ -35,13 +35,13 @@ class EMailPresenter:
         """ Returns mail subject """
         return self.config.get(
             "subject",
-            "{} {} {} {} {} scanning {} results".format(
+            "{} {} {} {} {} scanning #{} results".format(
                 self.context.get_meta("project_name", "UNKNOWN"),
                 self.context.get_meta("project_description", "Unnamed"),
                 self.context.get_meta("environment_name", "unknown"),
                 self.context.get_meta("testing_type", "UNKN"),
                 self.context.get_meta("scan_type", "unknown"),
-                self.context.get_meta("build_id", "#0"),
+                self.context.get_meta("build_id", "0"),
             )
         )
 

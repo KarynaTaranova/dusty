@@ -43,6 +43,8 @@ class Reporter(DependentModuleModel, ReporterModel):
     def report(self):
         """ Report """
         file = self.config.get("file", constants.DEFAULT_REPORT_FILE)
+        if self.config.get("format_file_name", True):
+            file = file.format(**self.context.meta)
         log.info("Creating HTML report %s", file)
         environment = Environment(
             loader=PackageLoader(
@@ -61,6 +63,10 @@ class Reporter(DependentModuleModel, ReporterModel):
     def fill_config(data_obj):
         """ Make sample config """
         data_obj.insert(len(data_obj), "file", "/path/to/report.html", comment="HTML report path")
+        data_obj.insert(
+            len(data_obj), "format_file_name", True,
+            comment="(optional) Allow to use {variables} inside file path"
+        )
 
     @staticmethod
     def get_name():

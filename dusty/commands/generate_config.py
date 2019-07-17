@@ -89,7 +89,7 @@ class Command(ModuleModel, CommandModel):
         data_obj.insert(len(data_obj), "testing_type", "DAST", comment="DAST or SAST")
         data_obj.insert(len(data_obj), "scan_type", "full", comment="full or incremental")
         data_obj.insert(
-            len(data_obj), "build_id", "#1", comment="Build number (or some other identifier)"
+            len(data_obj), "build_id", "1", comment="Build number (or some other identifier)"
         )
         data_obj.insert(
             len(data_obj),
