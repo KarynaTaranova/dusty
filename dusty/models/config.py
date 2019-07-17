@@ -75,7 +75,6 @@ class ConfigModel:
         if isinstance(obj, str):
             if re.match(r"^\$\![a-zA-Z_][a-zA-Z0-9_]*$", obj.strip()) \
                     and obj.strip()[2:] in os.environ:
-                log.debug("Mapping: %s -> %s", obj, os.environ[obj.strip()[2:]])
                 return os.environ[obj.strip()[2:]]
         return obj
 
