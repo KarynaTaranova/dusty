@@ -100,7 +100,6 @@ def parse_findings(data, scanner):
                     if endpoint in endpoints:
                         continue
                     endpoints.append(endpoint)
-                log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
                 # Data
                 finding_data.append({
                     "title": alert["name"],
@@ -120,4 +119,5 @@ def parse_findings(data, scanner):
                 finding.set_meta("severity", object_data["severity"])
                 finding.set_meta("confidence", object_data["confidence"])
                 finding.set_meta("endpoints", object_data["endpoints"])
+                log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
                 scanner.findings.append(finding)
