@@ -45,8 +45,7 @@ class HTMLPresenter:
             )
         raise ValueError("Unsupported item type")
 
-    @staticmethod
-    def _group_findings_by_endpoints(items):
+    def _group_findings_by_endpoints(self, items):
         result = list()
         endpoint_map = dict()
         ungrouped = list()
@@ -73,7 +72,7 @@ class HTMLPresenter:
                     key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
             ):
                 try:
-                    group.findings.append(_item_to_finding(finding))
+                    group.findings.append(self._item_to_finding(finding))
                 except:
                     log.exception("Failed to create finding item")
             result.append(group)
@@ -89,7 +88,7 @@ class HTMLPresenter:
                     key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
             ):
                 try:
-                    group.findings.append(_item_to_finding(finding))
+                    group.findings.append(self._item_to_finding(finding))
                 except:
                     log.exception("Failed to create finding item")
             result.append(group)
