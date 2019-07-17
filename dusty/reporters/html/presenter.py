@@ -48,12 +48,11 @@ class HTMLPresenter:
     def _group_findings_by_endpoints(self, items):
         result = list()
         try:
-            log.debug("Findings: %s", items)
             endpoint_map = dict()
             ungrouped = list()
             # Prepare endpoint mapping
             for item in items:
-                endpoints = item.get("endpoints", None)
+                endpoints = item.get_meta("endpoints", None)
                 if not endpoints:
                     ungrouped.append(item)
                     continue
@@ -95,9 +94,8 @@ class HTMLPresenter:
                         log.exception("Failed to create finding item")
                 result.append(group)
         except:
-            log.exception("Error during grouping")
+            log.exception("Error during findings grouping")
         # Done
-        log.debug("Result: %s", result)
         return result
 
     @property
