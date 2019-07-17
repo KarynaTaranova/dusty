@@ -72,7 +72,7 @@ class ConfigModel:
         if isinstance(obj, list):
             for index, item in enumerate(obj):
                 obj[index] = self._variable_substitution(item)
-        if isinstance(obj, str) and re.match(r"^\@[a-zA-Z_][a-zA-Z0-9_]*$", obj.strip()) \
+        if isinstance(obj, str) and re.match(r"^\&[a-zA-Z_][a-zA-Z0-9_]*$", obj.strip()) \
                 and obj.strip()[1:] in os.environ:
             return os.environ[obj.strip()[1:]]
         return obj
