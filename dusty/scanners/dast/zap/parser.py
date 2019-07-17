@@ -51,15 +51,6 @@ def parse_findings(data, scanner):
                 description.append("\n**Instances:**\n")
                 description.append("| URI | Method | Parameter | Attack | Evidence |")
                 description.append("| --- | ------ | --------- | ------ | -------- |")
-            for item in alert["instances"]:
-                description.append("| {} |".format(" | ".join([
-                    html.escape(markdown.markdown_table_escape(item.get("uri", "-"))),
-                    html.escape(markdown.markdown_table_escape(item.get("method", "-"))),
-                    html.escape(markdown.markdown_table_escape(item.get("param", "-"))),
-                    html.escape(markdown.markdown_table_escape(item.get("attack", "-"))),
-                    html.escape(markdown.markdown_table_escape(item.get("evidence", "-")))
-                ])))
-            description = "\n".join(description)
             # Prepare results
             finding_data = list()
             if scanner.config.get("split_by_endpoint", False):
@@ -76,7 +67,14 @@ def parse_findings(data, scanner):
                 for endpoint in endpoints:
                     finding_data.append({
                         "title": f'{alert["name"]} on {endpoint.raw}',
-                        "description": description,
+                        "description": "\n".join(description + ["| {} |".format(" | ".join([
+                            html.escape(markdown.markdown_table_escape(item.get("uri", "-"))),
+                            html.escape(markdown.markdown_table_escape(item.get("method", "-"))),
+                            html.escape(markdown.markdown_table_escape(item.get("param", "-"))),
+                            html.escape(markdown.markdown_table_escape(item.get("attack", "-"))),
+                            html.escape(markdown.markdown_table_escape(item.get("evidence", "-")))
+                            ])) for item in alert["instances"] \
+                                if item.get("uri", None) == endpoint.raw]),
                         "tool": scanner.get_name(),
                         "severity": constants.ZAP_SEVERITIES[alert["riskcode"]],
                         "confidence": constants.ZAP_CONFIDENCES[alert["confidence"]],
@@ -84,6 +82,15 @@ def parse_findings(data, scanner):
                     })
             # Make one finding object if needed/requested
             if not finding_data:
+                # Extend description
+                for item in alert["instances"]:
+                    description.append("| {} |".format(" | ".join([
+                        html.escape(markdown.markdown_table_escape(item.get("uri", "-"))),
+                        html.escape(markdown.markdown_table_escape(item.get("method", "-"))),
+                        html.escape(markdown.markdown_table_escape(item.get("param", "-"))),
+                        html.escape(markdown.markdown_table_escape(item.get("attack", "-"))),
+                        html.escape(markdown.markdown_table_escape(item.get("evidence", "-")))
+                    ])))
                 # Endpoints (for backwards compatibility)
                 endpoints = list()
                 for item in alert["instances"]:
@@ -97,7 +104,7 @@ def parse_findings(data, scanner):
                 # Data
                 finding_data.append({
                     "title": alert["name"],
-                    "description": description,
+                    "description": "\n".join(description),
                     "tool": scanner.get_name(),
                     "severity": constants.ZAP_SEVERITIES[alert["riskcode"]],
                     "confidence": constants.ZAP_CONFIDENCES[alert["confidence"]],
