@@ -46,53 +46,56 @@ class HTMLPresenter:
         raise ValueError("Unsupported item type")
 
     def _group_findings_by_endpoints(self, items):
-        log.debug("Findings: %s", items)
         result = list()
-        endpoint_map = dict()
-        ungrouped = list()
-        # Prepare endpoint mapping
-        for item in items:
-            endpoints = item.get("endpoints", None)
-            if not endpoints:
-                ungrouped.append(item)
-                continue
-            for endpoint in endpoints:
-                if endpoint not in endpoint_map:
-                    endpoint_map[endpoint] = list()
-                endpoint_map[endpoint].append(item)
-        # Make HTMLReportFinding instances
-        for endpoint in sorted(endpoint_map.keys(), key=lambda item: item.raw):
-            group = HTMLReportFinding(
-                tool="",
-                title=f'Findings on {endpoint.raw}',
-                severity="",
-                description=""
-            )
-            for finding in sorted(
-                    endpoint_map[endpoint],
-                    key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
-            ):
-                try:
-                    group.findings.append(self._item_to_finding(finding))
-                except:
-                    log.exception("Failed to create finding item")
-            result.append(group)
-        if ungrouped:
-            group = HTMLReportFinding(
-                tool="",
-                title="Findings with no endpoint",
-                severity="",
-                description=""
-            )
-            for finding in sorted(
-                    ungrouped,
-                    key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
-            ):
-                try:
-                    group.findings.append(self._item_to_finding(finding))
-                except:
-                    log.exception("Failed to create finding item")
-            result.append(group)
+        try:
+            log.debug("Findings: %s", items)
+            endpoint_map = dict()
+            ungrouped = list()
+            # Prepare endpoint mapping
+            for item in items:
+                endpoints = item.get("endpoints", None)
+                if not endpoints:
+                    ungrouped.append(item)
+                    continue
+                for endpoint in endpoints:
+                    if endpoint not in endpoint_map:
+                        endpoint_map[endpoint] = list()
+                    endpoint_map[endpoint].append(item)
+            # Make HTMLReportFinding instances
+            for endpoint in sorted(endpoint_map.keys(), key=lambda item: item.raw):
+                group = HTMLReportFinding(
+                    tool="",
+                    title=f'Findings on {endpoint.raw}',
+                    severity="",
+                    description=""
+                )
+                for finding in sorted(
+                        endpoint_map[endpoint],
+                        key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
+                ):
+                    try:
+                        group.findings.append(self._item_to_finding(finding))
+                    except:
+                        log.exception("Failed to create finding item")
+                result.append(group)
+            if ungrouped:
+                group = HTMLReportFinding(
+                    tool="",
+                    title="Findings with no endpoint",
+                    severity="",
+                    description=""
+                )
+                for finding in sorted(
+                        ungrouped,
+                        key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title)
+                ):
+                    try:
+                        group.findings.append(self._item_to_finding(finding))
+                    except:
+                        log.exception("Failed to create finding item")
+                result.append(group)
+        except:
+            log.exception("Error during grouping")
         # Done
         log.debug("Result: %s", result)
         return result
