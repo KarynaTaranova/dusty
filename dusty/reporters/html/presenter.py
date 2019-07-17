@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,R0903
+# pylint: disable=I0011,R0903,W0702
 
 #   Copyright 2019 getcarrier.io
 #
@@ -22,7 +22,7 @@
 
 from dusty.models.finding import DastFinding
 from dusty.constants import SEVERITIES
-from dusty.tools import markdown
+from dusty.tools import markdown, log
 
 from .models import HTMLReportMeta, HTMLReportAlert, HTMLReportFinding, HTMLReportError
 
@@ -30,8 +30,9 @@ from .models import HTMLReportMeta, HTMLReportAlert, HTMLReportFinding, HTMLRepo
 class HTMLPresenter:
     """ HTML presenter """
 
-    def __init__(self, context):
+    def __init__(self, context, config):
         self.context = context
+        self.config = config
 
     @staticmethod
     def _item_to_finding(item):
@@ -152,7 +153,10 @@ class HTMLPresenter:
             if item.get_meta("information_finding", False) or \
                     item.get_meta("false_positive_finding", False):
                 continue
-            result.append(self._item_to_finding(item))
+            try:
+                result.append(self._item_to_finding(item))
+            except:
+                log.exception("Failed to create finding item")
         result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
         return result
 
@@ -163,7 +167,10 @@ class HTMLPresenter:
         for item in self.context.findings:
             if item.get_meta("information_finding", False) and \
                     not item.get_meta("false_positive_finding", False):
-                result.append(self._item_to_finding(item))
+                try:
+                    result.append(self._item_to_finding(item))
+                except:
+                    log.exception("Failed to create finding item")
         result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
         return result
 
@@ -173,7 +180,10 @@ class HTMLPresenter:
         result = list()
         for item in self.context.findings:
             if item.get_meta("false_positive_finding", False):
-                result.append(self._item_to_finding(item))
+                try:
+                    result.append(self._item_to_finding(item))
+                except:
+                    log.exception("Failed to create finding item")
         result.sort(key=lambda item: (SEVERITIES.index(item.severity), item.tool, item.title))
         return result
 

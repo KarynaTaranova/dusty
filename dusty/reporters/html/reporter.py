@@ -54,7 +54,7 @@ class Reporter(DependentModuleModel, ReporterModel):
             autoescape=select_autoescape(["html", "xml"])
         )
         template = environment.get_template("report.html")
-        data = template.render(presenter=HTMLPresenter(self.context))
+        data = template.render(presenter=HTMLPresenter(self.context, self.config))
         with open(file, "w") as report:
             report.write(data)
         self.set_meta("report_file", file)
