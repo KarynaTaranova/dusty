@@ -183,7 +183,7 @@ class QualysHelper:
         obj = dot(response.json())
         return obj.ServiceResponse.data[0].WebApp.id
 
-    def create_selenium_auth_record(self, name, script):
+    def create_selenium_auth_record(self, name, script, regex):
         """ Create selenium auth record """
         response = self._request(
             "/qps/rest/3.0/create/was/webappauthrecord",
@@ -197,7 +197,7 @@ class QualysHelper:
                                 "seleniumScript": {
                                     "name": "seleniumScriptOK",
                                     "data": script,
-                                    "regex": "selenium"
+                                    "regex": regex
                                 }
                             }
                         }

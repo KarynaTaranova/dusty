@@ -87,7 +87,10 @@ class Scanner(DependentModuleModel, ScannerModel):
                 self.config.get("auth_password", ""),
                 self.config.get("target")
             )
-            auth_id = helper.create_selenium_auth_record(auth_name, auth_data)
+            auth_id = helper.create_selenium_auth_record(
+                auth_name, auth_data,
+                self.config.get("logged_in_indicator", "selenium")
+            )
             sleep(sleep_interval)
             helper.add_auth_record_to_webapp(webapp_id, project_name, auth_id)
         # Start scan
@@ -267,6 +270,10 @@ class Scanner(DependentModuleModel, ScannerModel):
             for key in ["command", "target", "value"]:
                 command_obj.insert(len(command_obj), key, command[key])
             script_obj.append(command_obj)
+        data_obj.insert(
+            len(data_obj), "logged_in_indicator", "Logout",
+            comment="(optional) Response regex that is always present for authenticated user"
+        )
         data_obj.insert(
             len(data_obj), "sleep_interval", 5,
             comment="(optional) Seconds to sleep after creating new resource"
