@@ -29,3 +29,18 @@ class LastUpdatedOrderedDict(OrderedDict):
     def __setitem__(self, key, value):
         super().__setitem__(key, value)
         super().move_to_end(key)
+
+
+def recursive_merge(dict_a, dict_b):
+    """ Merge dictionaries recursively """
+    result = dict()
+    for key in set(list(dict_a.keys()) + list(dict_b.keys())):
+        if key not in dict_a:
+            result[key] = dict_b[key]
+        elif key not in dict_b:
+            result[key] = dict_a[key]
+        elif isinstance(dict_a[key], dict) and isinstance(dict_b[key], dict):
+            result[key] = recursive_merge(dict_a[key], dict_b[key])
+        else:
+            result[key] = dict_b[key]
+    return result

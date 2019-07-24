@@ -26,6 +26,7 @@ import yaml
 
 from ruamel.yaml.comments import CommentedMap
 
+from dusty.tools.dict import recursive_merge
 from dusty.tools import log
 from dusty import constants
 
@@ -44,7 +45,8 @@ class ConfigModel:
         config = self._load_config(config_variable, config_file)
         if not self._validate_config_base(config):
             raise ValueError("Invalid config")
-        self.context.config = config["suites"].get(suite)
+        self.context.config = recursive_merge(config["global"], config["suites"].get(suite))
+        log.debug("Resulting context config: %s", self.context.config)
         log.info("Loaded %s suite configuration", suite)
 
     def _load_config(self, config_variable, config_file):
@@ -82,6 +84,8 @@ class ConfigModel:
         if config.get(constants.CONFIG_VERSION_KEY, 0) != constants.CURRENT_CONFIG_VERSION:
             log.error("Invalid config version")
             return False
+        if "global" not in config:
+            config["global"] = dict()
         if "suites" not in config:
             log.error("Suites are not defined")
             return False
