@@ -21,6 +21,7 @@
 """
 
 import os
+import signal
 import pkgutil
 import argparse
 import importlib
@@ -73,6 +74,8 @@ def main():
     # Display welcome message
     log.info(f"Dusty {pkg_resources.require('dusty')[0].version} is starting")
     log.debug("Loaded commands: {}".format(", ".join(list(commands.keys()))))
+    # Install interrupt signal handler
+    signal.signal(signal.SIGINT, interrupt_handler)
     # Run selected command
     try:
         commands[args.command].execute(args)
@@ -81,3 +84,9 @@ def main():
         os._exit(1)  # pylint: disable=W0212
     # Display bye-bye message
     log.info("All done. Have a nice day")
+
+
+def interrupt_handler(signal_, frame):  # pylint: disable=W0613
+    """ Handle interrupt signals """
+    log.error("Got interrupt signal. Terminating")
+    os._exit(1)  # pylint: disable=W0212
