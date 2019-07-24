@@ -53,6 +53,19 @@ class Reporter(DependentModuleModel, ReporterModel):
             f"{self.context.get_meta('environment_name', 'unknown')}-" \
             f"{self.context.get_meta('testing_type', 'AST')}"
         test_cases = list()
+        # Summary
+        summary_case = TestCase(
+            f"Security tests has been COMPLETED",
+            classname="Carrier Dusty"
+        )
+        summary_case.add_error_info(
+            message=\
+                f"Total findings (with false positives and info): {len(self.context.findings)}. " \
+                f"Total scan errors: {len(self.context.errors)}.",
+            error_type=SEVERITIES[-1]
+        )
+        test_cases.append(summary_case)
+        # Findings
         for item in self.context.findings:
             if item.get_meta("information_finding", False) or \
                     item.get_meta("false_positive_finding", False):
