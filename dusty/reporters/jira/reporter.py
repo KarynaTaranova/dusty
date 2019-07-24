@@ -86,9 +86,11 @@ class Reporter(DependentModuleModel, ReporterModel):
                     "description": item.description.replace("\\.", "."),
                     "issue_hash": item.get_meta("issue_hash", "<no_hash>"),
                     "additional_labels": [
-                        item.get_meta("tool", ""),
-                        self.context.get_meta("testing_type", "AST"),
-                        item.get_meta("severity", SEVERITIES[-1])
+                        label.replace(" ", "_") for label in [
+                            item.get_meta("tool", "scanner"),
+                            self.context.get_meta("testing_type", "AST"),
+                            item.get_meta("severity", SEVERITIES[-1])
+                        ]
                     ],
                     "raw": item
                 })
