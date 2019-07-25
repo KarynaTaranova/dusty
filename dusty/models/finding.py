@@ -24,7 +24,27 @@ from dusty.models.meta import MetaModel
 
 
 class DastFinding(MetaModel):
-    """ DAST Finding """
+    """
+        DAST Finding
+
+        - Fields:
+        title - finding title (simple text)
+        description - markdown-formatted (and escaped) item description
+
+        - Common metadata:
+        severity - finding severity level
+        tool - scanner name
+        endpoints - list of parsed endpoints (URLs)
+        confidence - scanner confidence
+
+        - DAST (legacy) metadata:
+        legacy.images - screenshots for ReportPortal attachments
+
+        - Metadata injected by processors:
+        issue_hash - (legacy) issue hash string
+        false_positive_finding - True if issue hash is in fpconfig
+        information_finding - True if finding is filtered by min_severity_filter
+    """
 
     def __init__(self, title, description):
         super().__init__()
@@ -33,4 +53,31 @@ class DastFinding(MetaModel):
 
 
 class SastFinding(MetaModel):
-    """ SAST Finding """
+    """
+        SAST Finding
+
+        - Fields:
+        title - finding title (simple text)
+        description - list of markdown-formatted (and escaped) item description chunks/steps/items
+
+        - Common metadata:
+        severity - finding severity level
+        tool - scanner name
+        endpoints - list of endpoints (filenames)
+        confidence - scanner confidence
+
+        - SAST (legacy) metadata:
+        legacy.file - file name/path
+        legacy.line - file line number
+        legacy.cwe - CWE-ID
+
+        - Metadata injected by processors:
+        issue_hash - (legacy) issue hash string
+        false_positive_finding - True if issue hash is in fpconfig
+        information_finding - True if finding is filtered by min_severity_filter
+    """
+
+    def __init__(self, title, description):
+        super().__init__()
+        self.title = title
+        self.description = description
