@@ -50,17 +50,13 @@ class Processor(DependentModuleModel, ProcessorModel):
                     f'{title}_None_None__'.strip().encode('utf-8')
                 ).hexdigest()
             if isinstance(item, SastFinding):
-                # Legacy version:
-                # def finding_error_string(self) -> str:
-                #     endpoint_str = ""
-                #     for e in self.endpoints:
-                #         endpoint_str += str(e)
-                #     return f'{self.finding["title"]}_' \
-                #            f'{self.finding["static_finding_details"]["cwe"]}_' \
-                #            f'{self.finding["static_finding_details"]["line_number"]}_' \
-                #            f'{self.finding["static_finding_details"]["file_name"]}_' \
-                #            f'{endpoint_str}'
-                pass
+                title = re.sub('[^A-Za-zА-Яа-я0-9//\\\.\- _]+', '', item.title)  # pylint: disable=W1401
+                cwe = item.get_meta("legacy.cwe", "None")
+                line = item.get_meta("legacy.line", "None")
+                file = item.get_meta("legacy.file", "")
+                issue_hash = hashlib.sha256(
+                    f'{title}_{cwe}_{line}_{file}_'.strip().encode('utf-8')
+                ).hexdigest()
             # Inject issue hash
             if issue_hash:
                 item.set_meta("issue_hash", issue_hash)

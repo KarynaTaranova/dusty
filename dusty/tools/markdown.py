@@ -26,7 +26,7 @@ import inscriptis
 
 def markdown_to_html(text):
     """ Convert markdown to HTML """
-    return markdown2.markdown(text, extras=["tables", "fenced-code-blocks", "wiki-tables"])
+    return markdown2.markdown(text, extras=["tables", "fenced-code-blocks"])
 
 
 def markdown_escape(string):
