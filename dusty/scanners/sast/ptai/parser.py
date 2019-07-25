@@ -20,16 +20,10 @@
     PT AI HTML parser
 """
 
-# import base64
-# import hashlib
-
-# from urllib.parse import urlparse
-# from lxml import etree
-
-# from dusty.tools import log, url, markdown
-# from dusty.models.finding import DastFinding
+from collections import namedtuple
 
 from dusty.tools import log
+from dusty.models.finding import SastFinding
 
 from .legacy import PTAIScanParser
 from . import constants
@@ -37,8 +31,21 @@ from . import constants
 
 def parse_findings(output_file, scanner):  # pylint: disable=E,W,R,C
     """ Parse findings (code from dusty 1.0) """
+    # Parse HTML report using legacy parser
     filtered_statuses = scanner.config.get(
         "filtered_statuses", constants.PTAI_DEFAULT_FILTERED_STATUSES
     )
+    if isinstance(filtered_statuses, str):
+        filtered_statuses = [item.strip() for item in filtered_statuses.split(",")]
     findings = PTAIScanParser(output_file, filtered_statuses).items
-    log.debug("Findings: %s", findings)
+    for item in findings:
+        finding = SastFinding(
+            title=item["title"],
+            description=[item["description"]] + item["steps_to_reproduce"]
+        )
+        finding.set_meta("tool", scanner.get_name())
+        finding.set_meta("severity", constants.PTAI_SEVERITIES[item["severity"]])
+        finding.set_meta("legacy.file", item["file_path"])
+        finding.set_meta("endpoints", [namedtuple("Endpoint", ["raw"])(raw=item["file_path"])])
+        log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
+        scanner.findings.append(finding)

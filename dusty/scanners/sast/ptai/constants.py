@@ -21,3 +21,10 @@
 
 
 PTAI_DEFAULT_FILTERED_STATUSES = ["discarded", "suspected"]
+
+PTAI_SEVERITIES = {
+    "Potential": "Info",
+    "Low": "Low",
+    "Medium": "Medium",
+    "High": "High"
+}
