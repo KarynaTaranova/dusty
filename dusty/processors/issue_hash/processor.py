@@ -60,7 +60,10 @@ class Processor(DependentModuleModel, ProcessorModel):
             # Inject issue hash
             if issue_hash:
                 item.set_meta("issue_hash", issue_hash)
-                item.description += f"\n\n**Issue Hash:** {issue_hash}"
+                if isinstance(item, DastFinding):
+                    item.description += f"\n\n**Issue Hash:** {issue_hash}"
+                if isinstance(item, SastFinding):
+                    item.description.append(f"\n\n**Issue Hash:** {issue_hash}")
 
     @staticmethod
     def get_name():
