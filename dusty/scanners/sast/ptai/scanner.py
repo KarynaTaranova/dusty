@@ -21,12 +21,14 @@
 """
 
 import os
+import traceback
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
+from dusty.models.error import Error
 
-# from .parser import parse_findings
+from .parser import parse_findings
 
 
 class Scanner(DependentModuleModel, ScannerModel):
@@ -41,11 +43,27 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def execute(self):
         """ Run the scanner """
-        log.debug(
-            "code = %s, isdir = %s",
-            self.config.get("code"),
-            os.path.isdir(self.config.get("code"))
-        )
+        path = self.config.get("code")
+        # Collect reports to parse
+        reports = list()
+        if os.path.isdir(path):
+            for root, _, files in os.walk(path):
+                for name in files:
+                    reports.append(os.path.join(root, name))
+        else:
+            reports.append(path)
+        # Parse reports
+        for report in reports:
+            try:
+                parse_findings(report, self)
+            except:
+                error = f"Failed to parse PT AI report {report}"
+                log.exception(error)
+                self.errors.append(Error(
+                    tool=self.get_name(),
+                    error=error,
+                    details=f"```\n{traceback.format_exc()}\n```"
+                ))
 
     @staticmethod
     def fill_config(data_obj):
@@ -54,6 +72,11 @@ class Scanner(DependentModuleModel, ScannerModel):
             len(data_obj),
             "code", "/path/to/code",
             comment="PT AI report HTML file or folder with PT AI HTML reports"
+        )
+        data_obj.insert(
+            len(data_obj),
+            "filtered_statuses", "discarded, suspected",
+            comment="(optional) finding statuses to filter-out"
         )
 
     @staticmethod

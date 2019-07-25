@@ -17,7 +17,7 @@
 #   limitations under the License.
 
 """
-    w3af XML parser
+    PT AI HTML parser
 """
 
 # import base64
@@ -29,8 +29,16 @@
 # from dusty.tools import log, url, markdown
 # from dusty.models.finding import DastFinding
 
-# from . import constants
+from dusty.tools import log
+
+from .legacy import PTAIScanParser
+from . import constants
 
 
 def parse_findings(output_file, scanner):  # pylint: disable=E,W,R,C
     """ Parse findings (code from dusty 1.0) """
+    filtered_statuses = scanner.config.get(
+        "filtered_statuses", constants.PTAI_DEFAULT_FILTERED_STATUSES
+    )
+    findings = PTAIScanParser(output_file, filtered_statuses).items
+    log.debug("Findings: %s", findings)
