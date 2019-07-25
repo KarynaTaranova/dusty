@@ -20,7 +20,7 @@
     HTML report presenter
 """
 
-from dusty.models.finding import DastFinding
+from dusty.models.finding import DastFinding, SastFinding
 from dusty.constants import SEVERITIES
 from dusty.tools import markdown, log
 
@@ -42,6 +42,13 @@ class HTMLPresenter:
                 title=item.title,
                 severity=item.get_meta("severity", SEVERITIES[-1]),
                 description=markdown.markdown_to_html(item.description)
+            )
+        if isinstance(item, SastFinding):
+            return HTMLReportFinding(
+                tool=item.get_meta("tool", ""),
+                title=item.title,
+                severity=item.get_meta("severity", SEVERITIES[-1]),
+                description=markdown.markdown_to_html("\n\n".join(item.description))
             )
         raise ValueError("Unsupported item type")
 
