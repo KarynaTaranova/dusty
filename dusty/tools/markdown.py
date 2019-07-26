@@ -55,7 +55,7 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
             f'{item.group("data")}\n' \
             "{panel}\n\n"
     text = re.sub(
-        r'\n\n(?P<data>\|\|(.*?[\n]*?)+|)\n\n',
+        r'\n\n(?P<data>\|\|(.*?[\n]*?)+\|)\n\n',
         _table_panel_handler,
         text,
         flags=re.MULTILINE
