@@ -35,7 +35,7 @@ def markdown_to_html(text):
 
 
 def _markdown2_preprocess(self, text):  # pylint: disable=W0613
-    print(">>> Text before: ", text)
+    print(">>> Text before: ", repr(text))
     # Handle {code}
     def _code_handler(item):
         return \
@@ -50,23 +50,20 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
     )
     text = text.replace("{code}", "```\n{code}")
     # Handle || tables |
-    def _table_header_handler(item):
+    def _table_handler(item):
         return \
             f'|| **{item.group("name")}** || || **{item.group("value")}** ||'
     text = re.sub(
         r'\|\| \*(?P<name>.*?)\* \| \*(?P<value>.*?)\* \|',
-        _table_header_handler,
+        _table_handler,
         text
     )
-    def _table_line_handler(item):
-        return \
-            f'|| **{item.group("name")}** || || {item.group("value")} ||'
     text = re.sub(
         r'\|\| \*(?P<name>.*?)\* \| (?P<value>.*?) \|',
-        _table_line_handler,
+        _table_handler,
         text
     )
-    print(">>> Text after: ", text)
+    print(">>> Text after: ", repr(text)
     return text
 
 
