@@ -27,10 +27,28 @@ import inscriptis
 
 def markdown_to_html(text):
     """ Convert markdown to HTML """
-    # Install markdown2 hook to support "{panel}", "{code}" and "|| tables |"
+    # Install markdown2 hooks to support "{panel}", "{code}" and "|| tables |"
+    markdown2.Markdown.preprocess = _markdown2_preprocess
     markdown2.Markdown.postprocess = _markdown2_postprocess
     # Run markdown2
     return markdown2.markdown(text, extras=["tables", "fenced-code-blocks"])
+
+
+def _markdown2_preprocess(self, text):  # pylint: disable=W0613
+    # Handle {code}
+    def _code_handler(item):
+        return \
+            "{code:title=" + \
+            item.group("title") + \
+            "|" + item.group("style") + \
+            "}\n```\n"
+    text = re.sub(
+        r'{code:title=(?P<title>.*?)\|(?P<style>.*?)}',
+        _code_handler,
+        text
+    )
+    text = text.replace("{code}", "\n```\n{code}")
+    return text
 
 
 def _markdown2_postprocess(self, text):  # pylint: disable=W0613
@@ -49,6 +67,22 @@ def _markdown2_postprocess(self, text):  # pylint: disable=W0613
         "</div></div>",
         text
     )
+    # Handle {code}
+    def _code_handler(item):
+        return \
+            f'<div class="card">' \
+            f'<div class="card-header">{item.group("title")}</div><div class="card-body">'
+    text = re.sub(
+        r'(\<p\>)?\s*{code:title=(?P<title>.*?)\|(?P<style>.*?)}\s*(\<\/p\>)?',
+        _code_handler,
+        text
+    )
+    text = re.sub(
+        r'(\<p\>)?\s*{code}\s*(\<\/p\>)?',
+        "</div></div>",
+        text
+    )
+    # Return result
     return text
 
 
