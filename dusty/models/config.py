@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,R0903
+# pylint: disable=I0011,R0903,R0201
 
 #   Copyright 2019 getcarrier.io
 #
@@ -41,13 +41,14 @@ class ConfigModel:
 
     def load(self, config_variable, config_file, suite):
         """ Load and parse config """
-        self.context.suite = suite
         config = self._load_config(config_variable, config_file)
-        if not self._validate_config_base(config):
+        if not self._validate_config_base(config, suite):
             raise ValueError("Invalid config")
-        self.context.config = recursive_merge(config["global"], config["suites"].get(suite))
+        context_config = self._process_depots(config, suite)
+        self.context.suite = suite
+        self.context.config = context_config
         log.debug("Resulting context config: %s", self.context.config)
-        log.info("Loaded %s suite configuration", suite)
+        log.info("Loaded %s suite configuration", self.context.suite)
 
     def _load_config(self, config_variable, config_file):
         config_data = os.environ.get(config_variable, None)
@@ -80,7 +81,20 @@ class ConfigModel:
                 return os.environ[obj.strip()[2:]]
         return obj
 
-    def _validate_config_base(self, config):
+    def _process_depots(self, config, suite):
+        """ Process depots: resolve Vault variables and merge config from MinIO """
+        context_config = recursive_merge(config["global"], config["suites"].get(suite))
+        # HashiCorp Vault
+        if context_config.get("depots", dict()).get("vault", None):
+            vault_config = context_config["depots"]["vault"]
+            log.debug("Vault config: %s", vault_config)
+        # MinIO
+        if context_config.get("depots", dict()).get("minio", None):
+            minio_config = context_config["depots"]["minio"]
+            log.debug("MinIO config: %s", minio_config)
+        return context_config
+
+    def _validate_config_base(self, config, suite):
         if config.get(constants.CONFIG_VERSION_KEY, 0) != constants.CURRENT_CONFIG_VERSION:
             log.error("Invalid config version")
             return False
@@ -89,12 +103,12 @@ class ConfigModel:
         if "suites" not in config:
             log.error("Suites are not defined")
             return False
-        if not config["suites"].get(self.context.suite, None):
-            log.error("Suite is not defined: %s", self.context.suite)
+        if not config["suites"].get(suite, None):
+            log.error("Suite is not defined: %s", suite)
             log.info("Available suites: %s", ", ".join(list(config["suites"])))
             return False
-        if "settings" not in config["suites"][self.context.suite]:
-            config["suites"][self.context.suite]["settings"] = dict()
+        if "settings" not in config["suites"][suite]:
+            config["suites"][suite]["settings"] = dict()
         return True
 
     def list_suites(self, config_variable, config_file):
