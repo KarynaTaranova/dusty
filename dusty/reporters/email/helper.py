@@ -79,14 +79,19 @@ class EmailHelper:
         if attachments:
             if isinstance(attachments, str):
                 attachments = [attachments]
-            for filename in attachments:
-                with open(filename, "rb") as file:
+            for item in attachments:
+                if isinstance(item, tuple):
+                    filepath, filename = item
+                else:
+                    filepath = item
+                    filename = item.split('/')[-1]
+                with open(filepath, "rb") as file:
                     part = MIMEBase("application", "octet-stream")
                     part.set_payload(file.read())
                 encoders.encode_base64(part)
                 part.add_header(
                     "Content-Disposition",
-                    f"attachment; filename= {filename.split('/')[-1]}"
+                    f"attachment; filename= {filename}"
                 )
                 message.attach(part)
         try:

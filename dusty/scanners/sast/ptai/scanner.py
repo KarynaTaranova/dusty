@@ -52,6 +52,16 @@ class Scanner(DependentModuleModel, ScannerModel):
                     reports.append(os.path.join(root, name))
         else:
             reports.append(path)
+            if self.config.get("mail_report", True):
+                if self.config.get("rename_mail_attachment", True):
+                    filename = self.config.get(
+                        "rename_pattern",
+                        "{project_name}_{testing_type}_{scan_type}_{build_id}.html"
+                    ).format(**self.context.meta)
+                    attachment = (path, filename)
+                    self.set_meta("report_file", attachment)
+                else:
+                    self.set_meta("report_file", path)
         # Parse reports
         for report in reports:
             try:
@@ -77,6 +87,21 @@ class Scanner(DependentModuleModel, ScannerModel):
             len(data_obj),
             "filtered_statuses", "discarded, suspected",
             comment="(optional) finding statuses to filter-out"
+        )
+        data_obj.insert(
+            len(data_obj),
+            "mail_report", True,
+            comment="(optional) attach report to email (if email reporter is enabled)"
+        )
+        data_obj.insert(
+            len(data_obj),
+            "rename_mail_attachment", True,
+            comment="(optional) rename email attachment"
+        )
+        data_obj.insert(
+            len(data_obj),
+            "rename_pattern", "{project_name}_{testing_type}_{scan_type}_{build_id}.html",
+            comment="(optional) pattern to rename email attachment to"
         )
 
     @staticmethod
