@@ -47,6 +47,7 @@ def resolve_name_order(names, package_template, module_name):
     for module in modules:
         result.append(module_name_map[module])
     result.extend(unknown_modules)
+    log.debug("Order: %s", str(result))
     return result
 
 def resolve_depencies(modules_ordered_dict):
@@ -60,7 +61,6 @@ def resolve_depencies(modules_ordered_dict):
         except IndexError:
             module_name_map[modules_ordered_dict[item].__module__.split(".")[-2]] = \
                 modules_ordered_dict[item]
-    log.debug("Modules: %s", str(list(module_name_map.keys())))
     # Check required depencies
     for module_name in module_name_map:
         for dependency in module_name_map[module_name].depends_on():
@@ -74,7 +74,6 @@ def resolve_depencies(modules_ordered_dict):
         if module_name not in module_order:
             _walk_module_depencies(module_name, module_name_map, module_order, visited_modules)
     # Re-order modules
-    log.debug("Order: %s", str(module_order))
     for module_name in module_order:
         modules_ordered_dict.move_to_end(module_name_map[module_name].get_name())
 
