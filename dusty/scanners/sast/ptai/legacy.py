@@ -180,7 +180,7 @@ class PTAIScanParser(object):
                     if param not in function_info_values:
                         # value = value.replace('\n                       ', ': ')\
                         #         .replace('|', '&#124; ').replace('{', '\{').replace('}', '\}')
-                        value = markdown_escape(value).replace("\n", "<br />")
+                        value = markdown_escape(value).replace("\n", " ")
                         str_line = '  \n  \n|| *{}* | *{}* |'.format(param, value)
                         function_info_values_str = str_line
                 for param, value in function_info_values.items():
