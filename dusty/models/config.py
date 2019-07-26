@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,R0903,R0201
+# pylint: disable=I0011,R0903,R0201,E0401,W0702
 
 #   Copyright 2019 getcarrier.io
 #
@@ -23,6 +23,7 @@
 import os
 import re
 import yaml
+import hvac
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -84,15 +85,44 @@ class ConfigModel:
     def _process_depots(self, config, suite):
         """ Process depots: resolve Vault variables and merge config from MinIO """
         context_config = recursive_merge(config["global"], config["suites"].get(suite))
-        # HashiCorp Vault
+        # Make HashiCorp Vault client
+        vault_client = None
         if context_config["settings"].get("depots", dict()).get("vault", None):
             vault_config = context_config["settings"]["depots"]["vault"]
-            log.debug("Vault config: %s", vault_config)
+            vault_client = self._create_vault_client(vault_config)
+        log.debug("Vault client: %s", vault_client)
         # MinIO
         if context_config["settings"].get("depots", dict()).get("minio", None):
             minio_config = context_config["settings"]["depots"]["minio"]
             log.debug("MinIO config: %s", minio_config)
         return context_config
+
+    def _create_vault_client(self, vault_config):
+        try:
+            if "url" not in vault_config:
+                log.error("No Vault URL in config")
+                return None
+            client = hvac.Client(
+                url=vault_config["url"],
+                verify=vault_config.get("ssl_verify", False)
+            )
+            if "auth_token" in vault_config:
+                client.token = vault_config["auth_token"]
+            if "auth_username" in vault_config:
+                client.auth_userpass(
+                    vault_config.get("auth_username"), vault_config.get("auth_password", "")
+                )
+            if "auth_role_id" in vault_config:
+                client.auth_approle(
+                    vault_config.get("auth_role_id"), vault_config.get("auth_secret_id", "")
+                )
+            if not client.is_authenticated():
+                log.error("Vault authentication failed")
+                return None
+            return client
+        except:
+            log.exception("Error during Vault client creation")
+            return None
 
     def _validate_config_base(self, config, suite):
         if config.get(constants.CONFIG_VERSION_KEY, 0) != constants.CURRENT_CONFIG_VERSION:
@@ -143,4 +173,32 @@ class ConfigModel:
         )
         depots_obj.insert(
             len(depots_obj), "minio", CommentedMap(), comment="MinIO depot"
+        )
+        vault_obj = depots_obj["vault"]
+        vault_obj.insert(
+            len(vault_obj), "url", "https://vault.example.com:8200", comment="Vault URL"
+        )
+        vault_obj.insert(
+            len(vault_obj), "ssl_verify", True,
+            comment="(optional) Verify SSL certificate: True, False or path to CA bundle"
+        )
+        vault_obj.insert(
+            len(vault_obj), "auth_token", "VAULT_TOKEN_VALUE",
+            comment="(optional) Auth via token"
+        )
+        vault_obj.insert(
+            len(vault_obj), "auth_username", "vault_username_value",
+            comment="(optional) Auth via username/password"
+        )
+        vault_obj.insert(
+            len(vault_obj), "auth_password", "vault_password_value",
+            comment="(optional) Auth via username/password"
+        )
+        vault_obj.insert(
+            len(vault_obj), "auth_role_id", "vault_approle_id_value",
+            comment="(optional) Auth via approle id/secret id"
+        )
+        vault_obj.insert(
+            len(vault_obj), "auth_secret_id", "vault_approle_secret_id_value",
+            comment="(optional) Auth via approle id/secret id"
         )
