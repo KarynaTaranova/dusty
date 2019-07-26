@@ -50,7 +50,7 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
     text = text.replace("{code}", "```\n{code}")
     # Handle || tables |
     def _table_handler(item):
-        return f'**{item.group("name")}**: {item.group("value")}'
+        return f'**{item.group("name")}**: {item.group("value")}\n\n'
     text = re.sub(
         r'\s*\|\|\s*\*(?P<name>.*?)\*\s*\|\s*\*(?P<value>.*?)\*\s*\|\s*',
         _table_handler,
