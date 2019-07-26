@@ -23,6 +23,7 @@
 import os
 import re
 from bs4 import BeautifulSoup
+from dusty.tools.markdown import markdown_escape
 from . import constants
 
 
@@ -177,14 +178,16 @@ class PTAIScanParser(object):
                 function_info_values_str = ''
                 for param, value in detail_info_values.items():
                     if param not in function_info_values:
-                        value = value.replace('\n                       ', ': ')\
-                                .replace('|', '&#124; ').replace('{', '\{').replace('}', '\}')
-                        str_line = '  \n  \n|| *{}* | *{}* |'.format(param, value.replace("\n", "<br />"))
+                        # value = value.replace('\n                       ', ': ')\
+                        #         .replace('|', '&#124; ').replace('{', '\{').replace('}', '\}')
+                        value = markdown_escape(value).replace("\n", "<br />")
+                        str_line = '  \n  \n|| *{}* | *{}* |'.format(param, value)
                         function_info_values_str = str_line
                 for param, value in function_info_values.items():
-                    value = value.replace('*', '\*').replace('|', '&#124; ').replace('{', '\{')\
-                        .replace('}', '\}')
-                    str_line = '|| *{}* | {} |'.format(param, value.replace("\n", "<br />"))
+                    # value = value.replace('*', '\*').replace('|', '&#124; ').replace('{', '\{')\
+                    #     .replace('}', '\}')
+                    value = markdown_escape(value).replace("\n", "<br />")
+                    str_line = '|| *{}* | {} |'.format(param, value)
                     str_line = str_line.replace('  ', '')
                     function_info_values_str += '  \n' + str_line
                 function_full_info_str = function_info_values_str + '\n  \n '
