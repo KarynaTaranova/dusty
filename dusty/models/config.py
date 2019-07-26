@@ -90,7 +90,14 @@ class ConfigModel:
         if context_config["settings"].get("depots", dict()).get("vault", None):
             vault_config = context_config["settings"]["depots"]["vault"]
             vault_client = self._create_vault_client(vault_config)
-        log.debug("Vault client: %s", vault_client)
+        # Resolve vault secrets
+        if vault_client:
+            vault_secrets = vault_client.secrets.kv.v2.read_secret_version(
+                path=vault_config.get("secrets_path", "carrier-kv"),
+                mount_point=vault_config.get("secrets_mount_point", "secret")
+            )
+            log.debug(vault_secrets)
+            # context_config =
         # MinIO
         if context_config["settings"].get("depots", dict()).get("minio", None):
             minio_config = context_config["settings"]["depots"]["minio"]
@@ -123,6 +130,21 @@ class ConfigModel:
         except:
             log.exception("Error during Vault client creation")
             return None
+
+    def _vault_substitution(self, obj):
+        """ Allows to use vault secrets inside YAML/JSON config """
+        if isinstance(obj, dict):
+            for key in list(obj.keys()):
+                obj[self._vault_substitution(key)] = \
+                    self._vault_substitution(obj.pop(key))
+        if isinstance(obj, list):
+            for index, item in enumerate(obj):
+                obj[index] = self._vault_substitution(item)
+        if isinstance(obj, str):
+            if re.match(r"^\$\=\S*$", obj.strip()) \
+                    and obj.strip()[2:] in os.environ:
+                return os.environ[obj.strip()[2:]]
+        return obj
 
     def _validate_config_base(self, config, suite):
         if config.get(constants.CONFIG_VERSION_KEY, 0) != constants.CURRENT_CONFIG_VERSION:
@@ -177,6 +199,14 @@ class ConfigModel:
         vault_obj = depots_obj["vault"]
         vault_obj.insert(
             len(vault_obj), "url", "https://vault.example.com:8200", comment="Vault URL"
+        )
+        vault_obj.insert(
+            len(vault_obj), "secrets_path", "carrier-kv",
+            comment="Secrets path"
+        )
+        vault_obj.insert(
+            len(vault_obj), "secrets_mount_point", "secret",
+            comment="(optional) Secrets KV V2 mount point"
         )
         vault_obj.insert(
             len(vault_obj), "ssl_verify", True,
