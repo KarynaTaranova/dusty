@@ -40,12 +40,12 @@ def _markdown2_postprocess(self, text):  # pylint: disable=W0613
             f'<div class="panel panel-default">' \
             f'<div class="panel-heading">{item.group("title")}</div><div class="panel-body">'
     text = re.sub(
-        "(\\<\\p\\>)?\\s*{panel:title=(?P<title>.*?):(?P<style>.*?)}\\s*(\\<\\/\\p\\>)?",
+        r'(\<p\>)?\s*{panel:title=(?P<title>.*?):(?P<style>.*?)}\s*(\<\/p\>)?',
         _panel_handler,
         text
     )
     text = re.sub(
-        "(\\<\\p\\>)?\\s*{panel}\\s*(\\<\\/\\p\\>)?",
+        r'(\<p\>)?\s*{panel}\s*(\<\/p\>)?',
         "</div></div>",
         text
     )
