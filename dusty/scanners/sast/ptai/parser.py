@@ -41,7 +41,9 @@ def parse_findings(output_file, scanner):  # pylint: disable=E,W,R,C
     for item in findings:
         finding = SastFinding(
             title=item["title"],
-            description=[item["description"]] + item["steps_to_reproduce"]
+            description=[
+                item["description"] + f"\n\n**File to review:** {item['file_path']}"
+            ] + item["steps_to_reproduce"]
         )
         finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", constants.PTAI_SEVERITIES[item["severity"]])
