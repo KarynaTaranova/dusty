@@ -107,6 +107,8 @@ class Reporter(DependentModuleModel, ReporterModel):
                         "<pre>", "{code:collapse=true}\n\n"
                     ).replace(
                         "</pre>", "\n\n{code}"
+                    ).replace(
+                        "<br />", "\n"
                     ) for item in item.description
                 ]
                 if len("\n\n".join(description_chunks)) > constants.JIRA_DESCRIPTION_MAX_SIZE:
