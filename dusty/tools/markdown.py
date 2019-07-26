@@ -51,9 +51,9 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
     # Handle || tables |
     def _table_panel_handler(item):
         return \
-            "{panel:title=Instance:}\n" \
+            "\n\n{panel:title=Instance:}\n" \
             f'{item.group("data")}\n' \
-            "{panel}"
+            "{panel}\n\n"
     text = re.sub(
         r'\n\n\n(?P<data>\|\|(.*?[\n]*?)+|)\n\n\n',
         _table_panel_handler,
