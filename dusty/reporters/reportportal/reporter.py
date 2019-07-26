@@ -60,7 +60,8 @@ class Reporter(DependentModuleModel, ReporterModel):
             return
         log.info("Reporting to ReportPortal")
         for item in self.context.findings:
-            if item.get_meta("false_positive_finding", False):
+            if item.get_meta("information_finding", False) or \
+                    item.get_meta("false_positive_finding", False):
                 continue
             if isinstance(item, DastFinding):
                 item_details = markdown.markdown_unescape(item.description)
