@@ -90,14 +90,19 @@ class ConfigModel:
         if context_config["settings"].get("depots", dict()).get("vault", None):
             vault_config = context_config["settings"]["depots"]["vault"]
             vault_client = self._create_vault_client(vault_config)
-        # Resolve vault secrets
+        # Get vault secrets
+        vault_secrets = None
         if vault_client:
-            vault_secrets = vault_client.secrets.kv.v2.read_secret_version(
-                path=vault_config.get("secrets_path", "carrier-kv"),
-                mount_point=vault_config.get("secrets_mount_point", "secret")
-            )
-            log.debug(vault_secrets)
-            # context_config =
+            try:
+                vault_secrets = vault_client.secrets.kv.v2.read_secret_version(
+                    path=vault_config.get("secrets_path", "carrier-kv"),
+                    mount_point=vault_config.get("secrets_mount_point", "secret")
+                ).get("data", dict()).get("data", dict())
+            except:
+                log.exception("Failed to get Vault secrets")
+        # Resolve vault secrets in config
+        if vault_secrets:
+            context_config = self._vault_substitution(context_config, vault_secrets)
         # MinIO
         if context_config["settings"].get("depots", dict()).get("minio", None):
             minio_config = context_config["settings"]["depots"]["minio"]
@@ -131,19 +136,19 @@ class ConfigModel:
             log.exception("Error during Vault client creation")
             return None
 
-    def _vault_substitution(self, obj):
+    def _vault_substitution(self, obj, vault_secrets):
         """ Allows to use vault secrets inside YAML/JSON config """
         if isinstance(obj, dict):
             for key in list(obj.keys()):
-                obj[self._vault_substitution(key)] = \
-                    self._vault_substitution(obj.pop(key))
+                obj[self._vault_substitution(key, vault_secrets)] = \
+                    self._vault_substitution(obj.pop(key), vault_secrets)
         if isinstance(obj, list):
             for index, item in enumerate(obj):
-                obj[index] = self._vault_substitution(item)
+                obj[index] = self._vault_substitution(item, vault_secrets)
         if isinstance(obj, str):
             if re.match(r"^\$\=\S*$", obj.strip()) \
-                    and obj.strip()[2:] in os.environ:
-                return os.environ[obj.strip()[2:]]
+                    and obj.strip()[2:] in vault_secrets:
+                return vault_secrets[obj.strip()[2:]]
         return obj
 
     def _validate_config_base(self, config, suite):
