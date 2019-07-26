@@ -20,13 +20,28 @@
     Markdown tools
 """
 
+import re
 import markdown2
 import inscriptis
 
 
 def markdown_to_html(text):
     """ Convert markdown to HTML """
+    # Install markdown2 hook to support "{panel}", "{code}" and "|| tables |"
+    markdown2.Markdown.preprocess = _markdown2_preprocess
+    # Run markdown2
     return markdown2.markdown(text, extras=["tables", "fenced-code-blocks"])
+
+
+def _markdown2_preprocess(self, text):  # pylint: disable=W0613
+    # Handle {panel}
+    def _panel_handler(item):
+        return \
+            f'<div class="panel panel-default">' \
+            f'<div class="panel-heading">{item.group("title")}</div><div class="panel-body">'
+    text = re.sub("{panel:title=(?P<title>.*?):(?P<style>.*?)}", _panel_handler, text)
+    text = text.replace("{panel}", "</div></div>")
+    return text
 
 
 def markdown_escape(string):
