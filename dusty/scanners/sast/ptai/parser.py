@@ -39,6 +39,7 @@ def parse_findings(output_file, scanner):  # pylint: disable=E,W,R,C
         filtered_statuses = [item.strip() for item in filtered_statuses.split(",")]
     findings = PTAIScanParser(output_file, filtered_statuses).items
     for item in findings:
+        log.debug("Description: %s", item["description"])
         finding = SastFinding(
             title=item["title"],
             description=[
