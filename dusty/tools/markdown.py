@@ -37,8 +37,8 @@ def _markdown2_postprocess(self, text):  # pylint: disable=W0613
     # Handle {panel}
     def _panel_handler(item):
         return \
-            f'<div class="panel panel-default">' \
-            f'<div class="panel-heading">{item.group("title")}</div><div class="panel-body">'
+            f'<div class="card">' \
+            f'<div class="card-header">{item.group("title")}</div><div class="card-body">'
     text = re.sub(
         r'(\<p\>)?\s*{panel:title=(?P<title>.*?):(?P<style>.*?)}\s*(\<\/p\>)?',
         _panel_handler,
