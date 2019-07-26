@@ -85,12 +85,12 @@ class ConfigModel:
         """ Process depots: resolve Vault variables and merge config from MinIO """
         context_config = recursive_merge(config["global"], config["suites"].get(suite))
         # HashiCorp Vault
-        if context_config.get("depots", dict()).get("vault", None):
-            vault_config = context_config["depots"]["vault"]
+        if context_config["settings"].get("depots", dict()).get("vault", None):
+            vault_config = context_config["settings"]["depots"]["vault"]
             log.debug("Vault config: %s", vault_config)
         # MinIO
-        if context_config.get("depots", dict()).get("minio", None):
-            minio_config = context_config["depots"]["minio"]
+        if context_config["settings"].get("depots", dict()).get("minio", None):
+            minio_config = context_config["settings"]["depots"]["minio"]
             log.debug("MinIO config: %s", minio_config)
         return context_config
 
@@ -129,3 +129,18 @@ class ConfigModel:
             len(data_obj), "global", CommentedMap(), comment="Common settings for all suites"
         )
         data_obj.insert(len(data_obj), "suites", CommentedMap(), comment="Test suites")
+        global_obj = data_obj["global"]
+        global_obj.insert(
+            len(global_obj), "settings", CommentedMap(), comment="General config"
+        )
+        settings_obj = global_obj["settings"]
+        settings_obj.insert(
+            len(settings_obj), "depots", CommentedMap(), comment="Upstream setting providers config"
+        )
+        depots_obj = settings_obj["depots"]
+        depots_obj.insert(
+            len(depots_obj), "vault", CommentedMap(), comment="HashiCorp Vault depot"
+        )
+        depots_obj.insert(
+            len(depots_obj), "minio", CommentedMap(), comment="MinIO depot"
+        )
