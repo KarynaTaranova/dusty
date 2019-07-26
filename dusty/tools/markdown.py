@@ -68,8 +68,6 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
         _table_item_handler,
         text
     )
-    print(">>> Text after: ", repr(text))
-    print(">>> Text after: ", text)
     return text
 
 
