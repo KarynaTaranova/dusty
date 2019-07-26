@@ -281,3 +281,16 @@ def prepare_jira_mapping(jira_service):
                 logging.error("Failed to find Jira mapping for %s", severity)
     jira_service.client.close()
     return mapping
+
+
+def cut_jira_comment(comment):
+    c = const
+    code_block_ending = "\n\n{code}"
+    if len(comment) > c.JIRA_COMMENT_MAX_SIZE:
+        _comment = comment[:c.JIRA_COMMENT_MAX_SIZE - 1]
+        last_code_block = _comment.rfind("{code:collapse=true}")
+        if last_code_block > -1 and _comment.find("{code}", last_code_block+1) == -1:
+            _comment = _comment[:(c.JIRA_COMMENT_MAX_SIZE - len(code_block_ending) - 1)] + code_block_ending
+    else:
+        _comment = comment
+    return _comment

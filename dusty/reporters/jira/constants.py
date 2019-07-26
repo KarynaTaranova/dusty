@@ -40,6 +40,9 @@ JIRA_ALTERNATIVES = {
     'Blocker': ['Very High', 'Critical']
 }
 JIRA_OPENED_STATUSES = ['Open', 'In Progress']
+JIRA_DESCRIPTION_MAX_SIZE = 61908
+# This is jira.text.field.character.limit default value
+JIRA_COMMENT_MAX_SIZE = 32767
 
 # Priority/Severity mapping
 JIRA_SEVERITY_MAPPING = {

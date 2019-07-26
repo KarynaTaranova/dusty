@@ -23,7 +23,7 @@
 from dusty.tools import log, markdown
 from dusty.models.module import DependentModuleModel
 from dusty.models.reporter import ReporterModel
-from dusty.models.finding import DastFinding
+from dusty.models.finding import DastFinding, SastFinding
 from dusty.constants import SEVERITIES
 
 from .legacy import launch_reportportal_service
@@ -67,7 +67,7 @@ class Reporter(DependentModuleModel, ReporterModel):
                 item_description = item_details
                 tags = [
                     f'Tool: {item.get_meta("tool", "")}',
-                    f'TestType: {self.context.get_meta("testing_type", "AST")}',
+                    f'TestType: {self.context.get_meta("testing_type", "DAST")}',
                     f'Severity: {item.get_meta("severity", SEVERITIES[-1])}'
                 ]
                 if item.get_meta("confidence", None):
@@ -80,6 +80,24 @@ class Reporter(DependentModuleModel, ReporterModel):
                 if item.get_meta("legacy.images", None):
                     for attachment in item.get_meta("legacy.images"):
                         self._rp_client.test_item_message(attachment["name"], "INFO", attachment)
+                self._rp_client.test_item_message("!!!MARKDOWN_MODE!!! %s " % item_details, "INFO")
+                self._rp_client.test_item_message(item.get_meta("issue_hash", "<no_hash>"), "ERROR")
+                self._rp_client.finish_test_item()
+            elif isinstance(item, SastFinding):
+                item_details = markdown.markdown_unescape("\n\n".join(item.description))
+                item_description = item_details
+                tags = [
+                    f'Tool: {item.get_meta("tool", "")}',
+                    f'TestType: {self.context.get_meta("testing_type", "SAST")}',
+                    f'Severity: {item.get_meta("severity", SEVERITIES[-1])}'
+                ]
+                if item.get_meta("confidence", None):
+                    tags.append(f'Confidence: {item.get_meta("confidence")}')
+                self._rp_client.start_test_item(
+                    item.title,
+                    description=item_description,
+                    tags=tags
+                )
                 self._rp_client.test_item_message("!!!MARKDOWN_MODE!!! %s " % item_details, "INFO")
                 self._rp_client.test_item_message(item.get_meta("issue_hash", "<no_hash>"), "ERROR")
                 self._rp_client.finish_test_item()

@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,E0401,R0914
+# pylint: disable=I0011,E0401,R0914,R0912,R0915
 
 #   Copyright 2019 getcarrier.io
 #
@@ -28,12 +28,12 @@ from ruamel.yaml.comments import CommentedMap
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.reporter import ReporterModel
-from dusty.models.finding import DastFinding
+from dusty.models.finding import DastFinding, SastFinding
 
 from dusty.constants import SEVERITIES
 
 from . import constants
-from .legacy import JiraWrapper, prepare_jira_mapping
+from .legacy import JiraWrapper, prepare_jira_mapping, cut_jira_comment
 
 
 class Reporter(DependentModuleModel, ReporterModel):
@@ -88,10 +88,54 @@ class Reporter(DependentModuleModel, ReporterModel):
                     "additional_labels": [
                         label.replace(" ", "_") for label in [
                             item.get_meta("tool", "scanner"),
-                            self.context.get_meta("testing_type", "AST"),
+                            self.context.get_meta("testing_type", "DAST"),
                             item.get_meta("severity", SEVERITIES[-1])
                         ]
                     ],
+                    "raw": item
+                })
+            elif isinstance(item, SastFinding):
+                severity = item.get_meta("severity", SEVERITIES[-1])
+                priority = constants.JIRA_SEVERITY_MAPPING[severity]
+                if priority_mapping and priority in priority_mapping:
+                    priority = priority_mapping[priority]
+                mapping_meta[severity] = priority  # Update meta mapping to reflect actual results
+                description_chunks = [
+                    item.replace(
+                        "\\.", "."
+                    ).replace(
+                        "<pre>", "{code:collapse=true}\n\n"
+                    ).replace(
+                        "</pre>", "\n\n{code}"
+                    ) for item in item.description
+                ]
+                if len("\n\n".join(description_chunks)) > constants.JIRA_DESCRIPTION_MAX_SIZE:
+                    description = description_chunks[0]
+                    chunks = description_chunks[1:]
+                    comments = list()
+                    new_line_str = '  \n  \n'
+                    for chunk in chunks:
+                        if not comments or (len(comments[-1]) + len(new_line_str) + len(chunk)) >= \
+                                constants.JIRA_COMMENT_MAX_SIZE:
+                            comments.append(cut_jira_comment(chunk))
+                        else:  # Last comment can handle one more chunk
+                            comments[-1] += new_line_str + cut_jira_comment(chunk)
+                else:
+                    description = "\n\n".join(description_chunks)
+                    comments = list()
+                findings.append({
+                    "title": item.title,
+                    "priority": priority,
+                    "description": description,
+                    "issue_hash": item.get_meta("issue_hash", "<no_hash>"),
+                    "additional_labels": [
+                        label.replace(" ", "_") for label in [
+                            item.get_meta("tool", "scanner"),
+                            self.context.get_meta("testing_type", "SAST"),
+                            item.get_meta("severity", SEVERITIES[-1])
+                        ]
+                    ],
+                    "comments": comments,
                     "raw": item
                 })
             else:
@@ -116,6 +160,9 @@ class Reporter(DependentModuleModel, ReporterModel):
                 # get_or_create=True,
                 additional_labels=finding["additional_labels"] # additional_labels
             )
+            if created and "comments" in finding:
+                for comment in finding["comments"]:
+                    wrapper.add_comment_to_issue(issue, comment)
             ticket_meta = {
                 "jira_id": issue.key,
                 "jira_url": f"{self.config.get('url')}/browse/{issue.key}",
