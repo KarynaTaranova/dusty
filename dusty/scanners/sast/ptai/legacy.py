@@ -24,7 +24,7 @@ import os
 import re
 from bs4 import BeautifulSoup
 
-from dusty.utils.markdown import markdown_table_escape
+from dusty.tools.markdown import markdown_table_escape
 from . import constants
 
 
