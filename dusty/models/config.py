@@ -111,4 +111,7 @@ class ConfigModel:
         data_obj.insert(
             len(data_obj), constants.CONFIG_VERSION_KEY, constants.CURRENT_CONFIG_VERSION
         )
+        data_obj.insert(
+            len(data_obj), "global", CommentedMap(), comment="Common settings for all suites"
+        )
         data_obj.insert(len(data_obj), "suites", CommentedMap(), comment="Test suites")
