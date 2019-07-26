@@ -67,7 +67,7 @@ class EMailPresenter:
             result.append(report_file)
         # Attach PT AI report (if any)
         ptai_report_file = \
-            self.context.performers["scanning"].get_module_meta("ptai", "report_file", None)
+            self.context.performers["scanning"].get_module_meta("sast.ptai", "report_file", None)
         if ptai_report_file:
             result.append(ptai_report_file)
         # Additional attachments
