@@ -53,12 +53,12 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
     def _table_handler(item):
         return f'|| **{item.group("name")}** || {item.group("value")} ||'
     text = re.sub(
-        r'\|\|\s*\*(?P<name>.*?)\*\s*\|\s*\*(?P<value>.*?)\*\s*\|',
+        r'\|\| \*(?P<name>.*?)\* \| \*(?P<value>.*?)\* \|',
         _table_handler,
         text
     )
     text = re.sub(
-        r'\|\|\s*\*(?P<name>.*?)\*\s*\|\s*(?P<value>.*?)\s*\|',
+        r'\|\| \*(?P<name>.*?)\* \| (?P<value>.*?) \|',
         _table_handler,
         text
     )
