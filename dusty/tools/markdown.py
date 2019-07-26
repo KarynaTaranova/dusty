@@ -41,13 +41,13 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
             "{code:title=" + \
             item.group("title") + \
             "|" + item.group("style") + \
-            "}\n```\n"
+            "}```"
     text = re.sub(
         r'{code:title=(?P<title>.*?)\|(?P<style>.*?)}',
         _code_handler,
         text
     )
-    text = text.replace("{code}", "\n```\n{code}")
+    text = text.replace("{code}", "```{code}")
     return text
 
 
