@@ -31,7 +31,7 @@ def markdown_to_html(text):
     markdown2.Markdown.preprocess = _markdown2_preprocess
     markdown2.Markdown.postprocess = _markdown2_postprocess
     # Run markdown2
-    return markdown2.markdown(text, extras=["tables", "fenced-code-blocks"])
+    return markdown2.markdown(text, extras=["tables", "wiki-tables", "fenced-code-blocks"])
 
 
 def _markdown2_preprocess(self, text):  # pylint: disable=W0613
@@ -51,7 +51,7 @@ def _markdown2_preprocess(self, text):  # pylint: disable=W0613
     text = text.replace("{code}", "```\n{code}")
     # Handle || tables |
     def _table_handler(item):
-        return f'| **{item.group("name")}** | {item.group("value")} |'
+        return f'|| **{item.group("name")}** || {item.group("value")} ||'
     text = re.sub(
         r'\|\|\s*\*(?P<name>.*?)\*\s*\|\s*\*(?P<value>.*?)\*\s*\|',
         _table_handler,
