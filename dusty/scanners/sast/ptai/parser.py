@@ -22,7 +22,7 @@
 
 from collections import namedtuple
 
-from dusty.tools import log
+from dusty.tools import log, markdown
 from dusty.models.finding import SastFinding
 
 from .legacy import PTAIScanParser
@@ -42,7 +42,8 @@ def parse_findings(output_file, scanner):  # pylint: disable=E,W,R,C
         finding = SastFinding(
             title=item["title"],
             description=[
-                item["description"] + f"\n\n**File to review:** {item['file_path']}"
+                markdown.markdown_escape(item["description"]) + \
+                f"\n\n**File to review:** {markdown.markdown_escape(item['file_path'])}"
             ] + item["steps_to_reproduce"]
         )
         finding.set_meta("tool", scanner.get_name())
