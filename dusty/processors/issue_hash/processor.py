@@ -63,7 +63,7 @@ class Processor(DependentModuleModel, ProcessorModel):
                 if isinstance(item, DastFinding):
                     item.description += f"\n\n**Issue Hash:** {issue_hash}"
                 if isinstance(item, SastFinding):
-                    item.description.append(f"\n\n**Issue Hash:** {issue_hash}")
+                    item.description[0] += f"\n\n**Issue Hash:** {issue_hash}"
 
     @staticmethod
     def get_name():
