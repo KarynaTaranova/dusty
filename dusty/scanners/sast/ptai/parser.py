@@ -39,12 +39,12 @@ def parse_findings(output_file, scanner):  # pylint: disable=E,W,R,C
         filtered_statuses = [item.strip() for item in filtered_statuses.split(",")]
     findings = PTAIScanParser(output_file, filtered_statuses).items
     for item in findings:
-        log.debug("Description: %s", item["description"])
         finding = SastFinding(
             title=item["title"],
             description=[
-                markdown.markdown_escape(item["description"]) + \
-                f"\n\n**File to review:** {markdown.markdown_escape(item['file_path'])}"
+                markdown.markdown_escape(
+                    item["description"].replace("                        ", "")
+                ) + f"\n\n**File to review:** {markdown.markdown_escape(item['file_path'])}"
             ] + item["steps_to_reproduce"]
         )
         finding.set_meta("tool", scanner.get_name())
