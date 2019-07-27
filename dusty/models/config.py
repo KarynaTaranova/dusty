@@ -24,6 +24,7 @@ import os
 import re
 import yaml
 import hvac
+import minio
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -104,17 +105,39 @@ class ConfigModel:
         if vault_secrets:
             context_config = self._vault_substitution(context_config, vault_secrets)
             log.info("Resolved secrets from Vault")
-        # MinIO
+        # Make MinIO client
+        minio_client = None
         if context_config["settings"].get("depots", dict()).get("minio", None):
             minio_config = context_config["settings"]["depots"]["minio"]
-            log.debug("MinIO config: %s", minio_config)
+            minio_client = self._create_minio_client(minio_config)
+        log.debug("MinIO client: %s", minio_client)
         return context_config
+
+    def _create_minio_client(self, minio_config):
+        try:
+            for key in ["endpoint"]:
+                if key not in minio_config:
+                    log.error("No MinIO %s in config")
+                    return None
+            client = minio.Minio(
+                minio_config["endpoint"],
+                minio_config.get("access_key", None),
+                minio_config.get("secret_key", None),
+                minio_config.get("secure", True),
+                minio_config.get("region", None)
+            )
+            return client
+        except:
+            log.exception("Error during MinIO client creation")
+            return None
+
 
     def _create_vault_client(self, vault_config):
         try:
-            if "url" not in vault_config:
-                log.error("No Vault URL in config")
-                return None
+            for key in ["url"]:
+                if key not in vault_config:
+                    log.error("No Vault %s in config")
+                    return None
             client = hvac.Client(
                 url=vault_config["url"],
                 verify=vault_config.get("ssl_verify", False)
@@ -237,4 +260,25 @@ class ConfigModel:
         vault_obj.insert(
             len(vault_obj), "auth_secret_id", "vault_approle_secret_id_value",
             comment="(optional) Auth via approle id/secret id"
+        )
+        minio_obj = depots_obj["minio"]
+        minio_obj.insert(
+            len(minio_obj), "endpoint", "minio.example.com:9000",
+            comment="S3 object storage endpoint"
+        )
+        minio_obj.insert(
+            len(minio_obj), "access_key", "ACCESSKEYVALUE",
+            comment="(optional) Access key for the object storage endpoint"
+        )
+        minio_obj.insert(
+            len(minio_obj), "secret_key", "SECRETACCESSKEYVALUE",
+            comment="(optional) Secret key for the object storage endpoint."
+        )
+        minio_obj.insert(
+            len(minio_obj), "secure", True,
+            comment="(optional) Set this value to True to enable secure (HTTPS) access"
+        )
+        minio_obj.insert(
+            len(minio_obj), "region", "us-east-1",
+            comment="(optional) Set this value to override automatic bucket location discovery"
         )
