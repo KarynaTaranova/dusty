@@ -95,14 +95,15 @@ class ConfigModel:
         if vault_client:
             try:
                 vault_secrets = vault_client.secrets.kv.v2.read_secret_version(
-                    path=vault_config.get("secrets_path", "carrier-kv"),
-                    mount_point=vault_config.get("secrets_mount_point", "secret")
+                    path=vault_config.get("secrets_path", "carrier-secrets"),
+                    mount_point=vault_config.get("secrets_mount_point", "carrier-kv")
                 ).get("data", dict()).get("data", dict())
             except:
                 log.exception("Failed to get Vault secrets")
         # Resolve vault secrets in config
         if vault_secrets:
             context_config = self._vault_substitution(context_config, vault_secrets)
+            log.info("Resolved secrets from Vault")
         # MinIO
         if context_config["settings"].get("depots", dict()).get("minio", None):
             minio_config = context_config["settings"]["depots"]["minio"]
