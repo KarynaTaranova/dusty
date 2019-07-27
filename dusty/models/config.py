@@ -126,6 +126,8 @@ class ConfigModel:
                 minio_config.get("secure", True),
                 minio_config.get("region", None)
             )
+            # Test client auth
+            client.list_buckets()
             return client
         except:
             log.exception("Error during MinIO client creation")
