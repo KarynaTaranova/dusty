@@ -110,8 +110,26 @@ class ConfigModel:
         if context_config["settings"].get("depots", dict()).get("minio", None):
             minio_config = context_config["settings"]["depots"]["minio"]
             minio_client = self._create_minio_client(minio_config)
-        log.debug("MinIO client: %s", minio_client)
-        return context_config
+        # Read base config
+        base_config = dict()
+        if minio_client:
+            try:
+                data = minio_client.get_object(
+                    minio_config.get("bucket", "carrier"),
+                    minio_config.get("object", "config.yaml")
+                )
+                base_config = self._variable_substitution(
+                    yaml.load(
+                        os.path.expandvars(data.read()),
+                        Loader=yaml.FullLoader
+                    )
+                )
+                if vault_secrets:
+                    base_config = self._vault_substitution(base_config, vault_secrets)
+            except:
+                pass
+        # Merge resulting config
+        return recursive_merge(base_config, context_config)
 
     def _create_minio_client(self, minio_config):
         try:
@@ -120,11 +138,11 @@ class ConfigModel:
                     log.error("No MinIO %s in config")
                     return None
             client = minio.Minio(
-                minio_config["endpoint"],
-                minio_config.get("access_key", None),
-                minio_config.get("secret_key", None),
-                minio_config.get("secure", True),
-                minio_config.get("region", None)
+                endpoint=minio_config["endpoint"],
+                access_key=minio_config.get("access_key", None),
+                secret_key=minio_config.get("secret_key", None),
+                secure=minio_config.get("secure", True),
+                region=minio_config.get("region", None)
             )
             # Test client auth
             client.list_buckets()
