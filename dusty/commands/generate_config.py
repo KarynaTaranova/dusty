@@ -87,7 +87,11 @@ class Command(ModuleModel, CommandModel):
             comment="Environment under testing (branch/module for SAST)"
         )
         data_obj.insert(len(data_obj), "testing_type", "DAST", comment="DAST or SAST")
-        data_obj.insert(len(data_obj), "scan_type", "full", comment="full or incremental")
+        data_obj.insert(
+            len(data_obj),
+            "scan_type", "full",
+            comment="full, incremental or other scan description (e.g.: qualys, authorized, etc)"
+        )
         data_obj.insert(
             len(data_obj), "build_id", "1", comment="Build number (or some other identifier)"
         )
