@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
-# pylint: disable=I0011,R0903,R0201,E0401,W0702
+# pylint: disable=I0011,R0903,R0201,E0401,W0702,C0411
 
 #   Copyright 2019 getcarrier.io
 #
@@ -25,6 +25,7 @@ import re
 import yaml
 import hvac
 import minio
+import urllib3
 
 from ruamel.yaml.comments import CommentedMap
 
@@ -146,12 +147,25 @@ class ConfigModel:
                 if key not in minio_config:
                     log.error("No MinIO %s in config")
                     return None
+            http_client = None
+            if not minio_config.get("ssl_verify", False):
+                http_client = urllib3.PoolManager(
+                    timeout=urllib3.Timeout.DEFAULT_TIMEOUT,
+                    cert_reqs="CERT_NONE",
+                    maxsize=10,
+                    retries=urllib3.Retry(
+                        total=5,
+                        backoff_factor=0.2,
+                        status_forcelist=[500, 502, 503, 504]
+                    )
+                )
             client = minio.Minio(
                 endpoint=minio_config["endpoint"],
                 access_key=minio_config.get("access_key", None),
                 secret_key=minio_config.get("secret_key", None),
                 secure=minio_config.get("secure", True),
-                region=minio_config.get("region", None)
+                region=minio_config.get("region", None),
+                http_client=http_client
             )
             # Test client auth
             client.list_buckets()
@@ -330,6 +344,10 @@ class ConfigModel:
         minio_obj.insert(
             len(minio_obj), "secure", True,
             comment="(optional) Set this value to True to enable secure (HTTPS) access"
+        )
+        minio_obj.insert(
+            len(minio_obj), "ssl_verify", True,
+            comment="(optional) Verify SSL certificate: True or False"
         )
         minio_obj.insert(
             len(minio_obj), "region", "us-east-1",
