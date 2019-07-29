@@ -58,11 +58,10 @@ class Reporter(DependentModuleModel, ReporterModel):
             f"Security tests has been COMPLETED",
             classname="Carrier Dusty"
         )
-        summary_case.add_error_info(
+        summary_case.add_skipped_info(
             message=\
                 f"Total findings (with false positives and info): {len(self.context.findings)}. " \
-                f"Total scan errors: {len(self.context.errors)}.",
-            error_type=SEVERITIES[-1]
+                f"Total scan errors: {len(self.context.errors)}."
         )
         test_cases.append(summary_case)
         # Findings
