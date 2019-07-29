@@ -102,9 +102,12 @@ class Scanner(DependentModuleModel, ScannerModel):
         scan_scanner = {"type": "EXTERNAL"}
         if self.config.get("qualys_scanner_type", "EXTERNAL") == "INTERNAL" and \
                 self.config.get("qualys_scanner_pool", None):
+            scanner_pool = self.config.get("qualys_scanner_pool")
+            if isinstance(scanner_pool, str):
+                scanner_pool = [item.strip() for item in scanner_pool.split(",")]
             scan_scanner = {
                 "type": "INTERNAL",
-                "friendlyName": random.choice(self.config.get("qualys_scanner_pool"))
+                "friendlyName": random.choice(scanner_pool)
             }
         scan_id = helper.start_scan(
             scan_name, webapp_id,
