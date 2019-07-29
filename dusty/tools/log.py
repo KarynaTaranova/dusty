@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # coding=utf-8
+# pylint: disable=I0011,E0401
 
 #   Copyright 2019 getcarrier.io
 #
@@ -21,6 +22,8 @@
 
 import logging
 import inspect
+import urllib3
+import requests
 
 from dusty import constants
 
@@ -36,6 +39,9 @@ def init(level=logging.INFO):
     # Disable requests/urllib3 logging
     logging.getLogger("requests").setLevel(logging.WARNING)
     logging.getLogger("urllib3").setLevel(logging.WARNING)
+    # Disable SSL warnings
+    urllib3.disable_warnings()
+    requests.packages.urllib3.disable_warnings()
 
 
 def get_logger():

@@ -52,8 +52,6 @@ class Reporter(DependentModuleModel, ReporterModel):
                 self._session.verify = False
                 self._session.auth = self.auth or None
             return self._session
-        # Disable SSL warnings
-        requests.packages.urllib3.disable_warnings()
         # Replace implementation in logging_loki
         logging_loki.handlers.LokiHandler.session = __session
 
