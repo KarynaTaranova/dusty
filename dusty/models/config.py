@@ -199,6 +199,7 @@ class ConfigModel:
                 )
                 if vault_secrets:
                     result = self._vault_substitution(result, vault_secrets)
+                log.info("Loaded %s from MinIO", object_)
             except:
                 pass
         return result
