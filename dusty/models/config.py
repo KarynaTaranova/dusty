@@ -83,7 +83,7 @@ class ConfigModel:
                 return os.environ[obj.strip()[2:]]
         return obj
 
-    def _process_depots(self, config, suite):
+    def _process_depots(self, config, suite):  # pylint: disable=R0912
         """ Process depots: resolve Vault variables and merge config from MinIO """
         context_config = recursive_merge(config["global"], config["suites"].get(suite))
         # Make HashiCorp Vault client
@@ -111,25 +111,34 @@ class ConfigModel:
             minio_config = context_config["settings"]["depots"]["minio"]
             minio_client = self._create_minio_client(minio_config)
         # Read base config
-        base_config = dict()
-        if minio_client:
-            try:
-                data = minio_client.get_object(
-                    minio_config.get("bucket", "carrier"),
-                    minio_config.get("object", "config.yaml")
-                )
-                base_config = self._variable_substitution(
-                    yaml.load(
-                        os.path.expandvars(data.read()),
-                        Loader=yaml.FullLoader
-                    )
-                )
-                if vault_secrets:
-                    base_config = self._vault_substitution(base_config, vault_secrets)
-            except:
-                pass
+        base_config = self._minio_read_config_object(
+            minio_client,
+            minio_config.get("bucket", "carrier"),
+            "__base__.yaml",
+            vault_secrets
+        )
+        # Read project config
+        project_config = dict()
+        if minio_config.get("object", None):
+            project_config = self._minio_read_config_object(
+                minio_client,
+                minio_config.get("bucket", "carrier"),
+                minio_config.get("object", "config.yaml"),
+                vault_secrets
+            )
+        # Read override config
+        override_config = self._minio_read_config_object(
+            minio_client,
+            minio_config.get("bucket", "carrier"),
+            "__override__.yaml",
+            vault_secrets
+        )
         # Merge resulting config
-        return recursive_merge(base_config, context_config)
+        return recursive_merge(
+            recursive_merge(
+                recursive_merge(base_config, context_config), project_config
+            ), override_config
+        )
 
     def _create_minio_client(self, minio_config):
         try:
@@ -151,6 +160,22 @@ class ConfigModel:
             log.exception("Error during MinIO client creation")
             return None
 
+    def _minio_read_config_object(self, minio_client, bucket, object_, vault_secrets=None):
+        result = dict()
+        if minio_client:
+            try:
+                data = minio_client.get_object(bucket, object_)
+                result = self._variable_substitution(
+                    yaml.load(
+                        os.path.expandvars(data.read()),
+                        Loader=yaml.FullLoader
+                    )
+                )
+                if vault_secrets:
+                    result = self._vault_substitution(result, vault_secrets)
+            except:
+                pass
+        return result
 
     def _create_vault_client(self, vault_config):
         try:
@@ -285,6 +310,14 @@ class ConfigModel:
         minio_obj.insert(
             len(minio_obj), "endpoint", "minio.example.com:9000",
             comment="S3 object storage endpoint"
+        )
+        minio_obj.insert(
+            len(minio_obj), "bucket", "carrier",
+            comment="Carrier bucket name"
+        )
+        minio_obj.insert(
+            len(minio_obj), "object", "MY-PROJECT_Application.yaml",
+            comment="Config file (object) name. Optional if only base and override are used"
         )
         minio_obj.insert(
             len(minio_obj), "access_key", "ACCESSKEYVALUE",
