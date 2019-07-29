@@ -159,6 +159,18 @@ class ConfigModel:
                         status_forcelist=[500, 502, 503, 504]
                     )
                 )
+            if isinstance(minio_config.get("ssl_verify", False), str):
+                http_client = urllib3.PoolManager(
+                    timeout=urllib3.Timeout.DEFAULT_TIMEOUT,
+                    cert_reqs="CERT_REQUIRED",
+                    ca_certs=minio_config.get("ssl_verify"),
+                    maxsize=10,
+                    retries=urllib3.Retry(
+                        total=5,
+                        backoff_factor=0.2,
+                        status_forcelist=[500, 502, 503, 504]
+                    )
+                )
             client = minio.Minio(
                 endpoint=minio_config["endpoint"],
                 access_key=minio_config.get("access_key", None),
@@ -347,7 +359,7 @@ class ConfigModel:
         )
         minio_obj.insert(
             len(minio_obj), "ssl_verify", True,
-            comment="(optional) Verify SSL certificate: True or False"
+            comment="(optional) Verify SSL certificate: True, False or path to CA bundle"
         )
         minio_obj.insert(
             len(minio_obj), "region", "us-east-1",
