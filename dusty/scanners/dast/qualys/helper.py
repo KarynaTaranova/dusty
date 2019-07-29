@@ -152,7 +152,7 @@ class QualysHelper:
                         "WebApp": {
                             "name": name,
                             "url": application_url,
-                            "defaultProfile": {"id": option_profile}
+                            "defaultProfile": {"id": int(option_profile)}
                         }
                     }
                 }
@@ -164,7 +164,7 @@ class QualysHelper:
                         "WebApp": {
                             "name": name,
                             "url": application_url,
-                            "defaultProfile": {"id": option_profile},
+                            "defaultProfile": {"id": int(option_profile)},
                             "urlBlacklist": {"set": {"UrlEntry": [
                                 {"value": item, "regex": "true"} for item in excludes
                             ]}},
@@ -259,7 +259,7 @@ class QualysHelper:
                                 "webAppAuthRecord": auth_record,
                                 "scannerAppliance": scanner_appliance
                             },
-                            "profile": {"id": option_profile},
+                            "profile": {"id": int(option_profile)},
                             "sendMail": False
                         }
                     }
@@ -304,7 +304,7 @@ class QualysHelper:
                                     }
                                 }
                             },
-                            "template": {"id": report_template}
+                            "template": {"id": int(report_template)}
                         }
                     }
                 }
