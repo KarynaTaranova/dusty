@@ -111,6 +111,8 @@ class ConfigModel:
         if context_config["settings"].get("depots", dict()).get("minio", None):
             minio_config = context_config["settings"]["depots"]["minio"]
             minio_client = self._create_minio_client(minio_config)
+        if not minio_client:
+            return context_config
         # Read base config
         base_config = self._minio_read_config_object(
             minio_client,
