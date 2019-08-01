@@ -50,6 +50,9 @@ def parse_findings(filename, scanner):
         finding.set_meta("severity", constants.SPOTBUGS_SEVERITIES[item["severity"]])
         finding.set_meta("legacy.file", item["file_path"])
         finding.set_meta("legacy.line", item["line"])
-        finding.set_meta("endpoints", [namedtuple("Endpoint", ["raw"])(raw=item["file_path"])])
+        endpoints = list()
+        if item["file_path"]:
+            endpoints.append(namedtuple("Endpoint", ["raw"])(raw=item["file_path"]))
+        finding.set_meta("endpoints", endpoints)
         log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
         scanner.findings.append(finding)
