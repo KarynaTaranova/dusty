@@ -51,10 +51,10 @@ class SpotbugsParser(object):
             filename = item.find('Class').find('SourceLine').get('sourcefile')
             file_path = item.find('Class').find('SourceLine').get('sourcepath')
             line = item.find('Class').find('SourceLine').find('Message').text
-            steps_to_reproduce = '\n\n'
+            steps_to_reproduce = ""
             details = data.find(f'.//BugPattern[@type="{issue_type}"]')
             for i, element in enumerate(item.findall('Method')):
-                steps_to_reproduce += f"\nClassname: {classname}\n" \
+                steps_to_reproduce += f"\n\nClassname: {classname}\n" \
                                       f"{element.find('Message').text}\n"
                 try:
                     steps_to_reproduce += \
