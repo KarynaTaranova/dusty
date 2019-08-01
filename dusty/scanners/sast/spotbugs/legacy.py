@@ -26,7 +26,7 @@ from dusty.tools import log as logging
 import hashlib
 import xml.etree.ElementTree
 from xml.sax import saxutils
-from markdownify import markdownify as md
+from dusty.tools import markdown
 
 
 def sanitize(input):
@@ -63,7 +63,7 @@ class SpotbugsParser(object):
                     pass
 
             if details is not None:
-                description += f'\n\n Details: {md(details.find("Details").text)}'
+                description += f'\n\n Details: {markdown.html_to_text(details.find("Details").text)}'
             dupe_key = hashlib.md5(f'{title} {issue_type} {category}'.encode('utf-8')).hexdigest()
             if file_path:
                 dupe_key += f' {file_path}'
