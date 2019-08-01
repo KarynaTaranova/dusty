@@ -46,7 +46,7 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
     def prepare(self):
         """ Prepare for action """
         log.debug("Preparing")
-        config = self.context.config["processing"]
+        config = self.context.config.get("processing", dict())
         # Schedule processors
         try:
             all_processors = dependency.resolve_name_order(
