@@ -39,7 +39,7 @@ def parse_findings(filename, scanner):
             title=item["title"],
             description=[
                 "\n\n".join([
-                    markdown.markdown_escape(item["description"]),
+                    item["description"],
                     f"**Category:** {markdown.markdown_escape(item['category'])}",
                     f"**File to review:** {markdown.markdown_escape(item['file_path'])}" \
                         f":{item['line']}"
