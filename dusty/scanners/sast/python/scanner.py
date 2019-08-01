@@ -50,7 +50,12 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def validate_config(config):
         """ Validate config """
-        log.debug(f"Config: {config}")
+        required = ["code"]
+        not_set = [item for item in required if item not in config]
+        if not_set:
+            error = f"Required configuration options not set: {', '.join(not_set)}"
+            log.error(error)
+            raise ValueError(error)
 
     @staticmethod
     def get_name():
