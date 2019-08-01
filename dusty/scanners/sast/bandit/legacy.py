@@ -29,6 +29,7 @@ import json
 
 class BanditParser(object):
     def __init__(self, data):
+        data = json.loads(data)
         dupes = dict()
         find_date = None
         if "generated_at" in data:
