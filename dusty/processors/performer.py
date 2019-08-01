@@ -46,7 +46,7 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
     def prepare(self):
         """ Prepare for action """
         log.debug("Preparing")
-        config = self.context.config.get("processing", dict())
+        config = self.context.config.get("processing")
         # Schedule processors
         try:
             all_processors = dependency.resolve_name_order(
@@ -179,6 +179,7 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
         """ Validate config """
         if "processing" not in config:
             log.warning("No processing defined in config")
+            config["processing"] = dict()
 
     @staticmethod
     def get_name():
