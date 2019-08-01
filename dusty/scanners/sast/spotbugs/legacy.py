@@ -82,7 +82,7 @@ class SpotbugsParser(object):
                 }
                 dupes[dupe_key]['steps_to_reproduce'].append(f'<pre>{issue_type} issue {steps_to_reproduce}</pre>')
             else:
-                dupes[dupe_key]['steps_to_reproduce'].append(f"<pre>\n{steps_to_reproduce}</pre>")
+                dupes[dupe_key]['steps_to_reproduce'].append(f"<pre>{steps_to_reproduce}</pre>")
 
         self.items = dupes.values()
 
