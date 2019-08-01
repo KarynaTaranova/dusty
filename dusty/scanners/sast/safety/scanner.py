@@ -50,7 +50,7 @@ class Scanner(DependentModuleModel, ScannerModel):
             options.append("-r")
             options.append(target)
         task = subprocess.run(
-            ["safety", "check", "--format", "json"] + options,
+            ["safety", "check", "--json"] + options,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE
         )
         log.log_subprocess_result(task)
