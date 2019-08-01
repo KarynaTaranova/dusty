@@ -78,10 +78,11 @@ class SpotbugsParser(object):
                     "file_path": file_path if file_path else filename if filename else "",
                     "line": line,
                     "date": find_date,
-                    "steps_to_reproduce": [f'<pre>{issue_type} issue {steps_to_reproduce}</pre>']
+                    "steps_to_reproduce": list()
                 }
+                dupes[dupe_key]['steps_to_reproduce'].append(f'<pre>{issue_type} issue {steps_to_reproduce}</pre>')
             else:
-                dupes[dupe_key]['steps_to_reproduce'].append(f"<pre>{steps_to_reproduce}</pre>")
+                dupes[dupe_key]['steps_to_reproduce'].append(f"<pre>\n{steps_to_reproduce}</pre>")
 
         self.items = dupes.values()
 
