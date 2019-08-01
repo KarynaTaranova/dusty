@@ -20,12 +20,14 @@
     Scanner: bandit
 """
 
-import time
-import random
+import os
+import subprocess
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
+
+from .parser import parse_findings
 
 
 class Scanner(DependentModuleModel, ScannerModel):
@@ -40,11 +42,27 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def execute(self):
         """ Run the scanner """
-        log.debug(f"Config: {self.config}")
-        delay = random.randrange(0, 15)
-        log.info("Sleeping for %d second(s)", delay)
-        time.sleep(delay)
-        raise RuntimeError("Scanning is not implemented yet")
+        task = subprocess.run([
+            "bandit", "-r", self.config.get("code"), "--format", "json"
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
+        parse_findings(task.stdout.decode("utf-8", errors="ignore"), self)
+        # Save intermediates
+        self.save_intermediates(task.stdout)
+
+    def save_intermediates(self, task_stdout):
+        """ Save scanner intermediates """
+        if self.config.get("save_intermediates_to", None):
+            log.info("Saving intermediates")
+            base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
+            try:
+                # Make directory for artifacts
+                os.makedirs(base, mode=0o755, exist_ok=True)
+                # Save report
+                with open(os.path.join(base, "report.json"), "w") as report:
+                    report.write(task_stdout.decode("utf-8", errors="ignore"))
+            except:
+                log.exception("Failed to save intermediates")
 
     @staticmethod
     def fill_config(data_obj):
@@ -54,7 +72,12 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def validate_config(config):
         """ Validate config """
-        log.debug(f"Config: {config}")
+        required = ["code"]
+        not_set = [item for item in required if item not in config]
+        if not_set:
+            error = f"Required configuration options not set: {', '.join(not_set)}"
+            log.error(error)
+            raise ValueError(error)
 
     @staticmethod
     def get_name():
@@ -64,4 +87,4 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def get_description():
         """ Module description or help message """
-        return "SAST scanner"
+        return "Python SAST scanner"
