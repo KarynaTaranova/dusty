@@ -21,6 +21,7 @@
 """
 
 from dusty.models.finding import SastFinding
+from dusty.tools import markdown
 
 from .legacy import SafetyScanParser
 
@@ -34,7 +35,7 @@ def parse_findings(data, scanner):
         #     "severity": sev.title(),
         finding = SastFinding(
             title=item["title"],
-            description=[f"```\n{item['description']}\n```"]
+            description=[markdown.markdown_escape(item["description"])]
         )
         finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", "Medium")
