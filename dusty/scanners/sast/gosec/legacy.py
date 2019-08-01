@@ -24,6 +24,8 @@ import json
 
 from collections import OrderedDict
 
+from dusty.tools import markdown
+
 
 class GosecOutputParser:
     """ Parses gosec output and populates finding list """
@@ -42,9 +44,9 @@ class GosecOutputParser:
                 severity = item["severity"]
                 file_path = item["file"]
                 description = \
-                    f"{item['details']}\n" \
-                    f"**Rule ID**: {item['rule_id']}\n" \
-                    f"**Confidence**: {item['confidence']}"
+                    f"{markdown.markdown_escape(item['details'])}\n\n" \
+                    f"**Rule ID**: {markdown.markdown_escape(item['rule_id'])}\n\n" \
+                    f"**Confidence**: {markdown.markdown_escape(item['confidence'])}"
                 steps_to_reproduce = list()
                 all_items[title] = {
                     "title": title,
