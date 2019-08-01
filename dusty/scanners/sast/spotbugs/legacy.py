@@ -75,7 +75,7 @@ class SpotbugsParser(object):
                     "category": category,
                     "description": description,
                     "severity": int(severity),
-                    "file_path": file_path,
+                    "file_path": file_path if file_path else filename if filename else "",
                     "line": line,
                     "date": find_date,
                     "steps_to_reproduce": [f'<pre>{issue_type} issue {steps_to_reproduce}</pre>']
