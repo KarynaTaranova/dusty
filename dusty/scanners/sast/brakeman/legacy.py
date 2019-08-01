@@ -29,7 +29,7 @@ import json
 
 class BrakemanParser(object):
     def __init__(self, data):
-        data = jsons.load(data)
+        data = json.loads(data)
         dupes = dict()
         find_date = data['scan_info']['start_time']
 
