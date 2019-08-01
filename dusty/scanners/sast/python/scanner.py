@@ -38,7 +38,10 @@ class Scanner(DependentModuleModel, ScannerModel):
     def prepare(self):
         """ Prepare scanner """
         log.debug(f"Config: {self.config}")
-        for scanner in ["bandit"]:
+        scanners = ["bandit"]
+        if self.config.get("composition_analysis", False):
+            scanners.append("safety")
+        for scanner in scanners:
             log.info("Adding %s scanner", scanner)
             self.context.performers["scanning"].schedule_scanner("sast", scanner, self.config)
 
@@ -47,7 +50,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         """ Make sample config """
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
         data_obj.insert(
-            len(data_obj), "composition_analysis", True, comment="enable composition analysis"
+            len(data_obj), "composition_analysis", False, comment="enable composition analysis"
         )
         data_obj.insert(
             len(data_obj), "requirements", "requirements.txt",
