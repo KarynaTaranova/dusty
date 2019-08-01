@@ -44,7 +44,7 @@ def parse_findings(data, scanner):
                     f"**File to review:** {markdown.markdown_escape(item['file_path'])}" \
                         f":{item['line']}"
                 ])
-            ] + item["steps_to_reproduce"]
+            ]
         )
         finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", constants.BRAKEMAN_SEVERITY_MAPPING[item["severity"]])
