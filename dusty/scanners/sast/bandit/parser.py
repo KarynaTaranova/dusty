@@ -35,7 +35,6 @@ def parse_findings(data, scanner):
     findings = BanditParser(data).items
     # Make finding instances
     for item in findings:
-        #     "severity": sev.title(),
         finding = SastFinding(
             title=item["title"],
             description=[

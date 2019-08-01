@@ -17,7 +17,7 @@
 #   limitations under the License.
 
 """
-    Scanner: python
+    Scanner: golang
 """
 
 from dusty.tools import log
@@ -37,9 +37,7 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def prepare(self):
         """ Prepare scanner """
-        scanners = ["bandit"]
-        if self.config.get("composition_analysis", False):
-            scanners.append("safety")
+        scanners = ["gosec"]
         for scanner in scanners:
             log.info("Adding %s scanner", scanner)
             self.context.performers["scanning"].schedule_scanner("sast", scanner, self.config)
@@ -48,13 +46,6 @@ class Scanner(DependentModuleModel, ScannerModel):
     def fill_config(data_obj):
         """ Make sample config """
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
-        data_obj.insert(
-            len(data_obj), "composition_analysis", False, comment="enable composition analysis"
-        )
-        data_obj.insert(
-            len(data_obj), "requirements", "requirements.txt",
-            comment="(composition analysis) path to requirements.txt (string or list of strings)"
-        )
 
     @staticmethod
     def validate_config(config):
@@ -69,7 +60,7 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def get_name():
         """ Module name """
-        return "python"
+        return "golang"
 
     @staticmethod
     def get_description():

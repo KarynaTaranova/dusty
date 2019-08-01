@@ -17,25 +17,37 @@
 #   limitations under the License.
 
 """
-    Safety JSON parser
+    Bandit JSON parser
 """
 
-from dusty.models.finding import SastFinding
-from dusty.tools import markdown
+from collections import namedtuple
 
-from .legacy import SafetyScanParser
+from dusty.tools import log, markdown
+from dusty.models.finding import SastFinding
+
+from .legacy import GosecOutputParser
+from . import constants
 
 
 def parse_findings(data, scanner):
     """ Parse findings """
     # Parse JSON using legacy parser
-    findings = SafetyScanParser(data).items
+    findings = GosecOutputParser(data).items
     # Make finding instances
     for item in findings:
+        # "steps_to_reproduce": steps_to_reproduce
         finding = SastFinding(
             title=item["title"],
-            description=[markdown.markdown_escape(item["description"])]
+            description=[
+                "\n\n".join([
+                    markdown.markdown_escape(item['description']),
+                    f"**File to review:** {markdown.markdown_escape(item['file_path'])}"
+                ])
+            ] + item["steps_to_reproduce"]
         )
         finding.set_meta("tool", scanner.get_name())
-        finding.set_meta("severity", "Medium")
+        finding.set_meta("severity", constants.GOSEC_SEVERITY_MAPPING[item["severity"]])
+        finding.set_meta("legacy.file", item["file_path"])
+        finding.set_meta("endpoints", [namedtuple("Endpoint", ["raw"])(raw=item["file_path"])])
+        log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
         scanner.findings.append(finding)
