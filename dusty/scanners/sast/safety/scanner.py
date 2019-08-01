@@ -17,12 +17,17 @@
 #   limitations under the License.
 
 """
-    Scanner: python
+    Scanner: safety
 """
+
+import os
+import subprocess
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
+
+from .parser import parse_findings
 
 
 class Scanner(DependentModuleModel, ScannerModel):
@@ -35,29 +40,50 @@ class Scanner(DependentModuleModel, ScannerModel):
         self.config = \
             self.context.config["scanners"][__name__.split(".")[-3]][__name__.split(".")[-2]]
 
-    def prepare(self):
-        """ Prepare scanner """
-        log.debug(f"Config: {self.config}")
-        for scanner in ["bandit"]:
-            log.info("Adding %s scanner", scanner)
-            self.context.performers["scanning"].schedule_scanner("sast", scanner, self.config)
+    def execute(self):
+        """ Run the scanner """
+        targets = self.config.get("requirements", "requirements.txt")
+        if isinstance(targets, str):
+            targets = [targets]
+        options = list()
+        for target in targets:
+            options.append("-r")
+            options.append(target)
+        task = subprocess.run(
+            ["safety", "check", "--format", "json"] + options,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        )
+        log.log_subprocess_result(task)
+        parse_findings(task.stdout.decode("utf-8", errors="ignore"), self)
+        # Save intermediates
+        self.save_intermediates(task.stdout)
+
+    def save_intermediates(self, task_stdout):
+        """ Save scanner intermediates """
+        if self.config.get("save_intermediates_to", None):
+            log.info("Saving intermediates")
+            base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
+            try:
+                # Make directory for artifacts
+                os.makedirs(base, mode=0o755, exist_ok=True)
+                # Save report
+                with open(os.path.join(base, "report.json"), "w") as report:
+                    report.write(task_stdout.decode("utf-8", errors="ignore"))
+            except:
+                log.exception("Failed to save intermediates")
 
     @staticmethod
     def fill_config(data_obj):
         """ Make sample config """
-        data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
-        data_obj.insert(
-            len(data_obj), "composition_analysis", True, comment="enable composition analysis"
-        )
         data_obj.insert(
             len(data_obj), "requirements", "requirements.txt",
-            comment="(composition analysis) path to requirements.txt (string or list of strings)"
+            comment="path to requirements.txt (string or list of strings)"
         )
 
     @staticmethod
     def validate_config(config):
         """ Validate config """
-        required = ["code"]
+        required = []
         not_set = [item for item in required if item not in config]
         if not_set:
             error = f"Required configuration options not set: {', '.join(not_set)}"
@@ -67,9 +93,9 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def get_name():
         """ Module name """
-        return "python"
+        return "safety"
 
     @staticmethod
     def get_description():
         """ Module description or help message """
-        return "SAST scanner"
+        return "Python dependency analyzer"
