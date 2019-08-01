@@ -54,7 +54,7 @@ class SpotbugsParser(object):
             steps_to_reproduce = '\n\n'
             details = data.find(f'.//BugPattern[@type="{issue_type}"]')
             for i, element in enumerate(item.findall('Method')):
-                steps_to_reproduce += f"Classname: {classname}\n" \
+                steps_to_reproduce += f"\nClassname: {classname}\n" \
                                       f"{element.find('Message').text}\n"
                 try:
                     steps_to_reproduce += \
