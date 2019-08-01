@@ -43,7 +43,7 @@ class SpotbugsParser(object):
         data = xml.etree.ElementTree.parse(filename).getroot()
         for item in data.findall('BugInstance'):
             title = item.find('ShortMessage').text
-            description = item.find('LongMessage').text
+            description = markdown.markdown_escape(item.find('LongMessage').text)
             category = item.get('category')
             issue_type = item.get('type')
             severity = item.get('priority')
