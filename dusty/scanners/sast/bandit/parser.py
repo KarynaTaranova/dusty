@@ -40,7 +40,7 @@ def parse_findings(data, scanner):
             title=item["title"],
             description=[
                 "\n\n".join([
-                    markdown.markdown_escape(item["description"]),
+                    f"```\n{markdown.markdown_escape(item['description'])}\n```",
                     f"**Mitigation:** {markdown.markdown_escape(item['mitigation'])}",
                     f"**Impact:** {markdown.markdown_escape(item['impact'])}",
                     f"**References:** {markdown.markdown_escape(item['references'])}",
