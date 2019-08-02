@@ -23,6 +23,8 @@
 import json
 import os
 
+from dusty.tools import markdown
+
 
 __author__ = 'KarynaTaranova'
 
@@ -69,17 +71,17 @@ class NpmScanParser(object):
                                 < EXTENDED_SEVERITIES.get(severity):
                             severity = current_severity
                         if advisory.get('url'):
-                            tmp_values['urls'].append(format_str.format(unique_ids[id], advisory.get('url')))
+                            tmp_values['urls'].append(format_str.format(unique_ids[id], markdown.markdown_escape(advisory.get('url'))))
                         if advisory.get('references'):
                             tmp_values['references_list'].append(
-                                format_str.format(unique_ids[id], advisory.get('references')))
+                                format_str.format(unique_ids[id], markdown.markdown_escape(advisory.get('references'))))
                             tmp_values['descriptions'].append(
-                                format_str.format(unique_ids[id], advisory.get('overview')))
+                                format_str.format(unique_ids[id], markdown.markdown_escape(advisory.get('overview'))))
                     if id not in tmp_values['file_paths']:
                         tmp_values['file_paths'][unique_ids[id]].append('\n- {}'.format(resolve.get('path')))
                 file_path = ''
                 for key in tmp_values['file_paths']:
-                    file_path = file_path + format_str.format(key, ',  '.join(tmp_values['file_paths'][key]))
+                    file_path = file_path + format_str.format(key, markdown.markdown_escape(',  '.join(tmp_values['file_paths'][key])))
                 rehearsal_str = ',  \n'
                 url = rehearsal_str.join(tmp_values['urls'])
                 references = rehearsal_str.join(tmp_values['references_list'])

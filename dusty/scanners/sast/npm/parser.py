@@ -43,11 +43,11 @@ def parse_findings(data, scanner):
             title=item["title"],
             description=[
                 "\n\n".join([
-                    markdown.markdown_escape(item['description']),
-                    f"**URL:** {markdown.markdown_escape(item['url'])}",
+                    item['description'],
+                    f"**URL:** {item['url']}",
                     f"**CWE:** {markdown.markdown_escape(item['cwe'])}",
-                    f"**References:** {markdown.markdown_escape(item['references'])}",
-                    f"**File to review:** {markdown.markdown_escape(item['file_path'])}"
+                    f"**References:** {item['references']}",
+                    f"**File to review:** {item['file_path']}"
                 ])
             ]
         )
