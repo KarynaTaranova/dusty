@@ -35,6 +35,9 @@ defusedxml==0.6.0
 # PT AI
 beautifulsoup4==4.8.0
 
+# Dependency Check
+jsonpath-rw==1.4.0
+
 #
 # Reporting
 #
