@@ -41,8 +41,8 @@ class NodeJsScanParser(object):
                 for sub_value in value:
                     title = sub_value['title']
                     description = sub_value['description']
-                    file_path = sub_value.get('path', None)
-                    line = sub_value.get('line', None)
+                    file_path = sub_value.get('path', '')
+                    line = sub_value.get('line', '')
                     steps_to_reproduce = f'<pre>{sub_value.get("lines", "")}</pre>\n\n'
                     dupe_key = key + ': ' + sub_value['title'] + ' with file ' + sub_value.get('filename', '')
                     if dupe_key not in dupes:
