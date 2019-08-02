@@ -46,6 +46,10 @@ class Scanner(DependentModuleModel, ScannerModel):
     def fill_config(data_obj):
         """ Make sample config """
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
+        data_obj.insert(
+            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            comment="(optional) Save scan intermediates (raw results, logs, ...)"
+        )
 
     @staticmethod
     def validate_config(config):

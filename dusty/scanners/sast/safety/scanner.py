@@ -79,6 +79,10 @@ class Scanner(DependentModuleModel, ScannerModel):
             len(data_obj), "requirements", "requirements.txt",
             comment="path to requirements.txt (string or list of strings)"
         )
+        data_obj.insert(
+            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            comment="(optional) Save scan intermediates (raw results, logs, ...)"
+        )
 
     @staticmethod
     def validate_config(config):

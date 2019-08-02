@@ -88,7 +88,11 @@ class Scanner(DependentModuleModel, ScannerModel):
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
         data_obj.insert(
             len(data_obj),
-            "scan_opts", "-maxHeap 768", comment="(optional) additional spotbugs options"
+            "scan_opts", "", comment="(optional) additional spotbugs options"
+        )
+        data_obj.insert(
+            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            comment="(optional) Save scan intermediates (raw results, logs, ...)"
         )
 
     @staticmethod

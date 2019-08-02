@@ -89,6 +89,10 @@ class Scanner(DependentModuleModel, ScannerModel):
             len(data_obj),
             "comp_opts", "", comment="(optional) additional options"
         )
+        data_obj.insert(
+            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            comment="(optional) Save scan intermediates (raw results, logs, ...)"
+        )
 
     @staticmethod
     def validate_config(config):
