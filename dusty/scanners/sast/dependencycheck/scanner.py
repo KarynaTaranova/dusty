@@ -22,6 +22,7 @@
 
 import os
 import shlex
+import shutil
 import tempfile
 import subprocess
 
