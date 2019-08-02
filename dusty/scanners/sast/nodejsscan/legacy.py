@@ -46,8 +46,8 @@ class NodeJsScanParser(object):
                     steps_to_reproduce = f'<pre>{sub_value.get("lines", "")}</pre>\n\n'
                     dupe_key = key + ': ' + sub_value['title'] + ' with file ' + sub_value.get('filename', '')
                     if dupe_key not in dupes:
-                        steps_to_reproduce = list()
-                        steps_to_reproduce.append(re.sub(r'[^\x00-\x7f]', r'', steps_to_reproduce))
+                        steps_to_reproduce_list = list()
+                        steps_to_reproduce_list.append(re.sub(r'[^\x00-\x7f]', r'', steps_to_reproduce))
                         dupes[dupe_key] = {
                             "title": dupe_key,
                             "description": description,
@@ -55,7 +55,7 @@ class NodeJsScanParser(object):
                             "file_path": file_path,
                             "line": line,
                             "date": find_date,
-                            "steps_to_reproduce": steps_to_reproduce
+                            "steps_to_reproduce": steps_to_reproduce_list
                         }
                     else:
                         dupes[dupe_key]['steps_to_reproduce'].append(re.sub(r'[^\x00-\x7f]', r'',
