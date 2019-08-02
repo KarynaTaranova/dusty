@@ -82,7 +82,7 @@ class NpmScanParser(object):
                 file_path = ''
                 for key in tmp_values['file_paths']:
                     file_path = file_path + format_str.format(key, markdown.markdown_escape(',  '.join(tmp_values['file_paths'][key])))
-                rehearsal_str = ',  \n'
+                rehearsal_str = '\n'
                 url = rehearsal_str.join(tmp_values['urls'])
                 references = rehearsal_str.join(tmp_values['references_list'])
                 description = rehearsal_str.join(tmp_values['descriptions'])
