@@ -55,8 +55,6 @@ def parse_findings(data, scanner):
         finding.set_meta("severity", constants.NPM_SEVERITY_MAPPING[item["severity"]])
         finding.set_meta("legacy.file", item["file_path"])
         endpoints = list()
-        if item["file_path"]:
-            endpoints.append(namedtuple("Endpoint", ["raw"])(raw=item["file_path"]))
         finding.set_meta("endpoints", endpoints)
         log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
         scanner.findings.append(finding)
