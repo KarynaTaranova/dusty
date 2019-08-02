@@ -58,7 +58,7 @@ class NpmScanParser(object):
                 tmp_values = {'file_paths': {}, 'descriptions': [], 'urls': [],
                               'references_list': [], 'cwes': []}
                 severity = 'Info'
-                format_str = '  \n**{}**:  {}\n  \n'
+                format_str = '  \n*{}*:  {}\n  \n'
                 for resolve in action.get('resolves'):
                     id = resolve.get('id')
                     if id not in unique_ids:
