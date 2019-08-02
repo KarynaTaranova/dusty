@@ -23,7 +23,6 @@
 import json
 import os
 import re
-from dusty.data_model.canonical_model import DefaultModel as Finding
 
 
 __author__ = 'akaminski, arozumenko'
