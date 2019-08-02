@@ -46,6 +46,7 @@ class NpmScanParser(object):
             module = action.get('module')
             if module in deps:
                 EXTENDED_SEVERITIES = {
+                    'Info': 4,
                     'Low': 3,
                     'Moderate': 2,
                     'High': 1,
