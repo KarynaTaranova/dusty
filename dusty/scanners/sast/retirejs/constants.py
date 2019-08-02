@@ -20,10 +20,11 @@
 """
 
 
-NPM_SEVERITY_MAPPING = {
+RETIREJS_SEVERITY_MAPPING = {
     "Critical": "Critical",
     "High": "High",
-    "Moderate": "Medium",
+    "Medium": "Medium",
     "Low": "Low",
+    "None": "Info",
     "Info": "Info"
 }
