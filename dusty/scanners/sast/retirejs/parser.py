@@ -20,8 +20,6 @@
     retirejs JSON parser
 """
 
-from collections import namedtuple
-
 from dusty.models.finding import SastFinding
 from dusty.tools import log
 
