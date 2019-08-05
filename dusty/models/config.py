@@ -205,10 +205,6 @@ class ConfigModel:
         )
         settings_obj = global_obj["settings"]
         settings_obj.insert(
-            len(settings_obj), "load_settings_from", "MY-PROJECT_Application.yaml",
-            comment="(optional) Config file (object) name in upstream settings (object) provider"
-        )
-        settings_obj.insert(
             len(settings_obj), "depots", CommentedMap(), comment="Upstream setting providers config"
         )
         depots_obj = settings_obj["depots"]

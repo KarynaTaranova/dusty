@@ -96,6 +96,10 @@ class Command(ModuleModel, CommandModel):
             len(data_obj), "build_id", "1", comment="Build number (or some other identifier)"
         )
         data_obj.insert(
+            len(data_obj), "load_settings_from", "MY-PROJECT_Application.yaml",
+            comment="(optional) Config file (object) name in upstream settings (object) provider"
+        )
+        data_obj.insert(
             len(data_obj),
             "dast", CommentedMap(),
             comment="Settings common to all DAST scanners"
