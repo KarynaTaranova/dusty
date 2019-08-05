@@ -155,7 +155,7 @@ class ConfigModel:
                     )
                 )
             )
-            log.info("Loaded %s from depot", obj)
+            log.info("Loaded %s from depots", obj)
             log.debug(
                 "Resolved %d object secrets from depots",
                 self.context.get_meta("depots_resolved_secrets", 0)
