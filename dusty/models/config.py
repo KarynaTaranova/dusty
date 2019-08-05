@@ -223,3 +223,4 @@ class ConfigModel:
                 len(depots_obj), name, CommentedMap(),
                 comment=depot.Depot.get_description()
             )
+            depot.Depot.fill_config(depots_obj[name])
