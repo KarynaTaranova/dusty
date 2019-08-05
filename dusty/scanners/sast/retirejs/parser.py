@@ -51,10 +51,7 @@ def parse_findings(filename, scanner):
         )
         finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", constants.RETIREJS_SEVERITY_MAPPING[item["severity"]])
-        finding.set_meta("legacy.file", item["file_path"])
         endpoints = list()
-        if item["file_path"]:
-            endpoints.append(namedtuple("Endpoint", ["raw"])(raw=item["file_path"]))
         finding.set_meta("endpoints", endpoints)
         log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
         scanner.findings.append(finding)
