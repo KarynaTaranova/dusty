@@ -47,7 +47,10 @@ class Reporter(DependentModuleModel, ReporterModel):
         self.set_meta("testing_finish_time", time.time())
         self.set_meta(
             "testing_run_time",
-            int(self.get_meta("testing_finish_time") - self.get_meta("testing_start_time"))
+            int(
+                self.get_meta("testing_finish_time") -
+                self.get_meta("testing_start_time", self.get_meta("testing_finish_time"))
+            )
         )
         log.info("Testing finished (%d seconds)", self.get_meta("testing_run_time"))
 
@@ -63,7 +66,10 @@ class Reporter(DependentModuleModel, ReporterModel):
             "scanner_run_time",
             int(
                 self.context.scanners[scanner].get_meta("scanner_finish_time") -
-                self.context.scanners[scanner].get_meta("scanner_start_time")
+                self.context.scanners[scanner].get_meta(
+                    "scanner_start_time",
+                    self.context.scanners[scanner].get_meta("scanner_finish_time")
+                )
             )
         )
         log.info(
