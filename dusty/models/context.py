@@ -41,4 +41,4 @@ class RunContext(MetaModel):
         self.processors = LastUpdatedOrderedDict()  # processor -> instance
         self.reporters = LastUpdatedOrderedDict()  # reporter -> instance
         self.performers = dict()  # performer -> instance
-        self.depots = dict()  # depot -> instance
+        self.depots = LastUpdatedOrderedDict()  # depot -> instance

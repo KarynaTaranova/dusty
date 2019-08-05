@@ -19,11 +19,11 @@
 """
     Depot models
 """
-
+from dusty.models.module import ModuleModel
 from dusty.models.meta import MetaModel
 
 
-class SecretDepotModel(MetaModel):
+class SecretDepotModel(ModuleModel, MetaModel):  # pylint: disable=W0223
     """ SecretDepot base class """
 
     def get_secret(self, key):
@@ -31,7 +31,7 @@ class SecretDepotModel(MetaModel):
         return None
 
 
-class ObjectDepotModel(MetaModel):
+class ObjectDepotModel(ModuleModel, MetaModel):  # pylint: disable=W0223
     """ ObjectDepot base class """
 
     def get_object(self, key):
