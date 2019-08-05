@@ -26,6 +26,7 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from distutils.version import LooseVersion
+from dusty.tools import markdown
 
 
 __author__ = 'KarynaTaranova'
@@ -102,16 +103,16 @@ class RetireScanParser(object):
             if value.get('version_to_update') != '0':
                 title += ' to version {}'.format(value.get('version_to_update'))
             severity = value.get('severity')
-            description = '  \n'.join([format_str.format(key, val)
+            description = '  \n'.join([format_str.format(markdown.markdown_escape(key), markdown.markdown_escape(val))
                                               for key, val in value.get('descriptions').items()])
             references = ''
             for ref_key, ref_val in value.get('references').items():
                 _references = ','.join(['  \n- {}'.format(x) for x in ref_val]) + '  \n'
-                references += format_str.format(ref_key, _references)
+                references += format_str.format(markdown.markdown_escape(ref_key), markdown.markdown_escape(_references))
             file_path = ''
             for path_key, path_val in value.get('file_paths').items():
                 _paths = ','.join(['  \n- {}'.format(x) for x in path_val]) + '  \n'
-                file_path += format_str.format(path_key, _paths)
+                file_path += format_str.format(markdown.markdown_escape(path_key), markdown.markdown_escape(_paths))
             dupes[title] = {
                 "title": title,
                 "description": description,
