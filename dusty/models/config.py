@@ -28,6 +28,7 @@ import importlib
 
 from ruamel.yaml.comments import CommentedMap
 
+from dusty.models.depot import SecretDepotModel
 from dusty.tools.dict import recursive_merge
 from dusty.tools import log, depots
 from dusty import constants
@@ -86,23 +87,23 @@ class ConfigModel:
     def _process_depots(self, config, suite):  # pylint: disable=R0912
         """ Process depots: resolve secret variables and merge config from objects """
         context_config = recursive_merge(config["global"], config["suites"].get(suite))
-        depots_config = context_config["settings"].get("depots", dict())
         # Make depot instances
-        for depot_name in depots_config:
+        for depot_name in list(context_config["settings"].get("depots", dict())):
             try:
                 depot = importlib.import_module(
                     f"dusty.tools.depots.{depot_name}.depot"
-                ).Depot(self.context, depots_config[depot_name])
+                ).Depot(self.context, context_config["settings"]["depots"][depot_name])
                 self.context.depots[depot.get_name()] = depot
                 log.info("Enabled depot %s", depot_name)
+                if isinstance(depot, SecretDepotModel):
+                    self.context.set_meta("depots_resolved_secrets", 0)
+                    context_config = self._depot_substitution(context_config)
+                    log.info(
+                        "Resolved %d secrets from depots",
+                        self.context.get_meta("depots_resolved_secrets", 0)
+                    )
             except:
                 log.exception("Failed to enable depot %s", depot_name)
-        # Resolve secrets
-        self.context.set_meta("depots_resolved_secrets", 0)
-        context_config = self._depot_substitution(context_config)
-        log.info(
-            "Resolved %d secrets from depots", self.context.get_meta("depots_resolved_secrets", 0)
-        )
         # Load config objects
         base_config = self._depot_read_config_object("__base__.yaml")
         project_config = self._depot_read_config_object(
@@ -145,6 +146,7 @@ class ConfigModel:
         if data is None:
             return result
         try:
+            self.context.set_meta("depots_resolved_secrets", 0)
             result = self._depot_substitution(
                 self._variable_substitution(
                     yaml.load(
@@ -154,6 +156,10 @@ class ConfigModel:
                 )
             )
             log.info("Loaded %s from depot", obj)
+            log.debug(
+                "Resolved %d object secrets from depots",
+                self.context.get_meta("depots_resolved_secrets", 0)
+            )
             return result
         except:
             return result
