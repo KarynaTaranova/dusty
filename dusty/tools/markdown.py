@@ -21,7 +21,6 @@
 """
 
 import re
-import html as html_
 import markdown2
 import inscriptis
 
@@ -107,10 +106,8 @@ def _markdown2_postprocess(self, text):  # pylint: disable=W0613
     return text
 
 
-def markdown_escape(string, html_escape=True):
+def markdown_escape(string):
     """ Escape markdown special symbols """
-    if html_escape:
-        string = html_.escape(string)
     to_escape = [
         "\\", "`", "*", "_",
         "{", "}", "[", "]", "(", ")",
