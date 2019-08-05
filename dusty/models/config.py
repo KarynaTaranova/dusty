@@ -92,7 +92,7 @@ class ConfigModel:
             try:
                 depot = importlib.import_module(
                     f"dusty.tools.depots.{depot_name}.depot"
-                ).Depot(depots_config[depot_name])
+                ).Depot(self.context, depots_config[depot_name])
                 self.context.depots[depot.get_name()] = depot
                 log.info("Enabled depot %s", depot_name)
             except:
