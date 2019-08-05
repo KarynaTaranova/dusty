@@ -24,6 +24,8 @@ import json
 import os
 import re
 
+from dusty.tools import markdown
+
 
 __author__ = 'akaminski, arozumenko'
 
@@ -43,7 +45,7 @@ class NodeJsScanParser(object):
                     description = sub_value['description']
                     file_path = sub_value.get('path', '')
                     line = sub_value.get('line', '')
-                    steps_to_reproduce = f'<pre>{sub_value.get("lines", "")}</pre>\n\n'
+                    steps_to_reproduce = f'<pre>{markdown.markdown_escape(sub_value.get("lines", ""))}</pre>\n\n'
                     dupe_key = key + ': ' + sub_value['title'] + ' with file ' + sub_value.get('filename', '')
                     if dupe_key not in dupes:
                         steps_to_reproduce_list = list()
