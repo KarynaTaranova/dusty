@@ -71,10 +71,10 @@ class Command(ModuleModel, CommandModel):
         except:  # pylint: disable=W0702
             os.environ["USERNAME"] = "carrier"
         # Clone repository
-        repository = porcelain.clone(args.source, args.target)
+        repository = porcelain.clone(args.source, args.target, depth=1)
         # Checkout branch
-        repository.reset_index(repository[b"refs/heads/" + args.branch].tree)
-        repository.refs.set_symbolic_ref(b"HEAD", b"refs/heads/" + args.branch)
+        repository.reset_index(repository[b"refs/heads/" + args.branch.encode("utf-8")].tree)
+        repository.refs.set_symbolic_ref(b"HEAD", b"refs/heads/" + args.branch.encode("utf-8"))
 
     @staticmethod
     def get_name():
