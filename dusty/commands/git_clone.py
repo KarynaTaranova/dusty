@@ -21,6 +21,7 @@
 
 import dulwich  # pylint: disable=E0401
 from dulwich import porcelain  # pylint: disable=E0401
+from dulwich.contrib.paramiko_vendor import ParamikoSSHVendor  # pylint: disable=E0401
 
 from dusty.tools import log
 from dusty.models.module import ModuleModel
@@ -54,6 +55,8 @@ class Command(ModuleModel, CommandModel):
         # Patch dulwich to work without valid UID/GID
         dulwich.repo.__original__get_default_identity = dulwich.repo._get_default_identity  # pylint: disable=W0212
         dulwich.repo._get_default_identity = _dulwich_repo_get_default_identity  # pylint: disable=W0212
+        # Patch dulwich to use paramiko SSH client
+        dulwich.client.get_ssh_vendor = ParamikoSSHVendor
         # Clone repository
         porcelain.clone(args.source, args.target)
 
