@@ -19,6 +19,7 @@
     Command: git-clone
 """
 
+import dulwich  # pylint: disable=E0401
 from dulwich import porcelain  # pylint: disable=E0401
 
 from dusty.tools import log
@@ -46,11 +47,14 @@ class Command(ModuleModel, CommandModel):
     def execute(self, args):
         """ Run the command """
         log.debug("Starting")
-        #
+        # Check args
         if not args.source or not args.target:
             log.error("Please specify source and target.")
             return
-        #
+        # Patch dulwich to work without valid UID/GID
+        dulwich.repo.__original__get_default_identity = dulwich.repo._get_default_identity  # pylint: disable=W0212
+        dulwich.repo._get_default_identity = _dulwich_repo_get_default_identity  # pylint: disable=W0212
+        # Clone repository
         porcelain.clone(args.source, args.target)
 
     @staticmethod
@@ -62,3 +66,10 @@ class Command(ModuleModel, CommandModel):
     def get_description():
         """ Command help message (description) """
         return "clone remote git repository"
+
+
+def _dulwich_repo_get_default_identity():
+    try:
+        return dulwich.repo.__original__get_default_identity()  # pylint: disable=W0212
+    except:  # pylint: disable=W0702
+        return ("Carrier User", "carrier@localhost")
