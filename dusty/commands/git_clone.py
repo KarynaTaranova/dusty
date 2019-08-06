@@ -19,7 +19,7 @@
     Command: git-clone
 """
 
-import dulwich  # pylint: disable=E0401
+from dulwich import porcelain  # pylint: disable=E0401
 
 from dusty.tools import log
 from dusty.models.module import ModuleModel
@@ -51,7 +51,7 @@ class Command(ModuleModel, CommandModel):
             log.error("Please specify source and target.")
             return
         #
-        dulwich.porcelain.clone(args.source, args.target)
+        porcelain.clone(args.source, args.target)
 
     @staticmethod
     def get_name():
