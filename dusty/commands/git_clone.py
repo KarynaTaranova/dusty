@@ -73,8 +73,8 @@ class Command(ModuleModel, CommandModel):
         # Clone repository
         repository = porcelain.clone(args.source, args.target)
         # Checkout branch
-        repository.reset_index(repository[b"refs/heads/" + args.branch.encode("utf-8")].tree)
-        repository.refs.set_symbolic_ref(b"HEAD", b"refs/heads/" + args.branch.encode("utf-8"))
+        repository.reset_index(repository[b"refs/remotes/origin/" + args.branch.encode("utf-8")].tree)
+        repository.refs.set_symbolic_ref(b"HEAD", b"refs/remotes/origin/" + args.branch.encode("utf-8"))
 
     @staticmethod
     def get_name():
