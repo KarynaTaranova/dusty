@@ -19,6 +19,9 @@
     Command: git-clone
 """
 
+import os
+import getpass
+
 import dulwich  # pylint: disable=E0401
 from dulwich import porcelain  # pylint: disable=E0401
 from dulwich.contrib.paramiko_vendor import ParamikoSSHVendor  # pylint: disable=E0401
@@ -62,6 +65,11 @@ class Command(ModuleModel, CommandModel):
         dulwich.repo._get_default_identity = _dulwich_repo_get_default_identity  # pylint: disable=W0212
         # Patch dulwich to use paramiko SSH client
         dulwich.client.get_ssh_vendor = ParamikoSSHVendor
+        # Set USERNAME if needed
+        try:
+            getpass.getuser()
+        except:  # pylint: disable=W0702
+            os.environ["USERNAME"] = "carrier"
         # Clone repository
         porcelain.clone(args.source, args.target)
         # Checkout branch
