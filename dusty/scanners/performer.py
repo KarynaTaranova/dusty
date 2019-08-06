@@ -262,8 +262,8 @@ class ScanningPerformer(ModuleModel, PerformerModel):
     def validate_config(config):
         """ Validate config """
         if "scanners" not in config:
-            log.error("No scanners defined in config")
-            raise ValueError("No scanners configuration present")
+            log.warning("No scanners defined in config")
+            config["scanners"] = dict()
 
     @staticmethod
     def get_name():

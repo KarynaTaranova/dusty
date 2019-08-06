@@ -101,29 +101,48 @@ class Command(ModuleModel, CommandModel):
         log.debug("Done")
 
     @staticmethod
-    def _fill_context_meta(context):
+    def _fill_context_meta(context):  # pylint: disable=R0912
         # Project name
         if context.config["settings"].get("project_name", None):
             context.set_meta("project_name", context.config["settings"]["project_name"])
+        else:
+            context.set_meta("project_name", "UnnamedProject")
         # Project description
         if context.config["settings"].get("project_description", None):
             context.set_meta(
                 "project_description", context.config["settings"]["project_description"]
             )
+        else:
+            context.set_meta("project_description", "Undescribed Project")
         # Environment name
         if context.config["settings"].get("environment_name", None):
             context.set_meta(
                 "environment_name", context.config["settings"]["environment_name"]
             )
+        else:
+            context.set_meta("environment_name", "default")
         # Testing type
         if context.config["settings"].get("testing_type", None):
             context.set_meta("testing_type", context.config["settings"]["testing_type"])
+        else:
+            dast_scanners = len(context.config["scanners"].get("dast", dict()))
+            sast_scanners = len(context.config["scanners"].get("sast", dict()))
+            if dast_scanners > sast_scanners and sast_scanners == 0:
+                context.set_meta("testing_type", "DAST")
+            elif sast_scanners > dast_scanners and dast_scanners == 0:
+                context.set_meta("testing_type", "SAST")
+            else:
+                context.set_meta("testing_type", "DSAST")
         # Scan type
         if context.config["settings"].get("scan_type", None):
             context.set_meta("scan_type", context.config["settings"]["scan_type"])
+        else:
+            context.set_meta("scan_type", "security")
         # Build ID
         if context.config["settings"].get("build_id", None):
             context.set_meta("build_id", context.config["settings"]["build_id"])
+        else:
+            context.set_meta("build_id", "0")
         # Dusty version
         context.set_meta("dusty_version", pkg_resources.require("dusty")[0].version)
         # DAST target
