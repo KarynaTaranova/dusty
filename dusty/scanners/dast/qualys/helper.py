@@ -281,6 +281,16 @@ class QualysHelper:
         obj = dot(response.json())
         return obj.ServiceResponse.data[0].WasScan.status
 
+    def get_scan_results_status(self, scan_id):
+        """ Get scan status """
+        response = self._request(
+            f"/qps/rest/3.0/status/was/wasscan/{scan_id}",
+            validator=lambda r: r.ok and \
+                dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
+        )
+        obj = dot(response.json())
+        return obj.ServiceResponse.data[0].WasScan.summary.resultsStatus
+
     def create_report(self, name, webapp_id, report_template):
         """ Create report """
         response = self._request(

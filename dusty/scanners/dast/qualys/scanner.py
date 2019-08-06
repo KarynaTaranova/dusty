@@ -33,6 +33,7 @@ from ruamel.yaml.comments import CommentedMap
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
+from dusty.models.error import Error
 
 from .helper import QualysHelper
 from .parser import parse_findings
@@ -119,6 +120,28 @@ class Scanner(DependentModuleModel, ScannerModel):
         while helper.get_scan_status(scan_id) in ["SUBMITTED", "RUNNING"]:
             log.info("Waiting for scan to finish")
             sleep(status_check_interval)
+        # Wait for results to finish processing
+        while helper.get_scan_results_status(scan_id) in ["TO_BE_PROCESSED", "PROCESSING"]:
+            log.info("Waiting for scan results to finish processing")
+            sleep(status_check_interval)
+        scan_result = helper.get_scan_results_status(scan_id)
+        if scan_result in ["NO_HOST_ALIVE", "NO_WEB_SERVICE"]:
+            error = Error(
+                tool=self.get_name(),
+                error=f"Qualys failed to access target",
+                details="Qualys failed to access target " \
+                        "(e.g. connection failed or target is not accessible). " \
+                        "Please check scanner type/pool and target URL."
+            )
+            self.errors.append(error)
+        if scan_result in ["SCAN_RESULTS_INVALID", "SERVICE_ERROR", "SCAN_INTERNAL_ERROR"]:
+            error = Error(
+                tool=self.get_name(),
+                error=f"Qualys internal error occured",
+                details="Qualys failed to perform scan (internal scan error occured). " \
+                        "Please re-run the scan and check config if error persists."
+            )
+            self.errors.append(error)
         # Request report
         log.info("Requesting report")
         report_name = f"{project_name} WAS {timestamp} FOR Scan {scan_id}"
