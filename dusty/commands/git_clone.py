@@ -44,6 +44,11 @@ class Command(ModuleModel, CommandModel):
             help="target directory",
             type=str
         )
+        argparser.add_argument(
+            "-b", "--branch", dest="branch",
+            help="repository branch",
+            type=str, default="master"
+        )
 
     def execute(self, args):
         """ Run the command """
@@ -59,6 +64,8 @@ class Command(ModuleModel, CommandModel):
         dulwich.client.get_ssh_vendor = ParamikoSSHVendor
         # Clone repository
         porcelain.clone(args.source, args.target)
+        # Checkout branch
+        porcelain.reset(args.target, "hard", args.branch)
 
     @staticmethod
     def get_name():
