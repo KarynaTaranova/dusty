@@ -69,7 +69,7 @@ class Command(ModuleModel, CommandModel):
         try:
             getpass.getuser()
         except:  # pylint: disable=W0702
-            os.environ["USERNAME"] = "carrier"
+            os.environ["USERNAME"] = "git"
         # Clone repository
         repository = porcelain.clone(args.source, args.target, checkout=False, depth=1)
         # Checkout branch
@@ -92,4 +92,4 @@ def _dulwich_repo_get_default_identity():
     try:
         return dulwich.repo.__original__get_default_identity()  # pylint: disable=W0212
     except:  # pylint: disable=W0702
-        return ("Carrier User", "carrier@localhost")
+        return ("Carrier User", "dusty@localhost")
