@@ -51,7 +51,7 @@ class Processor(DependentModuleModel, ProcessorModel):
         """ Make sample config """
         data_obj.insert(
             len(data_obj), "severity", "High",
-            comment="Minimal severity level to report"
+            comment="Minimal severity level to report, one of: Critical, High, Medium, Low, Info"
         )
 
     @staticmethod
