@@ -38,6 +38,9 @@ beautifulsoup4==4.8.0
 # Dependency Check
 jsonpath-rw==1.4.0
 
+# Safety
+packaging==19.1
+
 #
 # Reporting
 #
