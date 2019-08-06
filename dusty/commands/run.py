@@ -137,7 +137,7 @@ class Command(ModuleModel, CommandModel):
         if context.config["settings"].get("scan_type", None):
             context.set_meta("scan_type", context.config["settings"]["scan_type"])
         else:
-            context.set_meta("scan_type", "security")
+            context.set_meta("scan_type", context.suite)
         # Build ID
         if context.config["settings"].get("build_id", None):
             context.set_meta("build_id", context.config["settings"]["build_id"])
