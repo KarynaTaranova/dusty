@@ -1,0 +1,11 @@
+#!/bin/bash
+
+run_command() {
+  eval "$*"
+}
+
+run_command "$*" & pid=$!
+while ps -q $pid > /dev/null 2>&1; do
+  echo -ne .;
+  sleep 10;
+done
