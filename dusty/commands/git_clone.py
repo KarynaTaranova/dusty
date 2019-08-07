@@ -25,6 +25,10 @@ import getpass
 import dulwich  # pylint: disable=E0401
 from dulwich import porcelain  # pylint: disable=E0401
 from dulwich.contrib.paramiko_vendor import ParamikoSSHVendor  # pylint: disable=E0401
+import paramiko.transport  # pylint: disable=E0401
+from paramiko.ssh_exception import SSHException  # pylint: disable=E0401
+from paramiko.message import Message  # pylint: disable=E0401
+
 
 from dusty.tools import log
 from dusty.models.module import ModuleModel
@@ -101,6 +105,8 @@ class Command(ModuleModel, CommandModel):
         dulwich.repo._get_default_identity = _dulwich_repo_get_default_identity  # pylint: disable=W0212
         # Patch dulwich to use paramiko SSH client
         dulwich.client.get_ssh_vendor = ParamikoSSHVendor
+        # Patch paramiko to skip key verification
+        paramiko.transport.Transport._verify_key = _paramiko_transport_verify_key  # pylint: disable=W0212
         # Set USERNAME if needed
         try:
             getpass.getuser()
@@ -155,3 +161,10 @@ def _dulwich_repo_get_default_identity():
         return dulwich.repo.__original__get_default_identity()  # pylint: disable=W0212
     except:  # pylint: disable=W0702
         return ("Carrier User", "dusty@localhost")
+
+
+def _paramiko_transport_verify_key(self, host_key, sig):  # pylint: disable=W0613
+    key = self._key_info[self.host_key_type](Message(host_key))  # pylint: disable=W0212
+    if key is None:
+        raise SSHException('Unknown host key type')
+    self.host_key = key
