@@ -72,6 +72,21 @@ class Command(ModuleModel, CommandModel):
             help="SSH key file",
             type=str
         )
+        argparser.add_argument(
+            "--username-variable", dest="username_variable",
+            help="environment variable with username",
+            type=str, default="GIT_LOGIN"
+        )
+        argparser.add_argument(
+            "--password-variable", dest="password_variable",
+            help="environment variable with password",
+            type=str, default="GIT_PASSWORD"
+        )
+        argparser.add_argument(
+            "--key-variable", dest="key_variable",
+            help="environment variable with path to SSH key",
+            type=str, default="GIT_KEY"
+        )
 
 
     def execute(self, args):
@@ -91,17 +106,29 @@ class Command(ModuleModel, CommandModel):
             getpass.getuser()
         except:  # pylint: disable=W0702
             os.environ["USERNAME"] = "git"
-        # Clone repository
+        # Fill args
         depth = None
         if args.depth:
             depth = args.depth
+        # Prepare auth
         auth_args = dict()
+        # Take from env variables
+        if args.username_variable and args.username_variable in os.environ:
+            auth_args["username"] = os.environ[args.username_variable]
+            os.environ["USERNAME"] = os.environ[args.username_variable]
+        if args.password_variable and args.password_variable in os.environ:
+            auth_args["password"] = os.environ[args.password_variable]
+        if args.key_variable and args.key_variable in os.environ:
+            auth_args["key_filename"] = os.environ[args.key_variable]
+        # Take from commandline parameters
         if args.username:
             auth_args["username"] = args.username
+            os.environ["USERNAME"] = args.username
         if args.password:
             auth_args["password"] = args.password
         if args.key:
             auth_args["key_filename"] = args.key
+        # Clone repository
         repository = porcelain.clone(
             args.source, args.target,
             checkout=False, depth=depth,
