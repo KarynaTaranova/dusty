@@ -52,6 +52,12 @@ class Command(ModuleModel, CommandModel):
             help="repository branch",
             type=str, default="master"
         )
+        argparser.add_argument(
+            "-l", "--lightweight", dest="depth",
+            help="limit clone depth",
+            type=int
+        )
+
 
     def execute(self, args):
         """ Run the command """
@@ -71,7 +77,17 @@ class Command(ModuleModel, CommandModel):
         except:  # pylint: disable=W0702
             os.environ["USERNAME"] = "git"
         # Clone repository
-        repository = porcelain.clone(args.source, args.target, checkout=False, depth=1)
+        depth = None
+        if args.depth:
+            depth = args.depth
+        username = None
+        password = None
+        key_filename = None
+        repository = porcelain.clone(
+            args.source, args.target,
+            checkout=False, depth=depth,
+            username=username, password=password, key_filename=key_filename
+        )
         # Checkout branch
         repository.reset_index(
             repository[b"refs/remotes/origin/" + args.branch.encode("utf-8")].tree
