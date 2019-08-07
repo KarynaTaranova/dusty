@@ -57,6 +57,21 @@ class Command(ModuleModel, CommandModel):
             help="limit clone depth",
             type=int
         )
+        argparser.add_argument(
+            "-u", "--username", dest="username",
+            help="username",
+            type=str
+        )
+        argparser.add_argument(
+            "-p", "--password", dest="password",
+            help="password",
+            type=str
+        )
+        argparser.add_argument(
+            "-k", "--key", dest="key",
+            help="SSH key file",
+            type=str
+        )
 
 
     def execute(self, args):
@@ -80,13 +95,17 @@ class Command(ModuleModel, CommandModel):
         depth = None
         if args.depth:
             depth = args.depth
-        username = None
-        password = None
-        key_filename = None
+        auth_args = dict()
+        if args.username:
+            auth_args["username"] = args.username
+        if args.password:
+            auth_args["password"] = args.password
+        if args.key:
+            auth_args["key_filename"] = args.key
         repository = porcelain.clone(
             args.source, args.target,
             checkout=False, depth=depth,
-            username=username, password=password, key_filename=key_filename
+            **auth_args
         )
         # Checkout branch
         repository.reset_index(
