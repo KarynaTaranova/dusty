@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# This script runs command and
+# prints "." while it is running
+# to avoid OpenShift/Jenkins bug
+
 run_command() {
   eval "$*"
 }
