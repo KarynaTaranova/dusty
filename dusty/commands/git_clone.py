@@ -134,8 +134,10 @@ class Command(ModuleModel, CommandModel):
             auth_args["key_filename"] = os.environ[args.key_variable]
         if args.key_data_variable and args.key_data_variable in os.environ:
             key_file_fd, key_file_path = tempfile.mkstemp()
-            with os.fdopen(key_file_fd, "w") as key_file:
-                key_file.write(os.environ[args.key_data_variable])
+            os.write(key_file_fd, os.environ[args.key_data_variable])
+            os.close(key_file_fd)
+            log.debug("Key file: %s", key_file_path)
+            log.debug("Key value: %s", os.environ[args.key_data_variable])
             auth_args["key_filename"] = key_file_path
         # Take from commandline parameters
         if args.username:
