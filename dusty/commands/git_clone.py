@@ -139,8 +139,6 @@ class Command(ModuleModel, CommandModel):
             )
             os.close(key_file_fd)
             auth_args["key_filename"] = key_file_path
-            with open(key_file_path, "r") as file_debug:
-                log.debug(file_debug.read())
         # Take from commandline parameters
         if args.username:
             auth_args["username"] = args.username
