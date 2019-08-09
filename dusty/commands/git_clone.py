@@ -21,6 +21,7 @@
 
 import os
 import getpass
+import tempfile
 
 import dulwich  # pylint: disable=E0401
 from dulwich import porcelain  # pylint: disable=E0401
@@ -91,6 +92,11 @@ class Command(ModuleModel, CommandModel):
             help="environment variable with path to SSH key",
             type=str, default="GIT_KEY"
         )
+        argparser.add_argument(
+            "--key-data-variable", dest="key_data_variable",
+            help="environment variable with SSH key data",
+            type=str, default="GIT_KEY_DATA"
+        )
 
 
     def execute(self, args):
@@ -126,6 +132,11 @@ class Command(ModuleModel, CommandModel):
             auth_args["password"] = os.environ[args.password_variable]
         if args.key_variable and args.key_variable in os.environ:
             auth_args["key_filename"] = os.environ[args.key_variable]
+        if args.key_data_variable and args.key_data_variable in os.environ:
+            key_file_fd, key_file_path = tempfile.mkstemp()
+            with os.fdopen(key_file_fd, "w") as key_file:
+                key_file.write(os.environ[args.key_data_variable])
+            auth_args["key_filename"] = key_file_path
         # Take from commandline parameters
         if args.username:
             auth_args["username"] = args.username
