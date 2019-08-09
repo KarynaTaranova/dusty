@@ -289,7 +289,10 @@ class QualysHelper:
                 dot(r.json()).ServiceResponse.responseCode == "SUCCESS"
         )
         obj = dot(response.json())
-        return obj.ServiceResponse.data[0].WasScan.summary.resultsStatus
+        try:
+            return obj.ServiceResponse.data[0].WasScan.summary.resultsStatus
+        except:  # pylint: disable=W0702
+            return "UNKNOWN"
 
     def create_report(self, name, webapp_id, report_template):
         """ Create report """

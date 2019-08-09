@@ -49,7 +49,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         self.config = \
             self.context.config["scanners"][__name__.split(".")[-3]][__name__.split(".")[-2]]
 
-    def execute(self):
+    def execute(self):  # pylint: disable=R0912
         """ Run the scanner """
         helper = QualysHelper(
             self.context,
@@ -121,6 +121,11 @@ class Scanner(DependentModuleModel, ScannerModel):
             log.info("Waiting for scan to finish")
             sleep(status_check_interval)
         # Wait for results to finish processing
+        if helper.get_scan_results_status(scan_id) == "UNKNOWN":
+            log.warning(
+                "Unable to find scan results status. Scan status: %s",
+                helper.get_scan_status(scan_id)
+            )
         while helper.get_scan_results_status(scan_id) in ["TO_BE_PROCESSED", "PROCESSING"]:
             log.info("Waiting for scan results to finish processing")
             sleep(status_check_interval)
