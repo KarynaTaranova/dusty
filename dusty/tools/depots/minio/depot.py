@@ -72,7 +72,7 @@ class Depot(ObjectDepotModel):
             http_client=http_client
         )
         # Test client auth
-        client.list_buckets()
+        client.list_objects(self.config.get("bucket", "carrier"))
         return client
 
     def get_object(self, key):
