@@ -9,7 +9,7 @@
     </style>
   </head>
   <body>
-    {% if not presenter.text_only %}
+    {% if presenter.text_only %}
     <p>{{ presenter.body|safe }}</p>
     {% else %}
     <p>{{ presenter.body }}</p>
