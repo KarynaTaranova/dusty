@@ -21,6 +21,7 @@
 """
 
 import os
+import json
 import core.scanner as njsscan  # pylint: disable=E0611
 
 from dusty.tools import log
