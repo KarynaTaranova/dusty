@@ -57,6 +57,11 @@ class EMailPresenter:
         )
 
     @property
+    def text_only(self):
+        """ Return true if text-only mail is requested """
+        return self.config.get("text_only", False)
+
+    @property
     def attachments(self):
         """ Returns mail attachments """
         result = list()

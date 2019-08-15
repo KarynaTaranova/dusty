@@ -98,6 +98,11 @@ class Reporter(DependentModuleModel, ReporterModel):
             "attachments", "/path/to/file.1, /path/to/file.2",
             comment="(optional) Additional custom attachments. Also supports YAML list syntax"
         )
+        data_obj.insert(
+            len(data_obj),
+            "text_only", False,
+            comment="(optional) Text-only emai (do not include information about results/errors)"
+        )
 
     @staticmethod
     def validate_config(config):

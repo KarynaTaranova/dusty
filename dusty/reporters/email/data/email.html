@@ -11,6 +11,7 @@
   <body>
     <p>{{ presenter.body }}</p>
 
+    {% if not presenter.text_only %}
     {% macro jira_tickets_table(tickets) -%}
     <table>
         <tr>
@@ -60,6 +61,7 @@
         </tr>
         {% endfor %}
     </table>
+    {% endif %}
     {% endif %}
   </body>
 </html>
