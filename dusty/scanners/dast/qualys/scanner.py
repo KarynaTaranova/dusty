@@ -56,11 +56,13 @@ class Scanner(DependentModuleModel, ScannerModel):
             self.config.get("qualys_api_server"),
             self.config.get("qualys_login"),
             self.config.get("qualys_password"),
+            retries=self.config.get("retries", 10),
+            retry_delay=self.config.get("retry_delay", 30.0),
             timeout=self.config.get("timeout", 120)
         )
         log.info("Qualys WAS version: %s", helper.get_version())
         timestamp = datetime.utcfromtimestamp(int(time())).strftime("%Y-%m-%d %H:%M:%S")
-        sleep_interval = self.config.get("sleep_interval", 5.0)
+        sleep_interval = self.config.get("sleep_interval", 10.0)
         status_check_interval = self.config.get("status_check_interval", 60.0)
         # Create/get project
         project_name = self.context.get_meta("project_name", "UnnamedProject")
@@ -306,12 +308,20 @@ class Scanner(DependentModuleModel, ScannerModel):
             comment="(optional) Response regex that is always present for authenticated user"
         )
         data_obj.insert(
-            len(data_obj), "sleep_interval", 5,
+            len(data_obj), "sleep_interval", 10,
             comment="(optional) Seconds to sleep after creating new resource"
         )
         data_obj.insert(
             len(data_obj), "status_check_interval", 60,
             comment="(optional) Seconds to wait between scan/report status checks"
+        )
+        data_obj.insert(
+            len(data_obj), "retries", 10,
+            comment="(optional) API request retry count"
+        )
+        data_obj.insert(
+            len(data_obj), "retry_delay", 30,
+            comment="(optional) API request retry delay"
         )
         data_obj.insert(
             len(data_obj), "timeout", 120,
