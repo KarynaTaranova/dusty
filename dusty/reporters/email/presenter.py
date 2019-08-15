@@ -43,7 +43,7 @@ class EMailPresenter:
                 self.context.get_meta("scan_type", "unknown"),
                 self.context.get_meta("build_id", "0"),
             )
-        )
+        ).format(**self.context.meta)
 
     @property
     def body(self):
@@ -54,7 +54,7 @@ class EMailPresenter:
                 self.context.get_meta("project_description", "Unnamed"),
                 self.context.get_meta("environment_name", "unknown"),
             )
-        )
+        ).format(**self.context.meta)
 
     @property
     def text_only(self):
