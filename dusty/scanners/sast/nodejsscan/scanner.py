@@ -21,9 +21,7 @@
 """
 
 import os
-import shutil
-import tempfile
-import subprocess
+import core.scanner as njsscan  # pylint: disable=E0611
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
@@ -44,20 +42,14 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def execute(self):
         """ Run the scanner """
-        # Make temporary directory
-        output_dir = tempfile.mkdtemp()
-        log.debug("Output directory: %s", output_dir)
-        # Run task
-        task = subprocess.run([
-            "nodejsscan", "-o", "nodejsscan", "-d", self.config.get("code")
-        ], cwd=output_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        log.log_subprocess_result(task)
-        output_file = os.path.join(output_dir, "nodejsscan.json")
-        parse_findings(output_file, self)
+        # Run scanner
+        result = njsscan.scan_dirs([self.config.get("code")])
+        # Parse result
+        parse_findings(result, self)
         # Save intermediates
-        self.save_intermediates(output_file, task)
+        self.save_intermediates(result)
 
-    def save_intermediates(self, output_file, task):
+    def save_intermediates(self, result):
         """ Save scanner intermediates """
         if self.config.get("save_intermediates_to", None):
             log.info("Saving intermediates")
@@ -66,15 +58,8 @@ class Scanner(DependentModuleModel, ScannerModel):
                 # Make directory for artifacts
                 os.makedirs(base, mode=0o755, exist_ok=True)
                 # Save report
-                shutil.copyfile(
-                    output_file,
-                    os.path.join(base, "report.json")
-                )
-                # Save output
-                with open(os.path.join(base, "output.stdout"), "w") as output:
-                    output.write(task.stdout.decode("utf-8", errors="ignore"))
-                with open(os.path.join(base, "output.stderr"), "w") as output:
-                    output.write(task.stderr.decode("utf-8", errors="ignore"))
+                with open(os.path.join(base, "report.json"), "w") as output:
+                    json.dump(result, output)
             except:
                 log.exception("Failed to save intermediates")
 

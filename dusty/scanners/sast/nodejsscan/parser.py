@@ -28,10 +28,10 @@ from dusty.models.finding import SastFinding
 from .legacy import NodeJsScanParser
 
 
-def parse_findings(filename, scanner):
+def parse_findings(result, scanner):
     """ Parse findings """
     # Parse JSON using legacy parser
-    findings = NodeJsScanParser(filename).items
+    findings = NodeJsScanParser(result).items
     # Make finding instances
     for item in findings:
         finding = SastFinding(

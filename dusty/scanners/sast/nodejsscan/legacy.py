@@ -31,13 +31,10 @@ __author__ = 'akaminski, arozumenko'
 
 
 class NodeJsScanParser(object):
-    def __init__(self, filename):
+    def __init__(self, data):
         dupes = dict()
         find_date = None
         self.items = []
-        if not os.path.exists(filename):
-            return
-        data = json.load(open(filename))
         for item in ['good_finding', 'sec_issues', 'missing_sec_header']:
             for key, value in data[item].items():
                 for sub_value in value:
