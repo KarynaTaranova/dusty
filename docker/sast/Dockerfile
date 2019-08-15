@@ -1,4 +1,4 @@
-FROM getcarrier/sast:base-1.0
+FROM getcarrier/sast:2.0-base
 #   Copyright 2018-2019 getcarrier.io
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
