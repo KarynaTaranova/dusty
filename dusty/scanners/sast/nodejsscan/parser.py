@@ -32,8 +32,8 @@ def parse_findings(result, scanner):
     """ Parse findings """
     # Parse JSON using legacy parser
     findings = NodeJsScanParser({
-        "missing_sec_header": list(),
-        "good_finding": list(),
+        "missing_sec_header": dict(),
+        "good_finding": dict(),
         "sec_issues": result
     }).items
     # Make finding instances
