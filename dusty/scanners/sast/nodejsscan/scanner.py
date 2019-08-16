@@ -75,7 +75,7 @@ class Scanner(DependentModuleModel, ScannerModel):
                 for name in files:
                     target = os.path.join(root, name)
                     # Skip file if in excludes (direct match)
-                    if target in excludes:
+                    if os.path.join(subpath, name) in excludes:
                         log.debug("Skipping file %s", target)
                         continue
                     # Add to files to scan
