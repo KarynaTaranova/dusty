@@ -48,8 +48,40 @@ class Scanner(DependentModuleModel, ScannerModel):
         original_print = print
         builtins.print = lambda *args, **kwargs: log.debug(" ".join([str(item) for item in args]))
         try:
+            # Prepare excludes
+            excludes = self.config.get("excludes", list())
+            if not isinstance(excludes, list):
+                excludes = [item.strip() for item in excludes.split(",")]
+            excludes = [os.path.normpath(item) for item in excludes]
+            log.debug("Excludes: %s", excludes)
+            # Collect files to scan
+            scan_target = list()
+            base = os.path.normpath(self.config.get("code"))
+            for root, _, files in os.walk(base):
+                # Normalize relative dir path
+                subpath = os.path.normpath(root)[len(base):]
+                if subpath.startswith(os.sep):
+                    subpath = subpath[len(os.sep):]
+                # Check if dir (or any parent) is in excludes
+                skip_dir = False
+                for item in excludes:
+                    if item.endswith(os.sep) and subpath.startswith(item):
+                        skip_dir = True
+                # Skip dir if needed
+                if subpath + os.sep in excludes or skip_dir:
+                    log.debug("Skipping dir %s", root)
+                    continue
+                # Iterate files
+                for name in files:
+                    target = os.path.join(root, name)
+                    # Skip file if in excludes (direct match)
+                    if target in excludes:
+                        log.debug("Skipping file %s", target)
+                        continue
+                    # Add to files to scan
+                    scan_target.append(target)
             # Run scanner
-            result = njsscan.scan_dirs([self.config.get("code")])
+            result = njsscan.scan_file(scan_target)
         finally:
             # Restore print function
             builtins.print = original_print
@@ -75,6 +107,12 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def fill_config(data_obj):
         """ Make sample config """
+        data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
+        data_obj.insert(
+            len(data_obj),
+            "excludes", "path/to/dir/, path/to/file",
+            comment="(optional) Excludes. Also supports YAML list syntax"
+        )
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
         data_obj.insert(
             len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
