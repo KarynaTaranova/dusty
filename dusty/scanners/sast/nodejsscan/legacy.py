@@ -35,28 +35,26 @@ class NodeJsScanParser(object):
         dupes = dict()
         find_date = None
         self.items = []
-        for item in ['good_finding', 'sec_issues', 'missing_sec_header']:
-            for key, value in data[item].items():
-                for sub_value in value:
-                    title = sub_value['title']
-                    description = sub_value['description']
-                    file_path = sub_value.get('path', '')
-                    line = sub_value.get('line', '')
-                    steps_to_reproduce = f'<pre>{html.escape(sub_value.get("lines", ""))}</pre>\n\n'
-                    dupe_key = key + ': ' + sub_value['title'] + ' with file ' + sub_value.get('filename', '')
-                    if dupe_key not in dupes:
-                        steps_to_reproduce_list = list()
-                        steps_to_reproduce_list.append(re.sub(r'[^\x00-\x7f]', r'', steps_to_reproduce))
-                        dupes[dupe_key] = {
-                            "title": dupe_key,
-                            "description": description,
-                            "severity": "Medium",
-                            "file_path": file_path,
-                            "line": line,
-                            "date": find_date,
-                            "steps_to_reproduce": steps_to_reproduce_list
-                        }
-                    else:
-                        dupes[dupe_key]['steps_to_reproduce'].append(re.sub(r'[^\x00-\x7f]', r'',
-                                                                                    steps_to_reproduce))
+        for sub_value in data:
+            title = sub_value['title']
+            description = sub_value['description']
+            file_path = sub_value.get('path', '')
+            line = sub_value.get('line', '')
+            steps_to_reproduce = f'<pre>{html.escape(sub_value.get("lines", ""))}</pre>\n\n'
+            dupe_key = sub_value['title'] + ' with file ' + sub_value.get('filename', '')
+            if dupe_key not in dupes:
+                steps_to_reproduce_list = list()
+                steps_to_reproduce_list.append(re.sub(r'[^\x00-\x7f]', r'', steps_to_reproduce))
+                dupes[dupe_key] = {
+                    "title": dupe_key,
+                    "description": description,
+                    "severity": "Medium",
+                    "file_path": file_path,
+                    "line": line,
+                    "date": find_date,
+                    "steps_to_reproduce": steps_to_reproduce_list
+                }
+            else:
+                dupes[dupe_key]['steps_to_reproduce'].append(re.sub(r'[^\x00-\x7f]', r'',
+                                                                            steps_to_reproduce))
         self.items = dupes.values()

@@ -31,11 +31,7 @@ from .legacy import NodeJsScanParser
 def parse_findings(result, scanner):
     """ Parse findings """
     # Parse JSON using legacy parser
-    findings = NodeJsScanParser({
-        "missing_sec_header": dict(),
-        "good_finding": dict(),
-        "sec_issues": result
-    }).items
+    findings = NodeJsScanParser(result).items
     # Make finding instances
     for item in findings:
         finding = SastFinding(
