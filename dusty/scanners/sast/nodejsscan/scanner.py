@@ -22,6 +22,7 @@
 
 import os
 import json
+import builtins
 import core.scanner as njsscan  # pylint: disable=E0611
 
 from dusty.tools import log
@@ -43,8 +44,15 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def execute(self):
         """ Run the scanner """
-        # Run scanner
-        result = njsscan.scan_dirs([self.config.get("code")])
+        # Replace print function to hide njsscan print()s
+        original_print = print
+        builtins.print = lambda *args, **kwargs: log.debug(" ".join([str(item) for item in args]))
+        try:
+            # Run scanner
+            result = njsscan.scan_dirs([self.config.get("code")])
+        finally:
+            # Restore print function
+            builtins.print = original_print
         # Parse result
         parse_findings(result, self)
         # Save intermediates
