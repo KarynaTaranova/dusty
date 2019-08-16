@@ -52,7 +52,6 @@ class Scanner(DependentModuleModel, ScannerModel):
             excludes = self.config.get("excludes", list())
             if not isinstance(excludes, list):
                 excludes = [item.strip() for item in excludes.split(",")]
-            excludes = [os.path.normpath(item) for item in excludes]
             log.debug("Excludes: %s", excludes)
             # Collect files to scan
             scan_target = list()
