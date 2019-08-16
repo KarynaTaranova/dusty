@@ -34,6 +34,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         self.context = context
         self.config = \
             self.context.config["scanners"][__name__.split(".")[-3]][__name__.split(".")[-2]]
+        self.set_meta("meta_scanner", True)
 
     def prepare(self):
         """ Prepare scanner """

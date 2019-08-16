@@ -108,9 +108,10 @@ class ScanningPerformer(ModuleModel, PerformerModel):
                 if future not in started and (future.running() or future.done()):
                     item = future_map[future]
                     scanner = self.context.scanners[item]
-                    log.info(f"Started {item} ({scanner.get_description()})")
-                    if reporting:
-                        reporting.on_scanner_start(item)
+                    if not scanner.get_meta("meta_scanner", False):
+                        log.info(f"Started {item} ({scanner.get_description()})")
+                        if reporting:
+                            reporting.on_scanner_start(item)
                     # Add to started set
                     started.add(future)
             # Check for finished executors
@@ -136,8 +137,9 @@ class ScanningPerformer(ModuleModel, PerformerModel):
                     for error in scanner.get_errors():
                         error.set_meta("scanner_type", scanner_type)
                         self.context.errors.append(error)
-                    if reporting:
-                        reporting.on_scanner_finish(item)
+                    if not scanner.get_meta("meta_scanner", False):
+                        if reporting:
+                            reporting.on_scanner_finish(item)
                     # Add to finished set
                     finished.add(future)
             # Exit if all executors done
