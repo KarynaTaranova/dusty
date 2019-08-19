@@ -57,17 +57,22 @@ class QualysHelper:
 
     def _request(self, endpoint, json=None, validator=None):
         """ Perform API request (with error handling) """
+        last_response_text = ""
         for retry in range(self.retries):
             try:
                 response = self._request_raw(endpoint, json)
                 if validator is not None and not validator(response):
-                    raise ValueError("Invalid response")
+                    last_response_text = response.text
+                    raise ValueError(f"Invalid response: {response.text}")
                 return response
             except:  # pylint: disable=W0702
                 log.exception("Qualys API error [retry=%d]", retry)
                 self._destroy_connection()
                 time.sleep(self.retry_delay)
-        raise RuntimeError(f"Qualys API request failed after {self.retries} retries")
+        raise RuntimeError(
+            f"Qualys API request failed after {self.retries} retries. " \
+            f"Last response: {last_response_text}"
+        )
 
     def _request_raw(self, endpoint, json=None):
         """ Perform API request (directly) """
