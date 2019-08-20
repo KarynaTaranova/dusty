@@ -48,14 +48,17 @@ class ReportingPerformer(ModuleModel, PerformerModel, ReporterModel):
         """ Prepare for action """
         log.debug("Preparing")
         config = self.context.config["reporters"]
+        config_items = [
+            item for item in list(config) if not isinstance(config[item], bool) or config[item]
+        ]
         # Schedule reporters
         try:
             all_reporters = dependency.resolve_name_order(
-                list(config) + constants.DEFAULT_REPORTERS,
+                config_items + constants.DEFAULT_REPORTERS,
                 "dusty.reporters.{}.reporter", "Reporter"
             )
         except:
-            all_reporters = constants.DEFAULT_REPORTERS + list(config)
+            all_reporters = constants.DEFAULT_REPORTERS + config_items
         for reporter_name in all_reporters:
             try:
                 self.schedule_reporter(reporter_name, dict())

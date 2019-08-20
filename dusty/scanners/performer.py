@@ -53,6 +53,9 @@ class ScanningPerformer(ModuleModel, PerformerModel):
         # Schedule scanners
         for scanner_type in list(config):
             for scanner_name in list(config[scanner_type]):
+                if isinstance(config[scanner_type][scanner_name], bool) and \
+                        not config[scanner_type][scanner_name]:
+                    continue
                 try:
                     self.schedule_scanner(scanner_type, scanner_name, dict())
                 except:

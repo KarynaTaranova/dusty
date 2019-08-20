@@ -47,14 +47,17 @@ class ProcessingPerformer(ModuleModel, PerformerModel):
         """ Prepare for action """
         log.debug("Preparing")
         config = self.context.config.get("processing")
+        config_items = [
+            item for item in list(config) if not isinstance(config[item], bool) or config[item]
+        ]
         # Schedule processors
         try:
             all_processors = dependency.resolve_name_order(
-                list(config) + constants.DEFAULT_PROCESSORS,
+                config_items + constants.DEFAULT_PROCESSORS,
                 "dusty.processors.{}.processor", "Processor"
             )
         except:
-            all_processors = constants.DEFAULT_PROCESSORS + list(config)
+            all_processors = constants.DEFAULT_PROCESSORS + config_items
         for processor_name in all_processors:
             try:
                 self.schedule_processor(processor_name, dict())
