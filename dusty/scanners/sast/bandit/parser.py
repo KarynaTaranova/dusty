@@ -20,7 +20,9 @@
     Bandit JSON parser
 """
 
+import json
 from collections import namedtuple
+import pkg_resources
 
 from dusty.tools import log, markdown
 from dusty.models.finding import SastFinding
@@ -48,6 +50,19 @@ def parse_findings(data, scanner):
                 ])
             ]
         )
+        # Better bandit finding titles/descriptions
+        database = json.load(pkg_resources.resource_stream(
+            "dusty",
+            f"{'/'.join(__name__.split('.')[1:-1])}/data/findings.json"
+        ))
+        if item["bandit_id"] in database:
+            finding.set_meta("rewrite_title_to", item["bandit_id"]["title"])
+            if item["bandit_id"].get("description", None):
+                finding.description[0] = "\n\n".join([
+                    markdown.markdown_escape(item["bandit_id"]["description"]),
+                    finding.description[0]
+                ])
+        # Other meta
         finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", constants.BANDIT_SEVERITIES[item["severity"]])
         finding.set_meta("legacy.file", item["file_path"])

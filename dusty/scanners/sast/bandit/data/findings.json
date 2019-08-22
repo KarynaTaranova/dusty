@@ -1,0 +1,6 @@
+{
+  "B304": {
+    "title": "B304: insecure cipher or cipher mode",
+    "description": "Use of insecure cipher or cipher mode. Replace with a known secure cipher such as AES."
+  }
+}

@@ -64,6 +64,7 @@ class BanditParser(object):
                     "references": references,
                     "file_path": item["filename"],
                     "line": item["line_number"],
-                    "date": find_date
+                    "date": find_date,
+                    "bandit_id": item["test_id"]
                 }
         self.items = dupes.values()

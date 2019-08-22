@@ -21,5 +21,6 @@
 
 
 DEFAULT_PROCESSORS = [
-    "issue_hash"
+    "issue_hash",
+    "title_rewriter"
 ]
