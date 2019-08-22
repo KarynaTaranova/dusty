@@ -56,10 +56,11 @@ def parse_findings(data, scanner):
             f"{'/'.join(__name__.split('.')[1:-1])}/data/findings.json"
         ))
         if item["bandit_id"] in database:
-            finding.set_meta("rewrite_title_to", item["bandit_id"]["title"])
-            if item["bandit_id"].get("description", None):
+            db_item = database[item["bandit_id"]]
+            finding.set_meta("rewrite_title_to", db_item["title"])
+            if db_item.get("description", None):
                 finding.description[0] = "\n\n".join([
-                    markdown.markdown_escape(item["bandit_id"]["description"]),
+                    markdown.markdown_escape(db_item["description"]),
                     finding.description[0]
                 ])
         # Other meta
