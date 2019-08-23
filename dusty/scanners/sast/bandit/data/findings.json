@@ -51,77 +51,9 @@
     "title": "B201: Test for use of flask app with debug set to true",
     "description": "Running Flask applications in debug mode results in the Werkzeug debugger being enabled. This includes a feature that allows arbitrary code execution. Documentation for both Flask and Werkzeug strongly suggests that debug mode should never be enabled on production systems. Operating a production server with debug mode enabled was the probable cause of the Patreon breach in 2015."
   },
-  "B501": {
-    "title": "B501: Test for missing certificate validation",
-    "description": "Encryption in general is typically critical to the security of many applications. Using TLS can greatly increase security by guaranteeing the identity of the party you are communicating with. This is accomplished by one or both parties presenting trusted certificates during the connection initialization phase of TLS. When request methods are used certificates are validated automatically which is the desired behavior. If certificate validation is explicitly turned off Bandit will return a HIGH severity error."
-  },
-  "B502": {
-    "title": "B502: Test for SSL use with bad version used",
-    "description": "Several highly publicized exploitable flaws have been discovered in all versions of SSL and early versions of TLS. It is strongly recommended that use of the following known broken protocol versions be avoided: SSL v2, SSL v3, TLS v1, TLS v1.1. This plugin test scans for calls to Python methods with parameters that indicate the used broken SSL/TLS protocol versions. Currently, detection supports methods using Python’s native SSL/TLS support and the pyOpenSSL module. A HIGH severity warning will be reported whenever known broken protocol versions are detected. It is worth noting that native support for TLS 1.2 is only available in more recent Python versions, specifically 2.7.9 and up, and 3.x. Amongst the available SSL/TLS versions provided by Python/pyOpenSSL there exists the option to use SSLv23. This very poorly named option actually means “use the highest version of SSL/TLS supported by both the server and client”. This may (and should be) a version well in advance of SSL v2 or v3. Bandit can scan for the use of SSLv23 if desired, but its detection does not necessarily indicate a problem. When using SSLv23 it is important to also provide flags to explicitly exclude bad versions of SSL/TLS from the protocol versions considered. Both the Python native and pyOpenSSL modules provide the OP_NO_SSLv2 and OP_NO_SSLv3 flags for this purpose."
-  },
-  "B503": {
-    "title": "B503: Test for SSL use with bad defaults specified",
-    "description": "This plugin is part of a family of tests that detect the use of known bad versions of SSL/TLS. Specifically, this plugin test scans for Python methods with default parameter values that specify the use of broken SSL/TLS protocol versions. Currently, detection supports methods using Python’s native SSL/TLS support and the pyOpenSSL module. A MEDIUM severity warning will be reported whenever known broken protocol versions are detected."
-  },
-  "B504": {
-    "title": "B504: Test for SSL use with no version specified",
-    "description": "This plugin is part of a family of tests that detect the use of known bad versions of SSL/TLS. Specifically, This plugin test scans for specific methods in Python’s native SSL/TLS support and the pyOpenSSL module that configure the version of SSL/TLS protocol to use. These methods are known to provide default value that maximize compatibility, but permit use of the aforementioned broken protocol versions. A LOW severity warning will be reported whenever this is detected."
-  },
-  "B505": {
-    "title": "B505: Test for weak cryptographic key use",
-    "description": "As computational power increases, so does the ability to break ciphers with smaller key lengths. The recommended key length size for RSA and DSA algorithms is 2048 and higher. 1024 bits and below are now considered breakable. EC key length sizes are recommended to be 224 and higher with 160 and below considered breakable. This plugin test checks for use of any key less than those limits and returns a high severity error if lower than the lower threshold and a medium severity error for those lower than the higher threshold."
-  },
-  "B506": {
-    "title": "B506: Test for use of yaml load",
-    "description": "This plugin test checks for the unsafe usage of the yaml.load function from the PyYAML package. The yaml.load function provides the ability to construct an arbitrary Python object, which may be dangerous if you receive a YAML document from an untrusted source. The function yaml.safe_load limits this ability to simple Python objects like integers or lists. Please see http://pyyaml.org/wiki/PyYAMLDocumentation#LoadingYAML for more information on yaml.load and yaml.safe_load"
-  },
-  "B601": {
-    "title": "B601: Test for shell injection within Paramiko",
-    "description": "Paramiko is a Python library designed to work with the SSH2 protocol for secure (encrypted and authenticated) connections to remote machines. It is intended to run commands on a remote host. These commands are run within a shell on the target and are thus vulnerable to various shell injection attacks. Bandit reports a MEDIUM issue when it detects the use of Paramiko’s “exec_command” or “invoke_shell” methods advising the user to check inputs are correctly sanitized."
-  },
-  "B602": {
-    "title": "B602: Test for use of popen with shell equals true",
-    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess using a command shell. This type of subprocess invocation is dangerous as it is vulnerable to various shell injection attacks. Great care should be taken to sanitize all input in order to mitigate this risk. Calls of this type are identified by a parameter of ‘shell=True’ being given. Additionally, this plugin scans the command string given and adjusts its reported severity based on how it is presented. If the command string is a simple static string containing no special shell characters, then the resulting issue has low severity. If the string is static, but contains shell formatting characters or wildcards, then the reported issue is medium. Finally, if the string is computed using Python’s string manipulation or formatting operations, then the reported issue has high severity. These severity levels reflect the likelihood that the code is vulnerable to injection."
-  },
-  "B603": {
-    "title": "B603: Test for use of subprocess with shell equals true",
-    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess without the use of a command shell. This type of subprocess invocation is not vulnerable to shell injection attacks, but care should still be taken to ensure validity of input. Because this is a lesser issue than that described in subprocess_popen_with_shell_equals_true a LOW severity warning is reported."
-  },
-  "B604": {
-    "title": "B604: Test for any function with shell equals true",
-    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this plugin test interrogates method calls for the presence of a keyword parameter shell equalling true. It is related to detection of shell injection issues and is intended to catch custom wrappers to vulnerable methods that may have been created."
-  },
-  "B605": {
-    "title": "B605: Test for starting a process with a shell",
-    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess using a command shell. This type of subprocess invocation is dangerous as it is vulnerable to various shell injection attacks. Great care should be taken to sanitize all input in order to mitigate this risk. Calls of this type are identified by the use of certain commands which are known to use shells. Bandit will report a LOW severity warning."
-  },
-  "B606": {
-    "title": "B606: Test for starting a process with no shell",
-    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess in a way that doesn’t use a shell. Although this is generally safe, it maybe useful for penetration testing workflows to track where external system calls are used. As such a LOW severity message is generated."
-  },
-  "B607": {
-    "title": "B607: Test for starting a process with a partial path",
-    "description": "Python possesses many mechanisms to invoke an external executable. If the desired executable path is not fully qualified relative to the filesystem root then this may present a potential security risk. In POSIX environments, the PATH environment variable is used to specify a set of standard locations that will be searched for the first matching named executable. While convenient, this behavior may allow a malicious actor to exert control over a system. If they are able to adjust the contents of the PATH variable, or manipulate the file system, then a bogus executable may be discovered in place of the desired one. This executable will be invoked with the user privileges of the Python process that spawned it, potentially a highly privileged user. This test will scan the parameters of all configured Python methods, looking for paths that do not start at the filesystem root, that is, do not have a leading ‘/’ character."
-  },
-  "B608": {
-    "title": "B608: Test for SQL injection",
-    "description": "An SQL injection attack consists of insertion or “injection” of a SQL query via the input data given to an application. It is a very common attack vector. This plugin test looks for strings that resemble SQL statements that are involved in some form of string building operation. Unless care is taken to sanitize and control the input data when building such SQL statement strings, an injection attack becomes possible. If strings of this nature are discovered, a LOW confidence issue is reported. In order to boost result confidence, this plugin test will also check to see if the discovered string is in use with standard Python DBAPI calls execute or executemany. If so, a MEDIUM issue is reported."
-  },
-  "B609": {
-    "title": "B609: Test for use of wildcard injection",
-    "description": "Python provides a number of methods that emulate the behavior of standard Linux command line utilities. Like their Linux counterparts, these commands may take a wildcard “*” character in place of a file system path. This is interpreted to mean “any and all files or folders” and can be used to build partially qualified paths, such as “/home/user/*”. The use of partially qualified paths may result in unintended consequences if an unexpected file or symlink is placed into the path location given. This becomes particularly dangerous when combined with commands used to manipulate file permissions or copy data off of a system."
-  },
-  "B701": {
-    "title": "B701: Test for not auto escaping in jinja2",
-    "description": "Jinja2 is a Python HTML templating system. It is typically used to build web applications, though appears in other places well, notably the Ansible automation system. When configuring the Jinja2 environment, the option to use autoescaping on input can be specified. When autoescaping is enabled, Jinja2 will filter input strings to escape any HTML content submitted via template variables. Without escaping HTML input the application becomes vulnerable to Cross Site Scripting (XSS) attacks. Unfortunately, autoescaping is False by default. Thus this plugin test will warn on omission of an autoescape setting, as well as an explicit setting of false. A HIGH severity warning is generated in either of these scenarios."
-  },
-  "B702": {
-    "title": "B702: Test for use of mako templates",
-    "description": "Mako is a Python templating system often used to build web applications. It is the default templating system used in Pylons and Pyramid. Unlike Jinja2 (an alternative templating system), Mako has no environment wide variable escaping mechanism. Because of this, all input variables must be carefully escaped before use to prevent possible vulnerabilities to Cross Site Scripting (XSS) attacks."
-  },
   "B301": {
     "title": "B301: Blacklist various Python calls known to be dangerous: pickle",
-    "description": "Pickle library appears to be in use, possible security issue."
+    "description": "Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue."
   },
   "B302": {
     "title": "B302: Blacklist various Python calls known to be dangerous: marshal",
@@ -211,6 +143,10 @@
     "title": "B323: Blacklist various Python calls known to be dangerous: unverified_context",
     "description": "By default, Python will create a secure, verified ssl context for use in such classes as HTTPSConnection. However, it still allows using an insecure context via the _create_unverified_context that reverts to the previous behavior that does not validate certificates or perform hostname checks."
   },
+  "B325": {
+    "title": "B325: Blacklist various Python calls known to be dangerous: tempnam",
+    "description": "Use of os.tempnam() and os.tmpnam() is vulnerable to symlink attacks. Consider using tmpfile() instead."
+  },
   "B401": {
     "title": "B401: Blacklist various Python imports known to be dangerous: import_telnetlib",
     "description": "A telnet-related module is being imported. Telnet is considered insecure. Use SSH or some other encrypted protocol."
@@ -262,5 +198,90 @@
   "B413": {
     "title": "B413: Blacklist various Python imports known to be dangerous: import_pycrypto",
     "description": "pycrypto library is known to have publicly disclosed buffer overflow vulnerability https://github.com/dlitz/pycrypto/issues/176. It is no longer actively maintained and has been deprecated in favor of pyca/cryptography library."
+  },
+  "B414": {
+    "title": "B414: Blacklist various Python imports known to be dangerous: import_pycryptodome",
+    "description": "pycryptodome is a direct fork of pycrypto that has not fully addressed the issues inherent in PyCrypto. It seems to exist, mainly, as an API compatible continuation of pycrypto and should be deprecated in favor of pyca/cryptography which has more support among the Python community."
+  },
+  "B501": {
+    "title": "B501: Test for missing certificate validation",
+    "description": "Encryption in general is typically critical to the security of many applications. Using TLS can greatly increase security by guaranteeing the identity of the party you are communicating with. This is accomplished by one or both parties presenting trusted certificates during the connection initialization phase of TLS. When request methods are used certificates are validated automatically which is the desired behavior. If certificate validation is explicitly turned off Bandit will return a HIGH severity error."
+  },
+  "B502": {
+    "title": "B502: Test for SSL use with bad version used",
+    "description": "Several highly publicized exploitable flaws have been discovered in all versions of SSL and early versions of TLS. It is strongly recommended that use of the following known broken protocol versions be avoided: SSL v2, SSL v3, TLS v1, TLS v1.1. This plugin test scans for calls to Python methods with parameters that indicate the used broken SSL/TLS protocol versions. Currently, detection supports methods using Python’s native SSL/TLS support and the pyOpenSSL module. A HIGH severity warning will be reported whenever known broken protocol versions are detected. It is worth noting that native support for TLS 1.2 is only available in more recent Python versions, specifically 2.7.9 and up, and 3.x. Amongst the available SSL/TLS versions provided by Python/pyOpenSSL there exists the option to use SSLv23. This very poorly named option actually means “use the highest version of SSL/TLS supported by both the server and client”. This may (and should be) a version well in advance of SSL v2 or v3. Bandit can scan for the use of SSLv23 if desired, but its detection does not necessarily indicate a problem. When using SSLv23 it is important to also provide flags to explicitly exclude bad versions of SSL/TLS from the protocol versions considered. Both the Python native and pyOpenSSL modules provide the OP_NO_SSLv2 and OP_NO_SSLv3 flags for this purpose."
+  },
+  "B503": {
+    "title": "B503: Test for SSL use with bad defaults specified",
+    "description": "This plugin is part of a family of tests that detect the use of known bad versions of SSL/TLS. Specifically, this plugin test scans for Python methods with default parameter values that specify the use of broken SSL/TLS protocol versions. Currently, detection supports methods using Python’s native SSL/TLS support and the pyOpenSSL module. A MEDIUM severity warning will be reported whenever known broken protocol versions are detected."
+  },
+  "B504": {
+    "title": "B504: Test for SSL use with no version specified",
+    "description": "This plugin is part of a family of tests that detect the use of known bad versions of SSL/TLS. Specifically, This plugin test scans for specific methods in Python’s native SSL/TLS support and the pyOpenSSL module that configure the version of SSL/TLS protocol to use. These methods are known to provide default value that maximize compatibility, but permit use of the aforementioned broken protocol versions. A LOW severity warning will be reported whenever this is detected."
+  },
+  "B505": {
+    "title": "B505: Test for weak cryptographic key use",
+    "description": "As computational power increases, so does the ability to break ciphers with smaller key lengths. The recommended key length size for RSA and DSA algorithms is 2048 and higher. 1024 bits and below are now considered breakable. EC key length sizes are recommended to be 224 and higher with 160 and below considered breakable. This plugin test checks for use of any key less than those limits and returns a high severity error if lower than the lower threshold and a medium severity error for those lower than the higher threshold."
+  },
+  "B506": {
+    "title": "B506: Test for use of yaml load",
+    "description": "This plugin test checks for the unsafe usage of the yaml.load function from the PyYAML package. The yaml.load function provides the ability to construct an arbitrary Python object, which may be dangerous if you receive a YAML document from an untrusted source. The function yaml.safe_load limits this ability to simple Python objects like integers or lists. Please see http://pyyaml.org/wiki/PyYAMLDocumentation#LoadingYAML for more information on yaml.load and yaml.safe_load"
+  },
+  "B507": {
+    "title": "B507: Test for missing host key validation",
+    "description": "Encryption in general is typically critical to the security of many applications. Using SSH can greatly increase security by guaranteeing the identity of the party you are communicating with. This is accomplished by one or both parties presenting trusted host keys during the connection initialization phase of SSH. When paramiko methods are used, host keys are verified by default. If host key verification is disabled, Bandit will return a HIGH severity error."
+  },
+  "B601": {
+    "title": "B601: Test for shell injection within Paramiko",
+    "description": "Paramiko is a Python library designed to work with the SSH2 protocol for secure (encrypted and authenticated) connections to remote machines. It is intended to run commands on a remote host. These commands are run within a shell on the target and are thus vulnerable to various shell injection attacks. Bandit reports a MEDIUM issue when it detects the use of Paramiko’s “exec_command” or “invoke_shell” methods advising the user to check inputs are correctly sanitized."
+  },
+  "B602": {
+    "title": "B602: Test for use of popen with shell equals true",
+    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess using a command shell. This type of subprocess invocation is dangerous as it is vulnerable to various shell injection attacks. Great care should be taken to sanitize all input in order to mitigate this risk. Calls of this type are identified by a parameter of ‘shell=True’ being given. Additionally, this plugin scans the command string given and adjusts its reported severity based on how it is presented. If the command string is a simple static string containing no special shell characters, then the resulting issue has low severity. If the string is static, but contains shell formatting characters or wildcards, then the reported issue is medium. Finally, if the string is computed using Python’s string manipulation or formatting operations, then the reported issue has high severity. These severity levels reflect the likelihood that the code is vulnerable to injection."
+  },
+  "B603": {
+    "title": "B603: Test for use of subprocess without shell equals true",
+    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess without the use of a command shell. This type of subprocess invocation is not vulnerable to shell injection attacks, but care should still be taken to ensure validity of input. Because this is a lesser issue than that described in subprocess_popen_with_shell_equals_true a LOW severity warning is reported."
+  },
+  "B604": {
+    "title": "B604: Test for any function with shell equals true",
+    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this plugin test interrogates method calls for the presence of a keyword parameter shell equalling true. It is related to detection of shell injection issues and is intended to catch custom wrappers to vulnerable methods that may have been created."
+  },
+  "B605": {
+    "title": "B605: Test for starting a process with a shell",
+    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess using a command shell. This type of subprocess invocation is dangerous as it is vulnerable to various shell injection attacks. Great care should be taken to sanitize all input in order to mitigate this risk. Calls of this type are identified by the use of certain commands which are known to use shells. Bandit will report a LOW severity warning."
+  },
+  "B606": {
+    "title": "B606: Test for starting a process with no shell",
+    "description": "Python possesses many mechanisms to invoke an external executable. However, doing so may present a security issue if appropriate care is not taken to sanitize any user provided or variable input. This plugin test is part of a family of tests built to check for process spawning and warn appropriately. Specifically, this test looks for the spawning of a subprocess in a way that doesn’t use a shell. Although this is generally safe, it maybe useful for penetration testing workflows to track where external system calls are used. As such a LOW severity message is generated."
+  },
+  "B607": {
+    "title": "B607: Test for starting a process with a partial path",
+    "description": "Python possesses many mechanisms to invoke an external executable. If the desired executable path is not fully qualified relative to the filesystem root then this may present a potential security risk. In POSIX environments, the PATH environment variable is used to specify a set of standard locations that will be searched for the first matching named executable. While convenient, this behavior may allow a malicious actor to exert control over a system. If they are able to adjust the contents of the PATH variable, or manipulate the file system, then a bogus executable may be discovered in place of the desired one. This executable will be invoked with the user privileges of the Python process that spawned it, potentially a highly privileged user. This test will scan the parameters of all configured Python methods, looking for paths that do not start at the filesystem root, that is, do not have a leading ‘/’ character."
+  },
+  "B608": {
+    "title": "B608: Test for SQL injection",
+    "description": "An SQL injection attack consists of insertion or “injection” of a SQL query via the input data given to an application. It is a very common attack vector. This plugin test looks for strings that resemble SQL statements that are involved in some form of string building operation. Unless care is taken to sanitize and control the input data when building such SQL statement strings, an injection attack becomes possible. If strings of this nature are discovered, a LOW confidence issue is reported. In order to boost result confidence, this plugin test will also check to see if the discovered string is in use with standard Python DBAPI calls execute or executemany. If so, a MEDIUM issue is reported."
+  },
+  "B609": {
+    "title": "B609: Test for use of wildcard injection",
+    "description": "Python provides a number of methods that emulate the behavior of standard Linux command line utilities. Like their Linux counterparts, these commands may take a wildcard “*” character in place of a file system path. This is interpreted to mean “any and all files or folders” and can be used to build partially qualified paths, such as “/home/user/*”. The use of partially qualified paths may result in unintended consequences if an unexpected file or symlink is placed into the path location given. This becomes particularly dangerous when combined with commands used to manipulate file permissions or copy data off of a system."
+  },
+  "B610": {
+    "title": "B610: Potential SQL injection on extra function"
+  },
+  "B611": {
+    "title": "B611: Potential SQL injection on RawSQL function"
+  },
+  "B701": {
+    "title": "B701: Test for not auto escaping in jinja2",
+    "description": "Jinja2 is a Python HTML templating system. It is typically used to build web applications, though appears in other places well, notably the Ansible automation system. When configuring the Jinja2 environment, the option to use autoescaping on input can be specified. When autoescaping is enabled, Jinja2 will filter input strings to escape any HTML content submitted via template variables. Without escaping HTML input the application becomes vulnerable to Cross Site Scripting (XSS) attacks. Unfortunately, autoescaping is False by default. Thus this plugin test will warn on omission of an autoescape setting, as well as an explicit setting of false. A HIGH severity warning is generated in either of these scenarios."
+  },
+  "B702": {
+    "title": "B702: Test for use of mako templates",
+    "description": "Mako is a Python templating system often used to build web applications. It is the default templating system used in Pylons and Pyramid. Unlike Jinja2 (an alternative templating system), Mako has no environment wide variable escaping mechanism. Because of this, all input variables must be carefully escaped before use to prevent possible vulnerabilities to Cross Site Scripting (XSS) attacks."
+  },
+  "B703": {
+    "title": "B703: Potential XSS on mark_safe function"
   }
 }
