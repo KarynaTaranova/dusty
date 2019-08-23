@@ -143,6 +143,10 @@
     "title": "B323: Blacklist various Python calls known to be dangerous: unverified_context",
     "description": "By default, Python will create a secure, verified ssl context for use in such classes as HTTPSConnection. However, it still allows using an insecure context via the _create_unverified_context that reverts to the previous behavior that does not validate certificates or perform hostname checks."
   },
+  "B324": {
+    "title": "B324: Test for use of insecure md4 and md5 hash functions in hashlib.new()",
+    "description": "This plugin checks for the usage of the insecure MD4 and MD5 hash functions in ``hashlib.new`` function. The ``hashlib.new`` function provides the ability to construct a new hashing object using the named algorithm. This can be used to create insecure hash functions like MD4 and MD5 if they are passed as algorithm names to this function. This is similar to B303 blacklist check, except that this checks for insecure hash functions created using ``hashlib.new`` function."
+  },
   "B325": {
     "title": "B325: Blacklist various Python calls known to be dangerous: tempnam",
     "description": "Use of os.tempnam() and os.tmpnam() is vulnerable to symlink attacks. Consider using tmpfile() instead."
