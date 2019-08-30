@@ -87,6 +87,12 @@ class ConfigModel:
     def _process_depots(self, config, suite):  # pylint: disable=R0912
         """ Process depots: resolve secret variables and merge config from objects """
         context_config = recursive_merge(config["global"], config["suites"].get(suite))
+        # Allow to inherit from other suite
+        if context_config.get("inherit_from", None) and \
+                config["suites"].get(context_config.get("inherit_from"), None):
+            context_config = recursive_merge(
+                config["suites"].get(context_config.get("inherit_from")), context_config
+            )
         # Make depot instances
         for depot_name in list(context_config["settings"].get("depots", dict())):
             try:
