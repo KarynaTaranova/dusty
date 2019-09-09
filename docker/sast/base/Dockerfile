@@ -26,6 +26,7 @@ ARG BANDIT_VERSION=1.5.1
 ARG SPOTBUGS_VERSION=3.1.12
 ARG FINDSECBUGS_VERSION=1.8.0
 ARG DEPENDENCY_CHECK_VERSION=5.0.0-M2
+ARG GITLEAKS_VERSION=2.1.0
 
 # Default locale
 ENV LC_ALL=C.UTF-8
@@ -147,3 +148,8 @@ RUN set -x \
 RUN set -x \
   && go get github.com/securego/gosec/cmd/gosec \
   && rm -rf $GOPATH/src/*
+
+# SAST: gitleaks
+RUN set -x \
+  && wget https://github.com/zricethezav/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks-linux-amd64 -O /usr/local/bin/gitleaks \
+  && chmod a+x /usr/local/bin/gitleaks
