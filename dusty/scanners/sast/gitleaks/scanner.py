@@ -17,12 +17,19 @@
 #   limitations under the License.
 
 """
-    Scanner: nodejs
+    Scanner: gitleaks
 """
+
+import os
+import subprocess
+import shutil
+import tempfile
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
+
+from .parser import parse_findings
 
 
 class Scanner(DependentModuleModel, ScannerModel):
@@ -34,30 +41,47 @@ class Scanner(DependentModuleModel, ScannerModel):
         self.context = context
         self.config = \
             self.context.config["scanners"][__name__.split(".")[-3]][__name__.split(".")[-2]]
-        self.set_meta("meta_scanner", True)
 
-    def prepare(self):
-        """ Prepare scanner """
-        scanners = ["nodejsscan"]
-        if self.config.get("composition_analysis", False):
-            scanners.append("npm")
-            scanners.append("retirejs")
-            self.config["add_devdep"] = self.config.get("devdep", False)
-        for scanner in scanners:
-            log.info("Adding %s scanner", scanner)
-            self.context.performers["scanning"].schedule_scanner("sast", scanner, self.config)
+    def execute(self):
+        """ Run the scanner """
+        # Make temporary files
+        output_file_fd, output_file = tempfile.mkstemp('.json')
+        log.debug("Output file: %s", output_file)
+        os.close(output_file_fd)
+        # Run task
+        task = subprocess.run([
+            "gitleaks", "--repo-path", self.config.get('code'),"--report", output_file],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        log.log_subprocess_result(task)
+        parse_findings(output_file, self)
+        # Save intermediates
+        self.save_intermediates(output_file, task)
+
+    def save_intermediates(self, output_file, task):
+        """ Save scanner intermediates """
+        if self.config.get("save_intermediates_to", None):
+            log.info("Saving intermediates")
+            base = os.path.join(self.config.get("save_intermediates_to"), __name__.split(".")[-2])
+            try:
+                # Make directory for artifacts
+                os.makedirs(base, mode=0o755, exist_ok=True)
+                # Save report
+                shutil.copyfile(
+                    output_file,
+                    os.path.join(base, "report.json")
+                )
+                # Save output
+                with open(os.path.join(base, "output.stdout"), "w") as output:
+                    output.write(task.stdout.decode("utf-8", errors="ignore"))
+                with open(os.path.join(base, "output.stderr"), "w") as output:
+                    output.write(task.stderr.decode("utf-8", errors="ignore"))
+            except:
+                log.exception("Failed to save intermediates")
 
     @staticmethod
     def fill_config(data_obj):
         """ Make sample config """
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
-        data_obj.insert(
-            len(data_obj), "composition_analysis", False, comment="enable composition analysis"
-        )
-        data_obj.insert(
-            len(data_obj), "devdep", False,
-            comment="(composition analysis) (optional) add dependencies from devDependencies"
-        )
         data_obj.insert(
             len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
             comment="(optional) Save scan intermediates (raw results, logs, ...)"
@@ -76,9 +100,9 @@ class Scanner(DependentModuleModel, ScannerModel):
     @staticmethod
     def get_name():
         """ Module name """
-        return "nodejs"
+        return "gitleaks"
 
     @staticmethod
     def get_description():
         """ Module description or help message """
-        return "SAST scanner"
+        return "gitleaks scanning"

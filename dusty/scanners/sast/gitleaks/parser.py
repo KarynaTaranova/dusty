@@ -23,18 +23,13 @@
 from dusty.models.finding import SastFinding
 from dusty.tools import log, markdown
 
-from .legacy import NpmScanParser, get_dependencies
-from . import constants
+from .legacy import GitleaksScanParser
+# from . import constants
 
 
 def parse_findings(data, scanner):
     """ Parse findings """
-    # Get deps
-    deps = get_dependencies(
-        scanner.config.get("code"), scanner.config.get("add_devdep", False)
-    )
-    # Parse JSON using legacy parser
-    findings = NpmScanParser(data, deps).items
+    findings = GitleaksScanParser(data).items
     # Make finding instances
     for item in findings:
         finding = SastFinding(
@@ -42,15 +37,15 @@ def parse_findings(data, scanner):
             description=[
                 "\n\n".join([
                     item['description'],
-                    f"**URL:** {item['url']}",
-                    f"**CWE:** {markdown.markdown_escape(item['cwe'])}",
-                    f"**References:** {item['references']}",
+                    # f"**URL:** {item['url']}",
+                    # f"**CWE:** {markdown.markdown_escape(item['cwe'])}",
+                    # f"**References:** {item['references']}",
                     f"**File to review:** {item['file_path']}"
                 ])
             ]
         )
         finding.set_meta("tool", scanner.get_name())
-        finding.set_meta("severity", constants.NPM_SEVERITY_MAPPING[item["severity"]])
+        finding.set_meta("severity", "Medium")
         finding.set_meta("legacy.file", item["file_path"])
         endpoints = list()
         finding.set_meta("endpoints", endpoints)
