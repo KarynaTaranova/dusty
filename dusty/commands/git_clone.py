@@ -154,9 +154,8 @@ class Command(ModuleModel, CommandModel):
             **auth_args
         )
         # Checkout branch
-        repository.reset_index(
-            repository[b"refs/remotes/origin/" + args.branch.encode("utf-8")].tree
-        )
+        repository[b"HEAD"] = repository[b"refs/remotes/origin/" + args.branch.encode("utf-8")]
+        repository.reset_index(repository[b"HEAD"].tree)
 
     @staticmethod
     def get_name():
