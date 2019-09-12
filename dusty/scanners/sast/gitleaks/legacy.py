@@ -21,6 +21,9 @@
 """
 
 import json
+import html
+
+from dusty.tools import markdown
 
 from . import constants
 
@@ -29,7 +32,7 @@ __author__ = 'KarynaTaranova'
 
 
 class GitleaksScanParser(object):
-    def __init__(self, data):
+    def __init__(self, data, show_offender_line):
         dupes = dict()
         self.items = []
 
@@ -38,22 +41,25 @@ class GitleaksScanParser(object):
         for item in data:
             title = self.get_title(item)
             if title in dupes:
-                dupes[title]["commits"].add(item.get("commit"))
+                dupes[title]["commits"].append(self.get_commit_info(item, show_offender_line))
             else:
                 dupes[title] = {
-                    "description": item.get('info'),
+                    "description": ("\n\n**Info:** ") + item.get('info'),
                     "severity": item.get('severity'),
                     "date": item.get('date'),
                     "rule": item.get('rule'),
                     "file_path": item.get('file'),
-                    "commits": {item.get("commit")}
+                    "commits": [self.get_commit_info(item, show_offender_line)]
                 }
-
+        commits_head = []
+        commits_head.append("\n\n**Commits:**\n\n")
+        commits_head.append("| Commit | Author | Line |")
+        commits_head.append("| ------ | ------ | ---- |")
         for key, item in dupes.items():
-            commits_str = ',\n\n'.join(item.get('commits'))
             self.items.append({
                 "title": key,
-                "description": f"{item.get('description')}.\n\nCommits:\n\n{commits_str}",
+                "description": item.get("description") +
+                               "\n".join(commits_head + ["| {} |".format('\n'.join(item.get('commits')))]),
                 "severity": constants.RULES_SEVERITIES.get(item.get('rule'), 'Medium'),
                 "file_path": item.get('file_path'),
                 "date": item.get('date')
@@ -61,3 +67,12 @@ class GitleaksScanParser(object):
 
     def get_title(self, item):
         return f"{item.get('rule')} in {item.get('file')} file detected"
+
+    def get_commit_info(self, item, show_offender_line):
+        line = item.get("line")
+        if len(line) > 100:
+            line = f"{line[:100]} ... (offender: {item.get('offender')})"
+        return " | ".join([
+            html.escape(markdown.markdown_table_escape(item.get("commit")[:8])),
+            html.escape(markdown.markdown_table_escape(item.get("author"))),
+            html.escape(markdown.markdown_table_escape(line if show_offender_line else "-"))])
