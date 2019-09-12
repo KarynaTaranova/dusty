@@ -154,11 +154,9 @@ class Command(ModuleModel, CommandModel):
             **auth_args
         )
         # Checkout branch
-        repository.refs.add_if_new(
-            b"refs/heads/" + args.branch.encode("utf-8"),
-            repository[b"refs/remotes/origin/" + args.branch.encode("utf-8")].tree
-        )
-        repository.refs.set_symbolic_ref(b"HEAD", b"refs/heads/" + args.branch.encode("utf-8"))
+        branch = args.branch.encode("utf-8")
+        repository[b"refs/heads/" + branch] = repository[b"refs/remotes/origin/" + branch]
+        repository.refs.set_symbolic_ref(b"HEAD", b"refs/heads/" + branch)
         repository.reset_index(repository[b"HEAD"].tree)
 
     @staticmethod
