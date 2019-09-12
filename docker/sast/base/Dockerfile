@@ -107,6 +107,16 @@ RUN set -x \
   && chmod -R 777 "$GOPATH" \
   && go version
 
+# Dotnet Core
+RUN set -x \
+  && wget -q https://packages.microsoft.com/config/ubuntu/16.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb \
+  && dpkg -i packages-microsoft-prod.deb \
+  && rm packages-microsoft-prod.deb \
+  && apt-get update \
+  && apt-get install --no-install-recommends -y dotnet-sdk-2.2 \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+
 # SAST: pybandit (Python SAST tool)
 RUN set -x \
   && pip3 install bandit==${BANDIT_VERSION}
