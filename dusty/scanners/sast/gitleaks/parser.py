@@ -30,15 +30,15 @@ from .legacy import GitleaksScanParser
 
 def parse_findings(data, scanner):
     """ Parse findings """
-    findings = GitleaksScanParser(data).items
+    show_offender_line = scanner.config.get("show_offender_line", True)
+    findings = GitleaksScanParser(data, show_offender_line).items
     # Make finding instances
     for item in findings:
         finding = SastFinding(
             title=item["title"],
             description=[
-                "\n\n".join([
-                    markdown.markdown_escape(item['description']),
-                    f"**File to review:** {markdown.markdown_escape(item['file_path'])}"
+                "\n\n".join([item['description'],
+                             f"**File to review:** {markdown.markdown_escape(item['file_path'])}"
                 ])
             ]
         )

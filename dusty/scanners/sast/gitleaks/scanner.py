@@ -48,10 +48,15 @@ class Scanner(DependentModuleModel, ScannerModel):
         output_file_fd, output_file = tempfile.mkstemp('.json')
         log.debug("Output file: %s", output_file)
         os.close(output_file_fd)
+        additional_options = list()
+        if self.config.get("redact_offenders", None):
+            additional_options.append("--redact")
         # Run task
-        task = subprocess.run([
-            "gitleaks", "--repo-path", self.config.get('code'), "--report", output_file
-        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        task = subprocess.run(
+            [
+                "gitleaks", "--repo-path", self.config.get('code'), "--report", output_file
+            ] + additional_options,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         log.log_subprocess_result(task)
         parse_findings(output_file, self)
         # Save intermediates
