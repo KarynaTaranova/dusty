@@ -37,9 +37,6 @@ def parse_findings(data, scanner):
             description=[
                 "\n\n".join([
                     item['description'],
-                    # f"**URL:** {item['url']}",
-                    # f"**CWE:** {markdown.markdown_escape(item['cwe'])}",
-                    # f"**References:** {item['references']}",
                     f"**File to review:** {item['file_path']}"
                 ])
             ]
@@ -47,7 +44,4 @@ def parse_findings(data, scanner):
         finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", "Medium")
         finding.set_meta("legacy.file", item["file_path"])
-        endpoints = list()
-        finding.set_meta("endpoints", endpoints)
-        log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
         scanner.findings.append(finding)
