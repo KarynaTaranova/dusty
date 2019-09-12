@@ -21,9 +21,8 @@
 """
 
 import json
-import os
 
-from dusty.tools import markdown
+from . import constants
 
 
 __author__ = 'KarynaTaranova'
@@ -32,15 +31,33 @@ __author__ = 'KarynaTaranova'
 class GitleaksScanParser(object):
     def __init__(self, data):
         dupes = dict()
-        find_date = None
         self.items = []
 
         data = json.load(open(data))
 
         for item in data:
+            title = self.get_title(item)
+            if title in dupes:
+                dupes[title]["commits"].add(item.get("commit"))
+            else:
+                dupes[title] = {
+                    "description": item.get('info'),
+                    "severity": item.get('severity'),
+                    "date": item.get('date'),
+                    "rule": item.get('rule'),
+                    "file_path": item.get('file'),
+                    "commits": {item.get("commit")}
+                }
+
+        for key, item in dupes.items():
+            commits_str = ',\n\n'.join(item.get('commits'))
             self.items.append({
-                "title": f"{item.get('rule')} in {item.get('file')} file detected",
-                "description": item.get('info'),
-                "severity": item.get('severity', 'Medium'),
-                "file_path": item.get('file')
+                "title": key,
+                "description": f"{item.get('description')}.\n\nCommits:\n\n{commits_str}",
+                "severity": constants.RULES_SEVERITIES.get(item.get('rule'), 'Medium'),
+                "file_path": item.get('file_path'),
+                "date": item.get('date')
             })
+
+    def get_title(self, item):
+        return f"{item.get('rule')} in {item.get('file')} file detected"
