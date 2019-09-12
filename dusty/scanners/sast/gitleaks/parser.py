@@ -17,14 +17,15 @@
 #   limitations under the License.
 
 """
-    npm audit JSON parser
+    gitleaks JSON parser
 """
+
+from collections import namedtuple
 
 from dusty.models.finding import SastFinding
 from dusty.tools import log, markdown
 
 from .legacy import GitleaksScanParser
-# from . import constants
 
 
 def parse_findings(data, scanner):
@@ -36,12 +37,17 @@ def parse_findings(data, scanner):
             title=item["title"],
             description=[
                 "\n\n".join([
-                    item['description'],
-                    f"**File to review:** {item['file_path']}"
+                    markdown.markdown_escape(item['description']),
+                    f"**File to review:** {markdown.markdown_escape(item['file_path'])}"
                 ])
             ]
         )
         finding.set_meta("tool", scanner.get_name())
         finding.set_meta("severity", "Medium")
         finding.set_meta("legacy.file", item["file_path"])
+        endpoints = list()
+        if item["file_path"]:
+            endpoints.append(namedtuple("Endpoint", ["raw"])(raw=item["file_path"]))
+        finding.set_meta("endpoints", endpoints)
+        log.debug(f"Endpoints: {finding.get_meta('endpoints')}")
         scanner.findings.append(finding)

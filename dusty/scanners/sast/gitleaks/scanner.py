@@ -50,8 +50,8 @@ class Scanner(DependentModuleModel, ScannerModel):
         os.close(output_file_fd)
         # Run task
         task = subprocess.run([
-            "gitleaks", "--repo-path", self.config.get('code'),"--report", output_file],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            "gitleaks", "--repo-path", self.config.get('code'), "--report", output_file
+        ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         log.log_subprocess_result(task)
         parse_findings(output_file, self)
         # Save intermediates
@@ -83,7 +83,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         """ Make sample config """
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
         data_obj.insert(
-            len(data_obj), "save_intermediates_to", "/data/intermediates/dast",
+            len(data_obj), "save_intermediates_to", "/data/intermediates/sast",
             comment="(optional) Save scan intermediates (raw results, logs, ...)"
         )
 
