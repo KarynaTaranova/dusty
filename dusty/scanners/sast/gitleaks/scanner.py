@@ -24,6 +24,7 @@ import os
 import subprocess
 import shutil
 import tempfile
+import dulwich
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
@@ -44,8 +45,25 @@ class Scanner(DependentModuleModel, ScannerModel):
 
     def execute(self):
         """ Run the scanner """
+        # Squash commits (if needed)
+        if self.config.get("squash_commits", None):
+            # Rename old .git
+            try:
+                os.rename(
+                    os.path.join(self.config.get("code"), ".git"),
+                    os.path.join(self.config.get("code"), ".git.old")
+                )
+            except:
+                pass
+            # Initialize new repo
+            repository = dulwich.porcelain.init(self.config.get("code"))
+            dulwich.porcelain.add(repository)
+            dulwich.porcelain.commit(
+                repository,
+                b"Current project code", b"EPAM Carrier <SupportEPM-TIGROperational@epam.com>"
+            )
         # Make temporary files
-        output_file_fd, output_file = tempfile.mkstemp('.json')
+        output_file_fd, output_file = tempfile.mkstemp(".json")
         log.debug("Output file: %s", output_file)
         os.close(output_file_fd)
         additional_options = list()
@@ -54,13 +72,24 @@ class Scanner(DependentModuleModel, ScannerModel):
         # Run task
         task = subprocess.run(
             [
-                "gitleaks", "--repo-path", self.config.get('code'), "--report", output_file
+                "gitleaks", "--repo-path", self.config.get("code"), "--report", output_file
             ] + additional_options,
             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         log.log_subprocess_result(task)
+        # Parse findings
         parse_findings(output_file, self)
         # Save intermediates
         self.save_intermediates(output_file, task)
+        # Revert commit squashing (if any)
+        if self.config.get("squash_commits", None):
+            shutil.rmtree(os.path.join(self.config.get("code"), ".git"))
+            try:
+                os.rename(
+                    os.path.join(self.config.get("code"), ".git.old"),
+                    os.path.join(self.config.get("code"), ".git")
+                )
+            except:
+                pass
 
     def save_intermediates(self, output_file, task):
         """ Save scanner intermediates """
@@ -87,6 +116,18 @@ class Scanner(DependentModuleModel, ScannerModel):
     def fill_config(data_obj):
         """ Make sample config """
         data_obj.insert(len(data_obj), "code", "/path/to/code", comment="scan target")
+        data_obj.insert(
+            len(data_obj), "squash_commits", False,
+            comment="(optional) Make one commit with current code only"
+        )
+        data_obj.insert(
+            len(data_obj), "show_offender_line", True,
+            comment="(optional) Show lines with findings"
+        )
+        data_obj.insert(
+            len(data_obj), "redact_offenders", False,
+            comment="(optional) Hide secrets in lines with findings"
+        )
         data_obj.insert(
             len(data_obj), "save_intermediates_to", "/data/intermediates/sast",
             comment="(optional) Save scan intermediates (raw results, logs, ...)"
