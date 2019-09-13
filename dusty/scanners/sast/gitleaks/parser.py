@@ -37,8 +37,9 @@ def parse_findings(data, scanner):
         finding = SastFinding(
             title=item["title"],
             description=[
-                "\n\n".join([item['description'],
-                             f"**File to review:** {markdown.markdown_escape(item['file_path'])}"
+                "\n\n".join([
+                    item['description'],
+                    f"**File to review:** {markdown.markdown_escape(item['file_path'])}"
                 ])
             ]
         )

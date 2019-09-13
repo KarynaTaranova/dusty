@@ -36,7 +36,10 @@ class GitleaksScanParser(object):
         dupes = dict()
         self.items = []
 
-        data = json.load(open(data))
+        try:
+            data = json.load(open(data))
+        except:
+            return
 
         for item in data:
             title = self.get_title(item)
