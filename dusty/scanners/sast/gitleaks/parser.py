@@ -44,7 +44,7 @@ def parse_findings(data, scanner):
             ]
         )
         finding.set_meta("tool", scanner.get_name())
-        finding.set_meta("severity", "Medium")
+        finding.set_meta("severity", item["severity"])
         finding.set_meta("legacy.file", item["file_path"])
         endpoints = list()
         if item["file_path"]:

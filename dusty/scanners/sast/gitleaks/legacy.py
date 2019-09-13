@@ -63,7 +63,7 @@ class GitleaksScanParser(object):
                 "title": key,
                 "description": item.get("description") +
                                "\n".join(commits_head + ["| {} |".format('\n'.join(item.get('commits')))]),
-                "severity": constants.RULES_SEVERITIES.get(item.get('rule'), 'Medium'),
+                "severity": constants.RULES_SEVERITIES.get(item.get('rule'), 'Critical'),
                 "file_path": item.get('file_path'),
                 "date": item.get('date')
             })
