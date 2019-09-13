@@ -30,8 +30,7 @@ from .legacy import GitleaksScanParser
 
 def parse_findings(data, scanner):
     """ Parse findings """
-    show_offender_line = scanner.config.get("show_offender_line", True)
-    findings = GitleaksScanParser(data, show_offender_line).items
+    findings = GitleaksScanParser(data, scanner).items
     # Make finding instances
     for item in findings:
         finding = SastFinding(

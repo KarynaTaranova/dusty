@@ -32,7 +32,7 @@ __author__ = 'KarynaTaranova'
 
 
 class GitleaksScanParser(object):
-    def __init__(self, data, show_offender_line):
+    def __init__(self, data, scanner):
         dupes = dict()
         self.items = []
 
@@ -41,10 +41,15 @@ class GitleaksScanParser(object):
         except:
             return
 
+        show_offender_line = scanner.config.get("show_offender_line", True)
+        squash_commits = scanner.config.get("squash_commits", False)
+
         for item in data:
             title = self.get_title(item)
             if title in dupes:
-                dupes[title]["commits"].append(self.get_commit_info(item, show_offender_line))
+                dupes[title]["commits"].append(
+                    self.get_commit_info(item, show_offender_line, squash_commits)
+                )
             else:
                 dupes[title] = {
                     "description": ("\n\n**Info:** ") + item.get('info'),
@@ -52,17 +57,22 @@ class GitleaksScanParser(object):
                     "date": item.get('date'),
                     "rule": item.get('rule'),
                     "file_path": item.get('file'),
-                    "commits": [self.get_commit_info(item, show_offender_line)]
+                    "commits": [self.get_commit_info(item, show_offender_line, squash_commits)]
                 }
         commits_head = []
         commits_head.append("\n\n**Commits:**\n\n")
-        commits_head.append("| Commit | Author | Line |")
-        commits_head.append("| ------ | ------ | ---- |")
+        if squash_commits:
+            commits_head.append("| Line |")
+            commits_head.append("| ---- |")
+        else:
+            commits_head.append("| Commit | Author | Line |")
+            commits_head.append("| ------ | ------ | ---- |")
         for key, item in dupes.items():
             self.items.append({
                 "title": key,
                 "description": item.get("description") +
-                               "\n".join(commits_head + ["| {} |".format('\n'.join(item.get('commits')))]),
+                               "\n".join(commits_head +
+                               ["| {} |".format('\n'.join(item.get('commits')))]),
                 "severity": constants.RULES_SEVERITIES.get(item.get('rule'), 'Critical'),
                 "file_path": item.get('file_path'),
                 "date": item.get('date')
@@ -71,11 +81,18 @@ class GitleaksScanParser(object):
     def get_title(self, item):
         return f"{item.get('rule')} in {item.get('file')} file detected"
 
-    def get_commit_info(self, item, show_offender_line):
+    def get_commit_info(self, item, show_offender_line, squash_commits):
         line = item.get("line")
         if len(line) > 100:
             line = f"{line[:100]} ... (offender: {item.get('offender')})"
+        if squash_commits:
+            return html.escape(markdown.markdown_table_escape(
+                line if show_offender_line else "<hidden>"
+            ))
         return " | ".join([
             html.escape(markdown.markdown_table_escape(item.get("commit")[:8])),
             html.escape(markdown.markdown_table_escape(item.get("author"))),
-            html.escape(markdown.markdown_table_escape(line if show_offender_line else "-"))])
+            html.escape(markdown.markdown_table_escape(
+                line if show_offender_line else "<hidden>"
+            ))
+        ])
