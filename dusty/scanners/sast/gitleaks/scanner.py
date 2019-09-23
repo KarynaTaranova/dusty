@@ -25,6 +25,7 @@ import subprocess
 import shutil
 import tempfile
 import dulwich
+import pkg_resources
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
@@ -69,6 +70,19 @@ class Scanner(DependentModuleModel, ScannerModel):
         additional_options = list()
         if self.config.get("redact_offenders", None):
             additional_options.append("--redact")
+        # use_custom_rules: true/false
+        # custom_rules_path: /path/to/rules (optional)
+        if self.config.get("use_custom_rules", None):
+            custom_rules_path = self.config.get("custom_rules_path", None)
+            if custom_rules_path:
+                config_path = custom_rules_path
+            else:
+                config_path = pkg_resources.resource_filename(
+                    "dusty",
+                    f"{'/'.join(__name__.split('.')[1:-1])}/data/gitleaks.toml")
+            additional_options.append("--config")
+            additional_options.append(config_path)
+            print(config_path)
         # Run task
         task = subprocess.run(
             [
