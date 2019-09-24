@@ -21,7 +21,7 @@
 """
 
 import os
-import sys
+import getpass
 import subprocess
 import shutil
 import tempfile
@@ -30,6 +30,7 @@ import pkg_resources
 import dulwich
 
 from dusty.tools import log
+from dusty.commands import git_clone
 from dusty.models.module import DependentModuleModel
 from dusty.models.scanner import ScannerModel
 
@@ -62,6 +63,15 @@ class Scanner(DependentModuleModel, ScannerModel):
             current_dir = os.getcwd()
             try:
                 os.chdir(self.config.get("code"))
+                # Patch dulwich to work without valid UID/GID
+                dulwich.repo.__original__get_default_identity = dulwich.repo._get_default_identity  # pylint: disable=W0212
+                dulwich.repo._get_default_identity = git_clone._dulwich_repo_get_default_identity  # pylint: disable=W0212
+                # Set USERNAME if needed
+                try:
+                    getpass.getuser()
+                except:  # pylint: disable=W0702
+                    os.environ["USERNAME"] = "git"
+                # Add current code
                 repository = dulwich.porcelain.init(self.config.get("code"))
                 dulwich.porcelain.add(repository)
                 dulwich.porcelain.commit(
