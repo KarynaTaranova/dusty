@@ -33,8 +33,6 @@ def parse_findings(data, scanner):
     findings = GitleaksScanParser(data, scanner).items
     # Make finding instances
     for item in findings:
-        log.debug("Item description:")
-        log.debug("%s", repr(item['description']))
         finding = SastFinding(
             title=item["title"],
             description=[
