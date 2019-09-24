@@ -34,7 +34,7 @@ def parse_findings(data, scanner):
     # Make finding instances
     for item in findings:
         log.debug("Item description:")
-        log.debug("%s", item['description'])
+        log.debug("%s", repr(item['description']))
         finding = SastFinding(
             title=item["title"],
             description=[
