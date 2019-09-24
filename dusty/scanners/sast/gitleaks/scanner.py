@@ -24,6 +24,7 @@ import os
 import subprocess
 import shutil
 import tempfile
+import traceback
 import pkg_resources
 import dulwich
 
@@ -55,7 +56,7 @@ class Scanner(DependentModuleModel, ScannerModel):
                     os.path.join(self.config.get("code"), ".git.old")
                 )
             except:
-                pass
+                log.debug("Failed to rename old .git: %s", traceback.format_exc())
             # Initialize new repo
             repository = dulwich.porcelain.init(self.config.get("code"))
             dulwich.porcelain.add(repository)
@@ -102,7 +103,7 @@ class Scanner(DependentModuleModel, ScannerModel):
                     os.path.join(self.config.get("code"), ".git")
                 )
             except:
-                pass
+                log.debug("Failed to revert .git: %s", traceback.format_exc())
 
     def save_intermediates(self, output_file, task):
         """ Save scanner intermediates """
