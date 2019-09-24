@@ -24,8 +24,8 @@ import os
 import subprocess
 import shutil
 import tempfile
-import dulwich
 import pkg_resources
+import dulwich
 
 from dusty.tools import log
 from dusty.models.module import DependentModuleModel
@@ -70,8 +70,7 @@ class Scanner(DependentModuleModel, ScannerModel):
         additional_options = list()
         if self.config.get("redact_offenders", None):
             additional_options.append("--redact")
-        # use_custom_rules: true/false
-        # custom_rules_path: /path/to/rules (optional)
+        # Use custom rules
         if self.config.get("use_custom_rules", None):
             custom_rules_path = self.config.get("custom_rules_path", None)
             if custom_rules_path:
@@ -82,7 +81,7 @@ class Scanner(DependentModuleModel, ScannerModel):
                     f"{'/'.join(__name__.split('.')[1:-1])}/data/gitleaks.toml")
             additional_options.append("--config")
             additional_options.append(config_path)
-            print(config_path)
+            log.debug("Custom config path: %s", config_path)
         # Run task
         task = subprocess.run(
             [
@@ -141,6 +140,14 @@ class Scanner(DependentModuleModel, ScannerModel):
         data_obj.insert(
             len(data_obj), "redact_offenders", False,
             comment="(optional) Hide secrets in lines with findings"
+        )
+        data_obj.insert(
+            len(data_obj), "use_custom_rules", False,
+            comment="(optional) Use custom detection rules"
+        )
+        data_obj.insert(
+            len(data_obj), "custom_rules_path", "/path/to/rules",
+            comment="(optional) Path to custom rules"
         )
         data_obj.insert(
             len(data_obj), "save_intermediates_to", "/data/intermediates/sast",
