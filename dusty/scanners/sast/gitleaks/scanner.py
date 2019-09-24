@@ -21,6 +21,7 @@
 """
 
 import os
+import sys
 import subprocess
 import shutil
 import tempfile
@@ -34,6 +35,28 @@ from dusty.models.scanner import ScannerModel
 
 from .parser import parse_findings
 
+
+# debug
+def path_to_tree_path(repopath, path):
+    """Convert a path to a path usable in an index, e.g. bytes and relative to
+    the repository root.
+    :param repopath: Repository path, absolute or relative to the cwd
+    :param path: A path, absolute or relative to the cwd
+    :return: A path formatted for use in e.g. an index
+    """
+    if not isinstance(path, bytes):
+        path = path.encode(sys.getfilesystemencoding())
+    if not isinstance(repopath, bytes):
+        repopath = repopath.encode(sys.getfilesystemencoding())
+    log.debug("Path: %s", path)
+    log.debug("RepoPath: %s", repopath)
+    treepath = os.path.relpath(path, repopath)
+    if treepath.startswith(b'..'):
+        raise ValueError('Path not in repo')
+    if os.path.sep != '/':
+        treepath = treepath.replace(os.path.sep.encode('ascii'), b'/')
+    return treepath
+# /debug
 
 class Scanner(DependentModuleModel, ScannerModel):
     """ Scanner class """
@@ -49,6 +72,8 @@ class Scanner(DependentModuleModel, ScannerModel):
         """ Run the scanner """
         # Squash commits (if needed)
         if self.config.get("squash_commits", None):
+            # Debug
+            dulwich.porcelain.path_to_tree_path = path_to_tree_path
             # Rename old .git
             try:
                 os.rename(
