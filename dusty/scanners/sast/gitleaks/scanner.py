@@ -83,12 +83,17 @@ class Scanner(DependentModuleModel, ScannerModel):
             except:
                 log.debug("Failed to rename old .git: %s", traceback.format_exc())
             # Initialize new repo
-            repository = dulwich.porcelain.init(self.config.get("code"))
-            dulwich.porcelain.add(repository)
-            dulwich.porcelain.commit(
-                repository,
-                b"Current project code", b"EPAM Carrier <SupportEPM-TIGROperational@epam.com>"
-            )
+            current_dir = os.getcwd()
+            try:
+                os.chdir(self.config.get("code"))
+                repository = dulwich.porcelain.init(self.config.get("code"))
+                dulwich.porcelain.add(repository)
+                dulwich.porcelain.commit(
+                    repository,
+                    b"Current project code", b"EPAM Carrier <SupportEPM-TIGROperational@epam.com>"
+                )
+            finally:
+                os.chdir(current_dir)
         # Make temporary files
         output_file_fd, output_file = tempfile.mkstemp(".json")
         log.debug("Output file: %s", output_file)
