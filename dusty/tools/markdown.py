@@ -132,7 +132,7 @@ def markdown_unescape(string):
 
 def markdown_table_escape(string):
     """ Escape markdown special symbols in tables """
-    return markdown_escape(string).replace("\n", " ")
+    return markdown_escape(string).replace("\n", " ").replace("\r", " ")
 
 
 def html_to_text(html, escape=True):
