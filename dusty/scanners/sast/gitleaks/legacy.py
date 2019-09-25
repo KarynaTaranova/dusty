@@ -47,9 +47,9 @@ class GitleaksScanParser(object):
         for item in data:
             title = self.get_title(item)
             if title in dupes:
-                dupes[title]["commits"].append(
-                    self.get_commit_info(item, show_offender_line, squash_commits)
-                )
+                if len(dupes[title]["commits"]) < 10:
+                    dupes[title]["commits"].append(
+                        self.get_commit_info(item, show_offender_line, squash_commits))
             else:
                 dupes[title] = {
                     "description": ("\n\n**Info:** ") + item.get('info'),
@@ -68,6 +68,8 @@ class GitleaksScanParser(object):
             commits_head.append("| Commit | Author | Line |")
             commits_head.append("| ------ | ------ | ---- |")
         for key, item in dupes.items():
+            if len(item.get('commits')) == 10:
+                item["commits"].append(f"| And {len(item.get('commits'))} more | ------ | ---- |")
             self.items.append({
                 "title": key,
                 "description": item.get("description") +
